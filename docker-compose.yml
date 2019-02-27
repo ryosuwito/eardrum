@@ -1,0 +1,42 @@
+version: '2'
+services:
+  eardrum_db:
+    container_name: eardrum_db
+    build: ./deployment/psql
+    mem_limit: 1024m
+    volumes:
+      - /export/scratch/data/docker_data/eardrum/pg_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    env_file:
+      - ./deployment/environ/deployment.env
+  eardrum_app:
+    container_name: eardrum_app
+    build:
+      context: .
+      dockerfile: ./eardrum.Dockerfile
+    command: /bin/bash ./deployment/gunicorn/start.sh
+    mem_limit: 1024m
+    depends_on:
+      - eardrum_db
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/static
+      - /usr/src/uploads
+    expose:
+      - "8000"
+    env_file:
+      - ./deployment/environ/deployment.env
+  eardrum_nginx:
+    container_name: eardrum_nginx
+    build: ./deployment/nginx
+    command: /bin/bash start.sh
+    mem_limit: 1024m
+    depends_on:
+      - eardrum_app
+    volumes_from:
+      - eardrum_app
+    ports:
+      - "0.0.0.0:55555:80"
+    env_file:
+      - ./deployment/environ/deployment.env
