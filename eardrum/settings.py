@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '1grzia7rma(*+q5e2zyc-sq92amjf8e&l6cy1pjpv$ze2+7i%s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False or os.environ['DJANGO_DEPLOYMENT']=='false'
+DEBUG = False or not os.environ.get('DJANGO_ENV', None)=='prod'
 
-ALLOWED_HOSTS = ['django']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,14 +39,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_swagger',
+    'rest_framework.authtoken',
     'review',
+    'account',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -79,14 +81,27 @@ WSGI_APPLICATION = 'eardrum.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ['POSTGRES_USER'],
-        'USER': os.environ['POSTGRES_USER'],
-        'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-        'HOST': 'eardrum_db',
+        'NAME': 'eardrum',
+        'USER': 'ado',
+        'PASSWORD': '',
+        'HOST': 'localhost',
         'PORT': '5432',
         'CONN_MAX_AGE': 3600,
     }
 }
+
+if DEBUG == False:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ['POSTGRES_USER'],
+            'USER': os.environ['POSTGRES_USER'],
+            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
+            'HOST': 'eardrum_db',
+            'PORT': '5432',
+            'CONN_MAX_AGE': 3600,
+        }
+    }
 
 
 # Password validation
@@ -105,6 +120,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+
+# Authentication
+AUTHENTICATION_BACKENDS = [
+    'account.ldap_backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 

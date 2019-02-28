@@ -13,15 +13,21 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url
 
+from rest_framework.authtoken import views
 from rest_framework_swagger.views import get_swagger_view
 
-swagger_schema_view = get_swagger_view(title='Eardrum API')
+
+swagger_schema_view = get_swagger_view(title='Eardrum API', url='/')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url('^swagger/', swagger_schema_view),
+    url(r'^swagger/', swagger_schema_view),
+    url(r'^api-token-auth', views.obtain_auth_token),
 ]
