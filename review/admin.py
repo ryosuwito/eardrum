@@ -1,15 +1,26 @@
 from django.contrib import admin
+from django.db import models
+
+from markdownx.widgets import AdminMarkdownxWidget
 
 from review.models import (
     Question,
     Bucket,
     Request,
-    Review,
 )
+
+
+class QuestionAdmin(admin.ModelAdmin):
+    formfield_overrides = {
+        models.TextField: {'widget': AdminMarkdownxWidget}
+    }
+
+
+class BucketAdmin(admin.ModelAdmin):
+    filter_horizontal = ['questions']
 
 # Register your models here.
 
-admin.site.register(Question)
-admin.site.register(Bucket)
+admin.site.register(Question, QuestionAdmin)
+admin.site.register(Bucket, BucketAdmin)
 admin.site.register(Request)
-admin.site.register(Review)

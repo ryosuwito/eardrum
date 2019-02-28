@@ -1,0 +1,15 @@
+export const GRADE_OPTIONS = [
+  {value: 105, name: 'A+'},
+  {value: 100, name: 'A'},
+  {value: 95, name: 'A-'},
+  {value: 80, name: 'B+'},
+  {value: 75, name: 'B'},
+  {value: 70, name: 'B-'},
+  {value: 55, name: 'C+'},
+  {value: 50, name: 'C'},
+  {value: 45, name: 'C-'},
+  {value: 30, name: 'D+'},
+  {value: 25, name: 'D'},
+  {value: 20, name: 'D-'},
+  {value: 0, name: 'F'},
+]

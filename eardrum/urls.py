@@ -16,18 +16,33 @@ Including another URLconf
 import os
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import (
+    path,
+    include,
+)
 from django.conf.urls import url
+from django.views.generic import TemplateView
+from django.conf import settings
 
-from rest_framework.authtoken import views
+from rest_framework_jwt import views as jwt_views
 from rest_framework_swagger.views import get_swagger_view
+from rest_framework import routers
 
+from review import views as review_viewsets
+from config import views as config_viewsets
 
 swagger_schema_view = get_swagger_view(title='Eardrum API', url='/')
+router = routers.DefaultRouter()
+router.register('requests', review_viewsets.RequestViewSet)
+router.register('configs', config_viewsets.ConfigViewset)
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/', include(router.urls)),
+    url(r'^markdownx/', include('markdownx.urls')),
     url(r'^swagger/', swagger_schema_view),
-    url(r'^api-token-auth', views.obtain_auth_token),
+    path('api-token-auth/', jwt_views.obtain_jwt_token),
+    path('api-auth', include('rest_framework.urls', namespace='rest_framework')),
+    url('^(?!api)', TemplateView.as_view(template_name='frontend/index.html')),
 ]

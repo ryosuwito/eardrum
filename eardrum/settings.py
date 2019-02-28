@@ -11,21 +11,33 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import logging
+import datetime
+
+import localconfigs.settings as localconfigs
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_config_of(name, default):
+    """
+    Search value of config 'name' in os.environ, localconfigs and default.
+    The first value is found will be set to the config 'name'
+    """
+    return os.environ.get(name, getattr(localconfigs, name, default))
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '1grzia7rma(*+q5e2zyc-sq92amjf8e&l6cy1pjpv$ze2+7i%s'
+SECRET_KEY = get_config_of('SECRET_KEY', '1grzia7rma(*+q5e2zyc-sq92amjf8e&l6cy1pjpv$ze2+7i%s')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False or not os.environ.get('DJANGO_ENV', None)=='prod'
+DEBUG = get_config_of('DEBUG', False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = get_config_of('ALLOWED_HOSTS', [])
 
 
 # Application definition
@@ -39,9 +51,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_swagger',
-    'rest_framework.authtoken',
+    'webpack_loader',
+    'config',
     'review',
     'account',
+    'frontend',
+    'markdownx',
 ]
 
 MIDDLEWARE = [
@@ -80,28 +95,24 @@ WSGI_APPLICATION = 'eardrum.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'eardrum',
-        'USER': 'ado',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432',
-        'CONN_MAX_AGE': 3600,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
-if DEBUG == False:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ['POSTGRES_USER'],
-            'USER': os.environ['POSTGRES_USER'],
-            'PASSWORD': os.environ['POSTGRES_PASSWORD'],
-            'HOST': 'eardrum_db',
-            'PORT': '5432',
-            'CONN_MAX_AGE': 3600,
-        }
-    }
+DATABASES = get_config_of('DATABASES', DATABASES)
+
+# DATABASES = get_config_of('DATABASES', {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.environ.get('POSTGRES_USER'),
+#         'USER': os.environ.get('POSTGRES_USER'),
+#         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+#         'HOST': 'eardrum_db',
+#         'PORT': '5432',
+#         'CONN_MAX_AGE': 3600,
+#     }
+# })
 
 
 # Password validation
@@ -123,11 +134,36 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Authentication
+# Authentication Backends
 AUTHENTICATION_BACKENDS = [
     'account.ldap_backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+
+# REST_FRAMEWORK settings
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+
+# JWT_AUTH settings
+JWT_AUTH = {
+    'JWT_VERIFY_EXPIRATION': False,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=366),
+}
+
+
+# Authentication
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
 
 
 # Internationalization
@@ -149,4 +185,21 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_ROOT = '/usr/src/static'
+STATIC_ROOT = get_config_of('STATIC_ROOT', '/usr/src/static')
+
+STATICFILES_DIRS_DEFAULT = (
+    # We do this so that django's collectstatic copies or our bundles to the
+    # STATIC_ROOT or syncs them to whatever storage we use.
+    os.path.join(BASE_DIR, 'frontend', 'build', 'static'),
+)
+
+STATICFILES_DIRS = get_config_of('STATICFILES_DIRS', STATICFILES_DIRS_DEFAULT)
+
+WEBPACK_LOADER_DEFAULT = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': '',
+        'STATS_FILE': os.path.join(BASE_DIR, 'frontend', 'webpack-stats-prod.json'),
+    }
+}
+
+WEBPACK_LOADER = get_config_of('WEBPACK_LOADER', WEBPACK_LOADER_DEFAULT)

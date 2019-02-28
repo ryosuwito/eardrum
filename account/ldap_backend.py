@@ -1,15 +1,22 @@
 import logging
-import pam
 
 from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponseBadRequest
+from django.conf import settings
+
+from ldap3 import (
+    Server,
+    Connection,
+    ALL,
+)
+from ldap3.core.exceptions import LDAPBindError
 
 logger = logging.getLogger(__name__)
 
 
-class LDAPBackend():
+class LDAPBackend:
     """
     LDAPBackend
     """
@@ -19,20 +26,31 @@ class LDAPBackend():
         if username is None or password is None:
             return HttpResponseBadRequest
 
-        authenticated = pam.pam().authenticate(username, password)        
-        if not authenticated:
+        try:
+            server = Server(
+                getattr(settings, 'LDAP_SERVER', '10.0.0.201'),
+                get_info=ALL,
+            )
+            Connection(
+                server,
+                'cn={}, ou=People, dc=dtl'.format(username),
+                password,
+                auto_bind=True,
+            )
+        except LDAPBindError:
+            logger.info('Sign in failed with username={}'.format(username))
             return None
 
         try:
             user = User.objects.get(username=username)
         except ObjectDoesNotExist:
             logger.info("Save user {} into database")
-            user = User(username=username, password=password, email="{}@dytechlab.com".format(username))
+            user = User(username=username, password='', email="{}@dytechlab.com".format(username))
             user.save()
 
-        return user
+        return user if LDAPBackend.MODEL_BACKEND.user_can_authenticate(user) else None
 
     def get_user(self, user_id):
-        return MODEL_BACKEND.get_user(user_id)
+        return LDAPBackend.MODEL_BACKEND.get_user(user_id)
 
 

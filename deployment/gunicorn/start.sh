@@ -1,13 +1,16 @@
+# Frontend
+cd /usr/src/app/frontend
+npm install
+npm run build
+
 # Install packages
 cd /usr/src/app
-python3 -m pip install -U pip
-python3 -m venv env
-source env/bin/activate
-pip3 install -U setuptools
-pip3 install -r requirements.txt
-pip3 install gunicorn==19.9.0
+pip3 install -U pip
+pip install -U setuptools
+pip install -r requirements.txt
 
 # Runserver
 python3 manage.py collectstatic --noinput
 python3 manage.py migrate 
-python3 manage.py runserver 0.0.0.0:8000
+mkdir -p run
+gunicorn -c deployment/gunicorn/gunicorn.py eardrum.wsgi:application

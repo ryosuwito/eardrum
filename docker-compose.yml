@@ -20,7 +20,6 @@ services:
     depends_on:
       - eardrum_db
     volumes:
-      - .:/usr/src/app
       - /usr/src/static
       - /usr/src/uploads
     expose:
@@ -37,6 +36,6 @@ services:
     volumes_from:
       - eardrum_app
     ports:
-      - "0.0.0.0:55555:80"
+      - "0.0.0.0:8005:80"
     env_file:
       - ./deployment/environ/deployment.env

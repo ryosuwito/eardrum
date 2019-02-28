@@ -1,7 +1,16 @@
+import datetime
+import pytz
+import logging
+
 from django.db import models
 from django.contrib.auth.models import User
 
+from .settings import settings as review_settings
+
 # Create your models here.
+
+
+Logger = logging.getLogger(__name__)
 
 
 class Question(models.Model):
@@ -12,52 +21,85 @@ class Question(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return "(%s) %s" % (self.id, self.title)
 
 
 class Bucket(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=False, default='')
     
     questions = models.ManyToManyField(Question)
-    coefficients = models.CharField(max_length=255)
+
+    extra = models.CharField(max_length=255,
+        help_text="Weights of question in the format of \"question_id:weight;question_id:weight;...\"")
+
+    ordering = models.CharField(max_length=255, null=False, blank=True, default='',
+        help_text="Ordering of questions will be listed in format of \"question1_id,question2_id,question3_id,..\"")
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return "(%s) %s" % (self.id, self.title)
+
+
+def get_current_quarter_and_year():
+    now = datetime.datetime.now()
+    return "%s,%s" % ((now.month+2)//3, now.year)
 
 
 class Request(models.Model):
+    issuer = models.ForeignKey(
+        User,
+        models.CASCADE,
+        related_name='user_requests',
+    )
+
     reviewer = models.ForeignKey(
         User,
-        models.DO_NOTHING,
+        models.CASCADE,
         related_name='reviewer_requests',
         related_query_name='reviewer_request',
     )
     reviewee = models.ForeignKey(
         User,
-        models.DO_NOTHING,
+        models.CASCADE,
         related_name='reviewee_requests',
         related_query_name='reviewee_request',
     )
     
-    bucket = models.ForeignKey(Bucket, models.DO_NOTHING)
+    bucket = models.ForeignKey(Bucket, models.CASCADE)
 
-    status = models.CharField(max_length=255)
-    summary = models.CharField(max_length=255)
+    # Json as text
+    review = models.TextField(blank=True, null=False, default="{}")
+
+    # A point of time when the request will be closed, in other words.
+    # It's only available to be updated between created_at and close_at
+    close_at = models.DateTimeField(null=True, blank=True)
+
+    quarter_and_year = models.CharField(
+        max_length=10, null=False, blank=True, default=get_current_quarter_and_year())
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def get_close_at(self):
+        open_time = review_settings.REQUEST_WILL_BE_CLOSED_AFTER
+
+        close_at = self.close_at if self.close_at is not None \
+                else self.created_at + datetime.timedelta(hours=open_time)
+
+        return close_at
+
+
+    def is_request_valid_to_update(self):
+        """
+        Check if a request is valid to be updated or not.
+        """
+        now = pytz.utc.localize(datetime.datetime.now())
+
+        return self.get_close_at() > now
+
+    def __str__(self):
+        return "(%s) %s - %s" % (self.id, self.reviewer.username, self.reviewee.username)
     
-class Review(models.Model):
-    request = models.ForeignKey(Request, models.DO_NOTHING)
-    question = models.ForeignKey(Question, models.DO_NOTHING)
-
-    content = models.CharField(max_length=255)
-    extra_content = models.TextField()
-
-    updated_at = models.DateTimeField(auto_now=True)
-    created_at = models.DateTimeField(auto_now_add=True)

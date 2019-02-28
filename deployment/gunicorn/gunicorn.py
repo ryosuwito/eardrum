@@ -20,7 +20,7 @@
 
 from os import environ
 
-port = environ.get('PORT', '7999')
+port = environ.get('PORT', '8000')
 environ['PORT'] = port
 bind = '0.0.0.0:' + port
 backlog = 2048
