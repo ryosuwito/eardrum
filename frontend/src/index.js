@@ -10,7 +10,6 @@ import { SnackbarProvider } from 'notistack';
 import rootReducer from './reducers/index'; 
 import App from './App';
 import middlewares from './middlewares';
-import axiosConfig from './configs/axios';
 
 const store = createStore(
   rootReducer,
@@ -22,9 +21,9 @@ const store = createStore(
 // axios.defaults.headers.post['Content-Type'] = axiosConfig.headers.post['Content-Type'];
 // axios.defaults.proxy = axiosConfig.proxy;
 axios.interceptors.request.use(config => {
-  config.baseURL = axiosConfig.baseURL;
-  config.headers.post['Content-Type'] = axiosConfig.headers.post['Content-Type'];
-  config.headers.common['Authorization'] = 'JWT ' + localStorage.getItem('auth');
+  if (localStorage.getItem('auth')) {
+    config.headers.common['Authorization'] = 'JWT ' + localStorage.getItem('auth');
+  }
 
   return config;
 })

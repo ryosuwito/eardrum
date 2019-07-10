@@ -3,26 +3,72 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
 import {
   Grid,
-  Table,
   TableHeaderRow,
-  PagingPanel,
   TableRowDetail,
+  VirtualTable,
+  TableFilterRow,
 } from '@devexpress/dx-react-grid-material-ui';
 import {
-  PagingState,
-  IntegratedPaging,
   RowDetailState,
+  DataTypeProvider,
+  FilteringState,
+  SortingState,
+  IntegratedFiltering,
+  IntegratedSorting,
 } from '@devexpress/dx-react-grid';
 import { 
   requestFetchAll,
   requestSendReview,
 } from '../actions';
 import WithLongPolling from '../core/WithLongPolling';
-import QuestionStepper from './QuestionStepper';
+
+
+const DatetimeFormatter = ({ value }) => {
+  const time = new Date(value);
+  const twoLastDigits = value => ('0' + value % 100).slice(-2)
+  const x = twoLastDigits;
+  return `${x(time.getFullYear())}${x(time.getMonth()+1)}${x(time.getDay())} ${x(time.getHours())}:${x(time.getMinutes())}:${x(time.getSeconds())}`;
+}
+
+
+const current_quarter_and_year = () => {
+  const now = new Date();
+  return `${Math.floor(now.getMonth()/3 + 1)},${now.getFullYear()}`
+}
+
+
+const DatetimeTypeProvider = props => (
+  <DataTypeProvider
+    formatterComponent={ DatetimeFormatter }
+    {...props}
+    />
+)
+
+
+const styles = {
+  Open: {
+    backgroundColor: '#e3f2fd',
+  },
+  Closed: {
+    backgroundColor: '#e8f5e9',
+  }
+};
+
+const VirtualTableRow = ({ row, ...restProps }) => (
+  <VirtualTable.Row
+    {...restProps}
+    // eslint-disable-next-line no-alert
+    style={{
+      ...styles[row.status],
+    }}
+  />
+);
 
 const columns = [
   // { name: 'id', title: 'Id' },
@@ -36,9 +82,17 @@ const columns = [
   // { name: 'content', title: 'Content' },
 ]
 
+const datetimeColumns = ['close_at'];
 
-const defaultPageSize = 10;
-const defaultCurrentPage = 0;
+
+const sortingStateColumnExtensions = [
+  { columnName: 'reviewer', sortingEnabled: false },
+  { columnName: 'reviewee', sortingEnabled: false },
+  { columnName: 'bucket_title', sortingEnabled: false },
+  { columnName: 'quarter_and_year', sortingEnabled: false },
+  { columnName: 'progress', sortingEnabled: false },
+  { columnName: 'close_at', sortingEnabled: false },
+]
 
 
 class RequestList extends Component {
@@ -52,26 +106,31 @@ class RequestList extends Component {
   }
 
   RowDetail = ({ row }) => {
-    return (<QuestionStepper
-      questions={ row.bucket.ordered_questions } onRate={ this.onRate(row.id) } request={ row } bucket={ row.bucket }/>)
+    return (
+      <React.Fragment>
+        <Button color='primary' to={ `/requests/${row.id}/details`}
+          component={ Link } variant='outlined'>View</Button>{' '}
+        <Button color='primary' to={ `/requests/${row.id}/details`}
+          component={ Link } variant='outlined' disabled={ row.status === 'Closed' }>Edit</Button>
+      </React.Fragment>)
   }
 
   render() {
-    console.log(this.props.requests)
     return (
       <Paper>
         <Grid
           rows={ this.props.requests }
           columns={ columns }>
-          <PagingState
-            defaultCurrentPage={ defaultCurrentPage }
-            pageSize={ defaultPageSize }/>
-          <RowDetailState/>
-          <IntegratedPaging/>
-          <Table/>
-          <TableHeaderRow/>
+          <FilteringState defaultFilters={[{columnName: 'quarter_and_year', value: current_quarter_and_year()}]} />
+          <SortingState columnExtensions={ sortingStateColumnExtensions }/>
+          <DatetimeTypeProvider for={ datetimeColumns } />
+          <IntegratedFiltering />
+          <IntegratedSorting />
+          <RowDetailState />
+          <VirtualTable height="700px" rowComponent={ VirtualTableRow }/>
+          <TableHeaderRow showSortingControls/>
           <TableRowDetail contentComponent={ this.RowDetail } />
-          <PagingPanel/>
+          <TableFilterRow showFilterSelector/>
         </Grid>
       </Paper>
     )
@@ -84,7 +143,7 @@ RequestList.propTypes = {
 
 
 const mapStateToProps = state => ({
-  requests: _.cloneDeep(Object.values(state.requests).filter(req => req.status === 'Open')).map(
+  requests: _.cloneDeep(Object.values(state.requests)).map(
     request => {request.bucket_title = request.bucket.title; return request} ),
 })
 

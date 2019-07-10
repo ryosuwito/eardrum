@@ -156,20 +156,30 @@ class RequestDetails extends Component {
    
     return (
       <Paper className={ classes.root }>
+        <React.Fragment>
+          <div style={ {height: '50px'} }/>
+          <Typography variant='h4'>{ request.bucket_title }</Typography>
+          <div style={ {height: '50px'} }/>
+          <Typography variant='h5'>{ `Reviewer: ${request.reviewer}` }</Typography>
+          <br/>
+          <Typography variant='h5'>{ `Reviewee: ${request.reviewee}` }</Typography>
+          <br/>
+          <Typography variant='h5'>{ `Quarter, Year: ${request.quarter_and_year}` }</Typography>
+          <div style={ {height: '50px'} }/>
+        </React.Fragment>
         { questions.map(question => (
           <React.Fragment key={ `question-${question.id}`}>
             <Paper square elevation={0} className={classes.header}>
-              <Typography variant='h5'>{ `${question.title} (${getValueOfObject(extra, [question.id], 0)} points)` }</Typography>
+              {question.typ === '' &&
+              <Typography variant='h5'>{ `${question.title} (${getValueOfObject(extra, [question.id], 0)} points)` }</Typography>}
+              {question.typ !== '' &&
+              <Typography variant='h5'>{ `${question.title}` }</Typography>}
             </Paper>
 
             <Grid className={ classes.questionGroup } container justify='space-between'>
               <div className={ classes.questionStyle } dangerouslySetInnerHTML={{__html: question.html_content}}/>
               <div className={ classes.reviewFormStyle }>
-                {this.state.readOnly && (
-                  <React.Fragment>
-                    <InputLabel htmlFor="grade-label-placeholder-readonly-id">Grade</InputLabel>
-                  </React.Fragment>)}
-                {!this.state.readOnly && (
+                {!this.state.readOnly && question.typ === '' && (
                 <React.Fragment>
                   <FormControl variant="outlined" className={classes.formControlGrade}>
                     <InputLabel htmlFor="grade-label-placeholder-id">
@@ -202,12 +212,28 @@ class RequestDetails extends Component {
                   </FormControl>
                 </React.Fragment>)}
               </div>
+              {question.typ === 'comment' && (
+                <FormControl className={classes.formControl}>
+                  <TextField
+                    id="review-comment-id"
+                    label="Comment"
+                    multiline
+                    rows="5"
+                    rowsMax="5"
+                    value={ getValueOfObject(this.state.reviews, [question.id, 'comment'], '') }
+                    onChange={ this.handleChange(question.id, 'comment') }
+                    className={classes.textField}
+                    variant='outlined'
+                    margin="normal"
+                  />
+                </FormControl>
+              )}
             </Grid>
               <Divider variant="fullWidth" />
           </React.Fragment>
         ))}
         <Button onClick={ this.onReviewSubmit } color='primary' variant='contained' className={ classes.button }>Submit</Button>
-        <Button to='/requests' component={ Link } color='primary' variant='outlined' className={ classes.button }>Back</Button>
+        <Button to='/' component={ Link } color='primary' variant='outlined' className={ classes.button }>Back</Button>
       </Paper>
     )
   }
@@ -225,7 +251,7 @@ RequestDetails.propTypes = {
 
 const mapStateToProps = (state) => {
   return ({
-    request: state.request,
+    request: {..._.cloneDeep(state.request), bucket_title: !state.request.bucket? null: state.request.bucket.title},
     gradeOptions: [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.gradeOptions)], 
   })
 }

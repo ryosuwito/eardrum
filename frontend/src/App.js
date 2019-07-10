@@ -19,9 +19,8 @@ import {
   Switch,
 } from "react-router-dom";
 
-import Home from './views/Home';
+import FAQ from './views/FAQ';
 import SignInView from './views/SignInView';
-import Summary from './views/Summary';
 import RequestList from './views/RequestList';
 import RequestDetails from './views/RequestDetails';
 import { signOut, } from './actions/index';
@@ -46,8 +45,8 @@ const styles = theme => ({
     width: 'auto',
     marginLeft: theme.spacing.unit * 3,
     marginRight: theme.spacing.unit * 3,
-    [theme.breakpoints.up(900 + theme.spacing.unit * 3 * 2)]: {
-      width: 900,
+    [theme.breakpoints.up(1000 + theme.spacing.unit * 3 * 2)]: {
+      width: 1000,
       marginLeft: 'auto',
       marginRight: 'auto',
     },
@@ -87,7 +86,6 @@ function LinkTab(props) {
     />
   );
 }
-
 
 class App extends Component {
   constructor(props) {
@@ -168,8 +166,7 @@ class App extends Component {
                   <React.Fragment>
                     <Tabs value={ this.state.tabValue } onChange={ this.onChangeTab }>
                       <LinkTab label="Home" to="/" />
-                      <LinkTab label="Summary" to='/summary' />
-                      <LinkTab label="Requests" to='/requests' />
+                      <LinkTab label="Other" to='/other' />
                     </Tabs>
                     <Button to='/' color="primary" variant="outlined" component={ Link } onClick={ this.onSignOut }>Sign Out</Button>
                   </React.Fragment>
@@ -180,11 +177,10 @@ class App extends Component {
           <main className={ classes.layout }>
             <Switch>
               <SignInRoute path="/signin" component={ SignInView } />
-              <PrivateRoute exact={ true } path="/" component={ Home } />
-              <PrivateRoute path="/summary" component={ Summary } />
+              <PrivateRoute exact={ true } path="/" component={ RequestList } />
+              <PrivateRoute exact={ true } path="/other" component={ FAQ } />
               <Switch>
                 <PrivateRoute path="/requests/:requestId/details" component={ RequestDetails } />
-                <PrivateRoute path="/requests" component={ RequestList } />
               </Switch>
             </Switch>
           </main>
@@ -204,7 +200,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  dispatch: (action) => dispatch(action),
+  dispatch,
 })
 
 const pollingJobProducer = (props) => {

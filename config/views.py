@@ -7,8 +7,6 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from account.permissions import IsAuthenticated
-
 from .models import Entry
 from . import utils
 
@@ -16,7 +14,7 @@ from . import utils
 
 
 class ConfigViewset(viewsets.GenericViewSet):
-    permission_classes = (IsAuthenticated,)
+    permission_classes = []
     queryset = Entry.objects.all()
 
     @action(detail=False, methods=['GET'])

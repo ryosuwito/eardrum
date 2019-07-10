@@ -15,10 +15,17 @@ Logger = logging.getLogger(__name__)
 
 class Question(models.Model):
     title = models.CharField(max_length=255)
-    content = models.TextField()
+    content = models.TextField(blank=True, null=False, default='')
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # This field is for adding some group title or summary comment to a bucket,
+    # in those case the question is a dummy and not for answering. For example,
+    # people want a summary comment at the end of the form or they want to separate
+    # the question list into 2 or more groups with related questions so they want
+    # a group title for each groups.
+    typ = models.CharField(max_length=10, blank=True, null=False, default='')
 
     def __str__(self):
         return "(%s) %s" % (self.id, self.title)
@@ -49,12 +56,6 @@ def get_current_quarter_and_year():
 
 
 class Request(models.Model):
-    issuer = models.ForeignKey(
-        User,
-        models.CASCADE,
-        related_name='user_requests',
-    )
-
     reviewer = models.ForeignKey(
         User,
         models.CASCADE,

@@ -1,31 +1,34 @@
 import os
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Uncomment these settings for production
+#
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'eardrum',
-#         'USER': 'ado',
-#         'PASSWORD': '',
-#         'HOST': 'localhost',
+#         'NAME': os.environ.get('POSTGRES_DB'),
+#         'USER': os.environ.get('POSTGRES_USER'),
+#         'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+#         'HOST': 'eardrum_db',
 #         'PORT': '5432',
 #         'CONN_MAX_AGE': 3600,
 #     }
 # }
-
-
-# SECRET_KEY = 'SECRET_KEY'
-
-# DEBUG = True
-
-# ALLOWED_HOSTS = []
-
-# STATIC_ROOT = 'asset/static/'
-# MEDIA_ROOT = 'asset/media/'
-
+# ALLOWED_HOSTS = [os.environ.get('NGINX_SERVER_NAME')]
 
 # Uncomment these settings for development
+#
+# SECRET_KEY = 'SECRET_KEY'
+#
+# DEBUG = True
+#
+# ALLOWED_HOSTS = ['*']
+#
+# STATIC_ROOT = os.path.join(BASE_DIR, 'assets/static/')
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'assets/media/')
+#
 #
 # STATICFILES_DIRS = (
 #     # We do this so that django's collectstatic copies or our bundles to the

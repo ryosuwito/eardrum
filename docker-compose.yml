@@ -5,11 +5,11 @@ services:
     build: ./deployment/psql
     mem_limit: 1024m
     volumes:
-      - /export/scratch/data/docker_data/eardrum/pg_data:/var/lib/postgresql/data
+      - eardrum_db_vol:/var/lib/postgresql/data
     expose:
       - "5432"
     env_file:
-      - ./deployment/environ/deployment.env
+      - ./localconfigs/deployment.env
   eardrum_app:
     container_name: eardrum_app
     build:
@@ -20,12 +20,12 @@ services:
     depends_on:
       - eardrum_db
     volumes:
-      - /usr/src/static
-      - /usr/src/uploads
+      - eardrum_app_static:/usr/src/static
+      - eardrum_app_uploads:/usr/src/uploads
     expose:
       - "8000"
     env_file:
-      - ./deployment/environ/deployment.env
+      - ./localconfigs/deployment.env
   eardrum_nginx:
     container_name: eardrum_nginx
     build: ./deployment/nginx
@@ -38,4 +38,8 @@ services:
     ports:
       - "0.0.0.0:8005:80"
     env_file:
-      - ./deployment/environ/deployment.env
+      - ./localconfigs/deployment.env
+volumes:
+  eardrum_db_vol:
+  eardrum_app_static:
+  eardrum_app_uploads:

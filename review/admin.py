@@ -19,8 +19,12 @@ class QuestionAdmin(admin.ModelAdmin):
 class BucketAdmin(admin.ModelAdmin):
     filter_horizontal = ['questions']
 
+
+class RequestAdmin(admin.ModelAdmin):
+    readonly_fields = ['review']
+
 # Register your models here.
 
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Bucket, BucketAdmin)
-admin.site.register(Request)
+admin.site.register(Request, RequestAdmin)

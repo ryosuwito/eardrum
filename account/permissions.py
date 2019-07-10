@@ -5,7 +5,6 @@ from rest_framework.permissions import (
 )
 
 
-
 class IsAuthenticated(RF_IsAuthenticated):
     pass
 

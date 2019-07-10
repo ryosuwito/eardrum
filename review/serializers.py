@@ -62,7 +62,7 @@ class BucketSerializer(serializers.ModelSerializer):
     def get_extra(self, obj):
         try:
             extra = {el[0]: float(el[1]) for el in map(lambda x: x.split(':'), obj.extra.split(';'))}
-        except:
+        except Exception:
             return None
         else:
             return extra
@@ -131,7 +131,7 @@ class RequestSerializer(serializers.ModelSerializer):
 
     def get_progress(self, obj):
         try:
-            question_set = {str(question.id) for question in obj.bucket.questions.all()}
+            question_set = {str(question.id) for question in filter(lambda x: x.typ == '', obj.bucket.questions.all())}
             review_set = {str(key) for key in json.loads(obj.review).keys()}
         except Exception as err:
             Logger(err)
@@ -150,7 +150,7 @@ class RequestSerializer(serializers.ModelSerializer):
 
     def get_summary(self, obj):
         try:
-            coefficients = obj.bucket.extra
+            coefficients = BucketSerializer(obj.bucket).data['extra']
 
             questions = obj.bucket.questions.all()
             reviews = json.loads(obj.review)
