@@ -4,6 +4,7 @@ services:
     container_name: eardrum_db
     build: ./deployment/psql
     mem_limit: 1024m
+    restart: always
     volumes:
       - eardrum_db_vol:/var/lib/postgresql/data
     expose:
@@ -17,6 +18,7 @@ services:
       dockerfile: ./eardrum.Dockerfile
     command: /bin/bash ./deployment/gunicorn/start.sh
     mem_limit: 1024m
+    restart: always
     depends_on:
       - eardrum_db
     volumes:
@@ -31,6 +33,7 @@ services:
     build: ./deployment/nginx
     command: /bin/bash start.sh
     mem_limit: 1024m
+    restart: always
     depends_on:
       - eardrum_app
     volumes_from:
