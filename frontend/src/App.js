@@ -75,6 +75,9 @@ const styles = theme => ({
     borderTop: `1px solid ${theme.palette.divider}`,
     padding: `${theme.spacing.unit * 6}px 0`,
   },
+  navButton: {
+    marginLeft: theme.spacing.unit,
+  }
 });
 
 
@@ -172,6 +175,7 @@ class App extends Component {
                   </React.Fragment>
                 )
               }
+              <Button href='/admin/login/' color="primary" variant="outlined" target="_blank" className={ classes.navButton }>Admin pages</Button>
             </Toolbar>
           </AppBar>
           <main className={ classes.layout }>
