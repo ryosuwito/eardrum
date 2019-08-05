@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 import {
@@ -60,6 +61,7 @@ class SignInView extends Component {
     this.state = {
       username: '',
       password: '',
+      loading: false,
     }
   }
 
@@ -69,9 +71,12 @@ class SignInView extends Component {
     this.setState(newState);
   }
 
-  onSubmit = (event) => {
+  onSubmit = async (event) => {
     event.preventDefault();
-    this.props.onSignIn(signIn(this.state));
+    const funcAction = signIn(this.state);
+    this.setState({loading: true});
+    await funcAction(this.props.dispatch);
+    this.setState({loading: false});
   }
 
   render() {
@@ -108,10 +113,12 @@ class SignInView extends Component {
               variant="contained"
               color="primary"
               className={classes.submit}
+              disabled={ this.state.loading }
             >
               Sign in
             </Button>
           </form>
+          { this.state.loading && <CircularProgress/> }
         </Paper>
       </main>
     );
@@ -124,7 +131,7 @@ SignInView.propTypes = {
 
 const mapStateToProps = state => ({})
 const mapDispatchToProps = dispatch => ({
-  onSignIn: async action => dispatch(await action),
+  dispatch,
 })
 
 export default connect(
