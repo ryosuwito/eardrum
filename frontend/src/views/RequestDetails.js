@@ -113,14 +113,15 @@ class RequestDetails extends Component {
       this.state = Object.assign(
         {},
         this.state,
-        { reviews: this.props.request.review }
+        { reviews: this.props.request.review, requestId: this.props.request.id },
       )
     }
   }
 
   componentDidUpdate() {
-    if (!this.state.reviews && getValueOfObject(this.props, ['request', 'review'], null) !== null) {
-      this.setState({ reviews: this.props.request.review })
+    const request = getValueOfObject(this.props, ['request'], null);
+    if (request !== null && this.state.requestId !== request.id) {
+      this.setState({ reviews: this.props.request.review, requestId: this.props.request.id })
     }
   }
 
@@ -168,7 +169,7 @@ class RequestDetails extends Component {
           <div style={ {height: '50px'} }/>
         </React.Fragment>
         { questions.map(question => (
-          <React.Fragment key={ `question-${question.id}`}>
+          <div key={ `question-${question.id}`}>
             <Paper square elevation={0} className={classes.header}>
               {question.typ === '' &&
               <Typography variant='h5'>{ `${question.title} (${getValueOfObject(extra, [question.id], 0)} points)` }</Typography>}
@@ -230,7 +231,7 @@ class RequestDetails extends Component {
               )}
             </Grid>
               <Divider variant="fullWidth" />
-          </React.Fragment>
+          </div>
         ))}
         <Button onClick={ this.onReviewSubmit } color='primary' variant='contained' className={ classes.button }>Submit</Button>
         <Button to='/' component={ Link } color='primary' variant='outlined' className={ classes.button }>Back</Button>

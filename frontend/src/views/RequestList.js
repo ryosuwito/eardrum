@@ -37,10 +37,10 @@ const DatetimeFormatter = ({ value }) => {
 }
 
 
-const current_quarter_and_year = () => {
-  const now = new Date();
-  return `${Math.floor(now.getMonth()/3 + 1)},${now.getFullYear()}`
-}
+// const current_quarter_and_year = () => {
+//   const now = new Date();
+//   return `${Math.floor(now.getMonth()/3 + 1)},${now.getFullYear()}`
+// }
 
 
 const DatetimeTypeProvider = props => (
@@ -121,7 +121,7 @@ class RequestList extends Component {
         <Grid
           rows={ this.props.requests }
           columns={ columns }>
-          <FilteringState defaultFilters={[{columnName: 'quarter_and_year', value: current_quarter_and_year()}]} />
+          <FilteringState/>
           <SortingState columnExtensions={ sortingStateColumnExtensions }/>
           <DatetimeTypeProvider for={ datetimeColumns } />
           <IntegratedFiltering />
