@@ -45,3 +45,4 @@ virtualenv==16.4.1
 websocket-client==0.55.0
 easydict==1.9
 gevent==1.4.0
+django-auditlog==0.4.7

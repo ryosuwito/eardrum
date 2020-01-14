@@ -38,7 +38,7 @@ class BucketSerializer(serializers.ModelSerializer):
         model = Bucket
         fields = '__all__'
 
-    questions = QuestionSerializer(many=True, read_only=True)
+    # questions = QuestionSerializer(many=True, read_only=True)
     extra = serializers.SerializerMethodField()
     ordered_questions = serializers.SerializerMethodField()
 
