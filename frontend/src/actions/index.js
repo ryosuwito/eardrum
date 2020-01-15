@@ -141,3 +141,20 @@ export const configFetchGradeOptions = () => {
   )
 }
 /** END CONFIG ACTIONS */
+
+
+/** START OKR ACTIONS */
+export const okrFetchAll = () => {
+  return callAPI(
+    axios.get(urls.OKR_FETCH_ALL),
+    ActionTypes.OKR_FETCH_ALL,
+  )
+}
+
+export const okrFetchOne = (id) => {
+  return callAPI(
+    axios.get(urls.OKR_FETCH_ONE(id)),
+    ActionTypes.OKR_FETCH_ONE,
+  )
+}
+/** END OKR ACTIONS */

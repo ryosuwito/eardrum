@@ -23,9 +23,13 @@ import FAQ from './views/FAQ';
 import SignInView from './views/SignInView';
 import RequestList from './views/RequestList';
 import RequestDetails from './views/RequestDetails';
+import OKRList from './views/OKRList';
+import OKRDetail from './views/OKRDetail';
+
 import { signOut, } from './actions/index';
-import WithLongPolling from './core/WithLongPolling';
 import { configFetchGradeOptions } from './actions';
+
+import WithLongPolling from './core/WithLongPolling';
 import Notifier from './core/Notifier';
 
 
@@ -169,6 +173,7 @@ class App extends Component {
                   <React.Fragment>
                     <Tabs value={ this.state.tabValue } onChange={ this.onChangeTab }>
                       <LinkTab label="Home" to="/" />
+                      <LinkTab label="OKR" to="/okrs"/>
                       <LinkTab label="Other" to='/other' />
                     </Tabs>
                     <Button to='/' color="primary" variant="outlined" component={ Link } onClick={ this.onSignOut }>Sign Out</Button>
@@ -183,9 +188,9 @@ class App extends Component {
               <SignInRoute path="/signin" component={ SignInView } />
               <PrivateRoute exact={ true } path="/" component={ RequestList } />
               <PrivateRoute exact={ true } path="/other" component={ FAQ } />
-              <Switch>
-                <PrivateRoute path="/requests/:requestId/details" component={ RequestDetails } />
-              </Switch>
+              <PrivateRoute exact={ true } path="/okrs/:okrId" component={ OKRDetail } />
+              <PrivateRoute exact={ true } path="/okrs" component={ OKRList } />
+              <PrivateRoute path="/requests/:requestId/details" component={ RequestDetails } />
             </Switch>
           </main>
 
