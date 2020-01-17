@@ -143,8 +143,7 @@ RequestList.propTypes = {
 
 
 const mapStateToProps = state => ({
-  requests: _.cloneDeep(Object.values(state.requests)).map(
-    request => {request.bucket_title = request.bucket.title; return request} ),
+  requests: _.cloneDeep(Object.values(state.requests)),
 })
 
 

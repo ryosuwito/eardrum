@@ -5,7 +5,7 @@ import logging
 from django.db import models
 from django.contrib.auth.models import User
 
-from .settings import settings as review_settings
+from .settings import app_settings as review_settings
 
 # Create your models here.
 
@@ -34,13 +34,15 @@ class Question(models.Model):
 class Bucket(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=False, default='')
-    
+
     questions = models.ManyToManyField(Question)
 
-    extra = models.CharField(max_length=255,
+    extra = models.CharField(
+        max_length=255,
         help_text="Weights of question in the format of \"question_id:weight;question_id:weight;...\"")
 
-    ordering = models.CharField(max_length=255, null=False, blank=True, default='',
+    ordering = models.CharField(
+        max_length=255, null=False, blank=True, default='',
         help_text="Ordering of questions will be listed in format of \"question1_id,question2_id,question3_id,..\"")
 
     updated_at = models.DateTimeField(auto_now=True)
@@ -48,11 +50,6 @@ class Bucket(models.Model):
 
     def __str__(self):
         return "(%s) %s" % (self.id, self.title)
-
-
-def get_current_quarter_and_year():
-    now = datetime.datetime.now()
-    return "%s,%s" % ((now.month+2)//3, now.year)
 
 
 class Request(models.Model):
@@ -68,7 +65,7 @@ class Request(models.Model):
         related_name='reviewee_requests',
         related_query_name='reviewee_request',
     )
-    
+
     bucket = models.ForeignKey(Bucket, models.CASCADE)
 
     # Json as text
@@ -79,7 +76,7 @@ class Request(models.Model):
     close_at = models.DateTimeField(null=True, blank=True)
 
     quarter_and_year = models.CharField(
-        max_length=10, null=False, blank=True, default=get_current_quarter_and_year())
+        max_length=10, null=False, blank=True, default='q,yyyy')
 
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -88,10 +85,9 @@ class Request(models.Model):
         open_time = review_settings.REQUEST_WILL_BE_CLOSED_AFTER
 
         close_at = self.close_at if self.close_at is not None \
-                else self.created_at + datetime.timedelta(hours=open_time)
+            else self.created_at + datetime.timedelta(hours=open_time)
 
         return close_at
-
 
     def is_request_valid_to_update(self):
         """
@@ -103,4 +99,3 @@ class Request(models.Model):
 
     def __str__(self):
         return "(%s) %s - %s" % (self.id, self.reviewer.username, self.reviewee.username)
-    

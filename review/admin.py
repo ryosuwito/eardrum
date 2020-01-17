@@ -25,6 +25,7 @@ class RequestAdmin(admin.ModelAdmin):
 
 # Register your models here.
 
+
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Bucket, BucketAdmin)
 admin.site.register(Request, RequestAdmin)

@@ -109,13 +109,6 @@ class RequestDetails extends Component {
     this.state = {
       readOnly: false, // TODO Boolean(props['readOnly']),
     }
-    if (this.props.request) {
-      this.state = Object.assign(
-        {},
-        this.state,
-        { reviews: this.props.request.review, requestId: this.props.request.id },
-      )
-    }
   }
 
   componentDidUpdate() {

@@ -18,23 +18,25 @@ def get_grade_options(value):
         {'value': '0', 'name': 'F'}]
     """
     default_value = [
-            {'value': 0, 'name': 'A+'},
-            {'value': 0, 'name': 'A'},
-            {'value': 0, 'name': 'A-'},
-            {'value': 0, 'name': 'B+'},
-            {'value': 0, 'name': 'B'},
-            {'value': 0, 'name': 'B-'},
-            {'value': 0, 'name': 'C+'},
-            {'value': 0, 'name': 'C'},
-            {'value': 0, 'name': 'C-'},
-            {'value': 0, 'name': 'D+'},
-            {'value': 0, 'name': 'D'},
-            {'value': 0, 'name': 'D-'},
-            {'value': 0, 'name': 'F'},]
+        {'value': 0, 'name': 'A+'},
+        {'value': 0, 'name': 'A'},
+        {'value': 0, 'name': 'A-'},
+        {'value': 0, 'name': 'B+'},
+        {'value': 0, 'name': 'B'},
+        {'value': 0, 'name': 'B-'},
+        {'value': 0, 'name': 'C+'},
+        {'value': 0, 'name': 'C'},
+        {'value': 0, 'name': 'C-'},
+        {'value': 0, 'name': 'D+'},
+        {'value': 0, 'name': 'D'},
+        {'value': 0, 'name': 'D-'},
+        {'value': 0, 'name': 'F'},
+    ]
+
     def listToObj(values):
         return {'name': values[0], 'value': values[1]}
 
     try:
         return list(map(lambda x: listToObj(x.split(':')), value.split('|')))
-    except Exception as err:
+    except Exception:
         return default_value

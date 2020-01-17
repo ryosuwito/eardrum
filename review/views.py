@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from rest_framework import (
     viewsets,
     mixins,
@@ -7,13 +5,12 @@ from rest_framework import (
 )
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from account.permissions import (
     IsAdminUser,
     IsAuthenticated,
 )
 
-from .serializers import RequestSerializer
+from .serializers import RequestSerializer, LightRequestSerializer
 from .models import Request
 
 
@@ -61,3 +58,9 @@ class RequestViewSet(mixins.ListModelMixin,
 
         # Reviewer
         return self.queryset.filter(reviewer=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return LightRequestSerializer
+        else:
+            return self.serializer_class

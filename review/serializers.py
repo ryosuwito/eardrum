@@ -1,12 +1,9 @@
-import re
 import json
 import logging
 
-from django.contrib.auth import get_user_model
 from django.utils import six
 
 from rest_framework import serializers
-from rest_framework.validators import ValidationError
 from rest_framework.utils import html
 from markdownx import utils
 
@@ -142,7 +139,7 @@ class RequestSerializer(serializers.ModelSerializer):
     def get_status(self, obj):
         if obj.is_request_valid_to_update():
             return 'Open'
-        
+
         return 'Closed'
 
     def get_close_at(self, obj):
@@ -173,9 +170,85 @@ class RequestSerializer(serializers.ModelSerializer):
                 Logger.warn(err)
 
         return "%s/100" % round(points/100, 2)
-    
+
     def validate(self, attrs):
         if attrs.get('review'):
             attrs['review'] = json.dumps(attrs['review'])
-        
+
+        return attrs
+
+
+class LightRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Request
+        all_fields = {field.name for field in Request._meta.fields}
+        fields = [
+            'id', 'reviewer', 'reviewee', 'quarter_and_year',
+            'progress', 'status', 'close_at', 'summary', 'bucket_title',
+        ]
+        read_only_fields = list(all_fields - {'review'})
+
+    # issuer = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    reviewer = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    reviewee = serializers.SlugRelatedField(slug_field='username', read_only=True)
+
+    status = serializers.SerializerMethodField()
+    summary = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
+    close_at = serializers.SerializerMethodField()
+    bucket_title = serializers.SerializerMethodField()
+    # review = JSONField()
+
+    def get_bucket_title(self, obj):
+        return obj.bucket.title
+
+    def get_progress(self, obj):
+        try:
+            question_set = {str(question.id) for question in filter(lambda x: x.typ == '', obj.bucket.questions.all())}
+            review_set = {str(key) for key in json.loads(obj.review).keys()}
+        except Exception as err:
+            Logger(err)
+            return '-1/%s' % (len(question_set))
+        else:
+            return "%s/%s" % (len(question_set & review_set), len(question_set))
+
+    def get_status(self, obj):
+        if obj.is_request_valid_to_update():
+            return 'Open'
+
+        return 'Closed'
+
+    def get_close_at(self, obj):
+        return obj.get_close_at()
+
+    def get_summary(self, obj):
+        try:
+            coefficients = BucketSerializer(obj.bucket).data['extra']
+
+            questions = obj.bucket.questions.all()
+            reviews = json.loads(obj.review)
+
+            grade_options = config_utils.get_grade_options(Entry.objects.get(name='grade_options').value)
+            grade_map = {grade['name']: grade['value'] for grade in grade_options}
+        except Exception as err:
+            Logger.warn(err)
+            return "-1/100"
+
+        points = 0
+        for question_id, ans in reviews.items():
+            try:
+                if type(coefficients) is not dict:
+                    coef = 100.0/len(questions)
+                else:
+                    coef = coefficients[question_id]
+                points += coef * int(grade_map[ans.get('grade', 'F')])
+            except Exception as err:
+                Logger.warn(err)
+
+        return "%s/100" % round(points/100, 2)
+
+    def validate(self, attrs):
+        if attrs.get('review'):
+            attrs['review'] = json.dumps(attrs['review'])
+
         return attrs

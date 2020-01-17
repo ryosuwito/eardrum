@@ -52,5 +52,3 @@ class LDAPBackend:
 
     def get_user(self, user_id):
         return LDAPBackend.MODEL_BACKEND.get_user(user_id)
-
-

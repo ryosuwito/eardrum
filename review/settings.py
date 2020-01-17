@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from  easydict import EasyDict
+from easydict import EasyDict
 
 
 DEFAULT_SETTINGS = {
@@ -13,4 +13,4 @@ def get_config_of(key, default_value=None):
     return getattr(settings, key, default_value)
 
 
-settings = EasyDict({k:get_config_of(k, v) for k, v in DEFAULT_SETTINGS.items()})
+app_settings = EasyDict({k: get_config_of(k, v) for k, v in DEFAULT_SETTINGS.items()})

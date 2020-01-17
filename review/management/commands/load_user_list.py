@@ -57,6 +57,7 @@ user_list = [
     'llu',
 ]
 
+
 class Command(BaseCommand):
     help = 'Load user list'
 

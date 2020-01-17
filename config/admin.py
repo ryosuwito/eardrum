@@ -4,6 +4,7 @@ from .models import Entry
 
 # Register your models here.
 
+
 class EntryAdmin(admin.ModelAdmin):
     list_display = ('name', 'value')
 
