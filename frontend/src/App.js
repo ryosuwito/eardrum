@@ -26,7 +26,7 @@ import RequestDetails from './views/RequestDetails';
 import OKRList from './views/OKRList';
 import OKRDetail from './views/OKRDetail';
 
-import { signOut, } from './actions/index';
+import { signOut, getCurrentUser, accountFetchAll, } from './actions/index';
 import { configFetchGradeOptions } from './actions';
 
 import WithLongPolling from './core/WithLongPolling';
@@ -214,8 +214,19 @@ const mapDispatchToProps = dispatch => ({
 
 const pollingJobProducer = (props) => {
   const configFetchGradeOptionsFunc = () => props.dispatch(configFetchGradeOptions());
+  const fetchUsers = () => {
+      props.dispatch(getCurrentUser());
+      props.dispatch(accountFetchAll());
+  }
+  const repeatUntilTrue = () => {
+    if (props.auth.is_authenticated) {
+      fetchUsers();
+    } else {
+      setInterval(repeatUntilTrue, 1000);
+    }
+  }
   return {
-    funcs: [configFetchGradeOptionsFunc],
+    funcs: [configFetchGradeOptionsFunc, repeatUntilTrue],
     workers: [setInterval(configFetchGradeOptionsFunc, 10*60*1000)],
   }
 }

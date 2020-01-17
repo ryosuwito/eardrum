@@ -3,16 +3,15 @@ import _ from 'lodash';
 import ActionTypes from '../actions/types';
 
 
-const okr = (state = {}, action) => {
-  switch (action.type) {
-    case ActionTypes.OKR_FETCH_ONE:
+const user = (state = {}, action) => {
+  switch(action.type) {
+    case ActionTypes.GET_CURRENT_USER:
       return action.payload;
     case ActionTypes.AUTH_SIGN_OUT:
-      return {};
+      return {}
     default:
       return state;
   }
 }
 
-export default okr;
-
+export default user;

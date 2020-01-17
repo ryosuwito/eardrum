@@ -9,6 +9,7 @@ const ActionTypes = {
   USER_FETCH_ALL: 'user_fetch_all',
   USER_FETCH_ALL_ERROR: 'user_fetch_all_error',
   USER_FETCH_ONE: 'user_fetch_one',
+  GET_CURRENT_USER: 'user_fetch_one',
   USER_FETCH_ONE_ERROR: 'user_fetch_one_error',
 
   // QUESTION

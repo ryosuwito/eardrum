@@ -17,6 +17,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
   signIn,
+  getCurrentUser,
+  accountFetchAll,
   // signOut,
 } from '../actions';
 
@@ -75,7 +77,11 @@ class SignInView extends Component {
     event.preventDefault();
     const funcAction = signIn(this.state);
     this.setState({loading: true});
-    await funcAction(this.props.dispatch);
+    const isSucceeded = await funcAction(this.props.dispatch);
+    if (isSucceeded) {
+      this.props.dispatch(getCurrentUser());
+      this.props.dispatch(accountFetchAll());
+    }
     this.setState({loading: false});
   }
 

@@ -67,7 +67,7 @@ class Home extends Component {
             <Typography variant="h6" align="justify" color="textPrimary" gutterBottom>
               Concepts
             </Typography>
-            <Typography variant="body1" align="justify" color="textPrimary" gutterBottom>
+            <Typography component='div' variant="body1" align="justify" color="textPrimary" gutterBottom>
               <ul>
                 <li>
                   A <b>Request</b> will contain a reviewer, a reviewee, a specific list of question and a point of time when the request will be closed (could be empty). The reviewer will give the review to the reviewee by complete all the questions in the list. The request will be closed automatically after the defined point of time or 3 days after the request created by default.
@@ -90,7 +90,7 @@ class Home extends Component {
             <Typography variant="h6" align="justify" color="textPrimary" gutterBottom>
               Use Cases
             </Typography>
-            <Typography variant="body1" align="justify" color="textPrimary" gutterBottom>
+            <Typography component='div' variant="body1" align="justify" color="textPrimary" gutterBottom>
             <ul>
               <li>
                 Reviewer
@@ -127,7 +127,7 @@ class Home extends Component {
             <Typography variant='h6' gutterBottom align='justify' color='textPrimary'>
               Review System
             </Typography>
-            <Typography variant='body1' gutterBottom align='justify' color='textPrimary'>
+            <Typography component='div' variant='body1' gutterBottom align='justify' color='textPrimary'>
               <ul>
                 <li>
                   Each question in a bucket has a specified score.

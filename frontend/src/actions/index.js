@@ -31,6 +31,7 @@ const callAPI = (axiosRequest, actionType, successMessage = null, errorMessage =
       } else {
         console.error("Undefined 'actionType'", actionType);
       }
+      return true;
     } catch(err) {
       console.error(err);
       if (errorMessage !== null) {
@@ -45,6 +46,7 @@ const callAPI = (axiosRequest, actionType, successMessage = null, errorMessage =
           }
         }))
       }
+      return false;
     }
   }
 }
@@ -155,6 +157,52 @@ export const okrFetchOne = (id) => {
   return callAPI(
     axios.get(urls.OKR_FETCH_ONE(id)),
     ActionTypes.OKR_FETCH_ONE,
+    null,
+    API_MESSAGES.OKR_FETCH_ONE_ERROR,
+  )
+}
+
+export const onSaveOKR = async (id, okr) => {
+  return callAPI(
+    await axios.patch(urls.OKR_DETAIL_URL(id), { ...okr }),
+    ActionTypes.OKR_FETCH_ONE,
+    API_MESSAGES.ON_SAVE_OKR,
+    API_MESSAGES.ON_SAVE_OKR_ERROR,
+  )
+}
+
+export const onCreateOKR = async (okr) => {
+  return callAPI(
+    await axios.post(urls.OKR_DETAIL_URL(), { ...okr }),
+    ActionTypes.OKR_FETCH_ONE,
+    API_MESSAGES.ON_CREATE_OKR,
+    API_MESSAGES.ON_CREATE_OKR_ERROR,
+  )
+}
+
+export const onDeleteOKR = async (id) => {
+  return callAPI(
+    await axios.delete(urls.OKR_DETAIL_URL(id)),
+    null,
+    API_MESSAGES.ON_DELETE_OKR,
   )
 }
 /** END OKR ACTIONS */
+
+/** START ACCOUNT ACTIONS */
+export const accountFetchAll = () => {
+  return callAPI(
+    axios.get(urls.USER_FETCH_ALL),
+    ActionTypes.USER_FETCH_ALL,
+  )
+}
+
+export const getCurrentUser = () => {
+  return callAPI(
+    axios.get(urls.GET_CURRENT_USER),
+    ActionTypes.GET_CURRENT_USER,
+  )
+}
+
+/** END ACCOUNT ACTIONS */
+

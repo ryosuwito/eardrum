@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 import { withStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
@@ -17,10 +18,14 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import Divider from '@material-ui/core/Divider';
-
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core'
 import WithLongPolling from '../core/WithLongPolling';
 import {
   okrFetchOne,
+  onSaveOKR,
+  onCreateOKR,
+  enqueueSnackbar,
+  onDeleteOKR,
 } from '../actions';
 
 
@@ -85,40 +90,66 @@ const styles = theme => ({
 });
 
 
-const getValueOfObject = (obj, fields=[], defaultValue=null) => {
-  try {
-    for(let i = 0; i < fields.length; i++) {
-      if (obj.hasOwnProperty(fields[i])) {
-        obj = obj[fields[i]];
-      } else {
-        return defaultValue;
-      }
-    }
-  } catch(err)  {
-    // console.error(err)
-    return defaultValue;
-  }
-  return obj;
+function SimpleDialog(props) {
+  const { open, onClose, okr } = props;
+
+  return (
+    <Dialog onClose={onClose(false)} aria-labelledby="simple-dialog-title" open={open}>
+      <DialogTitle>Do you want to delete this OKR?</DialogTitle>
+      <DialogContent>
+        <table style={{textAlign: 'left'}}>
+          <tbody>
+            <tr>
+              <th>Issuer</th>
+              <td>{okr.issuer}</td>
+            </tr>
+            <tr>
+              <th>Quarter</th>
+              <td>{okr.quarter}</td>
+            </tr>
+            <tr>
+              <th>Year</th>
+              <td>{okr.year}</td>
+            </tr>
+          </tbody>
+        </table>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose(true)} color='default' variant='contained'>Yes</Button>
+        <Button onClick={onClose(false)} color='primary' variant='contained'>No</Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
+
+SimpleDialog.propTypes = {
+  onClose: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+};
 
 
 class OKRDetail extends Component {
   constructor(props) {
     super(props);
+    const defaultOKR = {};
+    if (this.props.new) {
+      const now = new Date();
+      defaultOKR.quarter = Math.floor(now.getMonth()/3) + 1;
+      defaultOKR.year = now.getFullYear();
+    }
     this.state = {
       readOnly: false, // TODO Boolean(props['readOnly']),
       okrContentState: 'write',
-    }
-    if (this.props.okr) {
-      this.state = Object.assign(
-        {},
-        this.state,
-        { okr: this.props.okr },
-      )
+      loadingPreview: false,
+      okr: defaultOKR,
+      dialogOpen: false,
     }
   }
 
   okrContentStateChange = (newState) => (event )=> {
+    if (newState === 'preview') {
+      this.getPreviewContent();
+    }
     this.setState({okrContentState: newState})
   }
 
@@ -128,92 +159,172 @@ class OKRDetail extends Component {
     this.setState({ okr: newOKR })
   }
 
-  onReviewSubmit = () => {
-    // const reviews = {};
-    // Object.keys(this.state.reviews).forEach(
-    //   key => {
-    //     if (this.state.reviews[key].grade !== 'NONE') {
-    //       reviews[key] = this.state.reviews[key];
-    //     }
-    //   }
-    // );
-    // this.props.dispatch(requestSendReview(this.props.request.id, reviews))
+  getOKRValue = (name) => {
+    return this.state.okr[name] || this.props.okr[name];
+  }
+
+  componentDidUpdate() {
+  }
+
+  getPreviewContent = async () => {
+    const okrContent = this.getOKRValue('content');
+    if (okrContent !== this.state.lastContent) {
+      this.setState({ loadingPreview: true, lastContent: okrContent });
+      try {
+        let bodyFormData = new FormData();
+        bodyFormData.set('content', okrContent)
+        const res = await axios({
+          method: 'post',
+          url: '/markdownx/markdownify/',
+          data: bodyFormData,
+          headers: {'Content-Type': 'multipart/form-data'},
+        });
+        console.log(res.data);
+        this.setState({ loadingPreview: false, previewContent: res.data});
+      } catch (err) {
+        console.log(err);
+      } finally {
+        this.setState({ loadingPreview: false })
+      }
+    }
+  }
+
+  onSaveForm = async (event) => {
+    try {
+      if (this.state.okr !== null && this.state.okr !== undefined && Object.keys(this.state.okr).length > 0) {
+        if (!this.props.new) {
+          const isSucceeded = await (await onSaveOKR(this.props.match.params.okrId, this.state.okr))(this.props.dispatch);
+          if (isSucceeded) {
+            this.setState({ okr: {} });
+          }
+        } else {
+          const isSucceeded = await (await onCreateOKR(this.state.okr))(this.props.dispatch);
+          if (isSucceeded) {
+            this.props.history.push('/okrs');
+          }
+        }
+      } else {
+        throw Error('Empty Form! Fill in the form, please!')
+      }
+    } catch (err) {
+      this.props.dispatch(enqueueSnackbar({
+        message: err.message,
+        options: {
+          variant: 'error',
+        }
+      }))
+    }
+  }
+
+  onDeleteOKR = () => {
+    this.setState({dialogOpen: true})
+  }
+
+  onCloseDialog = (answer=false) => async () => {
+    if (answer) {
+      try {
+        const isSucceeded = await (await onDeleteOKR(this.props.okr.id))(this.props.dispatch);
+        if (isSucceeded) {
+          this.props.history.push('/okrs')
+        }
+      } catch (err) {
+        this.props.dispatch(enqueueSnackbar({
+          message: err.message,
+          options: {
+            variant: 'error',
+          }
+        }))       
+      }
+    } else {
+      this.setState({dialogOpen: false})
+    }
   }
 
   render() {
-    if (this.props.okr.id != this.props.match.params.okrId) {
-      return (<h2>Loading...</h2>)
+    if (!this.props.new && this.props.okr.id != this.props.match.params.okrId) {
+      return (<Typography component='h1'>Loading...</Typography>)
     }
-    const { classes } = this.props;
 
-    const getOKRValue = (name) => {
-      return this.props.okr[name] || this.state.okr[name];
-    }
-   
+    const { classes } = this.props;
+  
     return (
       <Paper className={ classes.root }>
         <div>
+          {!this.props.new && (<SimpleDialog open={this.state.dialogOpen} onClose={ this.onCloseDialog } okr={ this.props.okr }/>)}
           <Grid className={ classes.questionGroup } container justify='space-between'>
             <React.Fragment>
-              <FormControl variant="outlined" className={classes.formCOntrol}>
+              {!this.props.new && this.props.user && this.props.user.is_admin && (<FormControl variant="outlined" className={classes.formControl}>
                 <TextField
                   label="Issuer"
-                  defaultValue={ getOKRValue('issuer') }
+                  defaultValue={ this.getOKRValue('issuer') }
                   onChange={ this.handleChange('issuer') }
                   className={classes.textField}
                   variant='outlined'
                   margin="normal"
+                  disabled={true}
                 />
-              </FormControl>
+              </FormControl>)}
 
-              <FormControl variant="outlined" className={classes.formControl}>
-                <TextField
-                  label="Quarter"
-                  defaultValue={ getOKRValue('quarter') }
-                  onChange={ this.handleChange('quarter') }
-                  className={classes.textField}
-                  variant='outlined'
-                  margin="normal"
-                />
+              <FormControl variant="outlined" className={classes.formControl} style={{marginTop: '10px'}}>
+                <InputLabel htmlFor="grade-label-placeholder-id">
+                  Quarter
+                </InputLabel>
+                <Select
+                  native
+                  defaultValue={ this.getOKRValue('quarter') }
+                  onChange={this.handleChange('quarter')}
+                  input={<OutlinedInput labelWidth={ 45 }
+                  name="quarter" id="grade-label-placeholder-id" />}
+                >
+                  <option value='1'>1</option>
+                  <option value='2'>2</option>
+                  <option value='3'>3</option>
+                  <option value='4'>4</option>
+                </Select>
               </FormControl>
 
               <FormControl variant="outlined" className={classes.formControl}>
                 <TextField
                   label="Year"
-                  defaultValue={ getOKRValue('year') }
+                  defaultValue={ this.getOKRValue('year') }
                   onChange={ this.handleChange('year') }
                   className={classes.textField}
                   variant='outlined'
                   margin="normal"
                 />
               </FormControl>
-
-              <Button disabled={ this.state.okrContentState !== 'preview'} onClick={ this.okrContentStateChange('write') }>Write</Button>
-              <Button disabled={ this.state.okrContentState !== 'write'} onClick={ this.okrContentStateChange('preview')}>Preview</Button>
+              <FormControl>
+                <Button disabled={ this.state.okrContentState !== 'preview'} onClick={ this.okrContentStateChange('write') }>Write</Button>
+                <Button disabled={ this.state.okrContentState !== 'write'} onClick={ this.okrContentStateChange('preview')}>Preview</Button>
+              </FormControl>
 
               {this.state.okrContentState === 'write' &&
               <FormControl className={classes.formControl}>
                 <TextField
                   label="Content"
                   multiline
-                  rows="30"
-                  rowsMax="30"
-                  defaultValue={ getOKRValue('content') }
+                  rows="20"
+                  rowsMax="20"
+                  defaultValue={ this.getOKRValue('content') }
                   onChange={ this.handleChange('content') }
                   className={classes.textField}
                   variant='outlined'
                   margin="normal"
+                  autoFocus={ true }
                 />
               </FormControl>}
-              {this.state.okrContentState === 'preview' &&
-              <Paper><div dangerouslySetInnerHTML={{__html: getOKRValue('html_content')}}/></Paper>}
+              {this.state.okrContentState === 'preview' && this.state.loadingPreview === true &&
+              <FormControl className={classes.formControl}><Typography component='h1'>Loading...</Typography></FormControl>}
+              {this.state.okrContentState === 'preview' && this.state.loadingPreview === false &&
+              <FormControl className={classes.formControl}><Typography component='div' dangerouslySetInnerHTML={{__html: this.state.previewContent }}/></FormControl>}
 
             </React.Fragment>
           </Grid>
         </div>
         <Divider variant="fullWidth" />
-        <Button onClick={ this.onReviewSubmit } color='primary' variant='contained' className={ classes.button }>Save</Button>
-        <Button to='/' component={ Link } color='primary' variant='outlined' className={ classes.button }>Cancel & Back</Button>
+        <Button onClick={ this.onSaveForm } color='primary' variant='contained' className={ classes.button }>Save</Button>
+        <Button to='/okrs' component={ Link } color='primary' variant='outlined' className={ classes.button }>Cancel & Back</Button>
+        {!this.props.new && (<Button onClick={ this.onDeleteOKR } variant='contained' color='secondary'>Delete</Button>)}
       </Paper>
     )
   }
@@ -225,13 +336,26 @@ OKRDetail.propTypes = {
   classes: PropTypes.object.isRequired,
   okr: PropTypes.object.isRequired,
   match: PropTypes.object,
+  new: PropTypes.bool,
 }
 
 
-const mapStateToProps = (state) => {
-  return ({
-    okr: _.cloneDeep(state.okr),
-  })
+const mapStateToProps = (state, props) => {
+  if (isNaN(parseInt(props.match.params.okrId))) {
+    return ({
+      okr: {},
+      user: _.cloneDeep(state.user),
+      users: _.cloneDeep(state.users),
+      new: true,
+    })
+  } else {
+    return ({
+      okr: _.cloneDeep(state.okr),
+      user: _.cloneDeep(state.user),
+      users: _.cloneDeep(state.users),
+      new: false,
+    })
+  }
 }
 
 
@@ -239,6 +363,11 @@ const mapDispatchToProps = (dispatch) => ({ dispatch: dispatch })
 
 
 const pollingJobProducer = (ownProps) => {
+  if (isNaN(parseInt(ownProps.match.params.okrId))) {
+    return {
+      funcs: [], workers: [],
+    }
+  }
   const fetchOneOKRFunc = () => ownProps.dispatch(okrFetchOne(ownProps.match.params.okrId));
   return {
     funcs: [fetchOneOKRFunc],

@@ -34,12 +34,11 @@ class OKRViewset(viewsets.GenericViewSet,
             return self.serializer_class
 
     def create(self, request, *args, **kwargs):
-        if not IsAdminUser.has_permission(None, request, self):
-            request.data['issuer'] = request.user.username
+        request.data['issuer'] = request.user.username
         return super().create(request, *args, **kwargs)
 
     def update(self, request, *args, **kwargs):
         if not IsAdminUser.has_permission(None, request, self):
-            if request.data['issuer']:
+            if request.data.get('issuer', None):
                 del request.data['issuer']
         return super().update(request, *args, **kwargs)

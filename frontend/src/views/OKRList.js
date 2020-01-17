@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import {
   Grid,
   TableHeaderRow,
@@ -23,10 +24,7 @@ import {
   IntegratedSorting,
 } from '@devexpress/dx-react-grid';
 import { 
-  requestFetchAll,
   okrFetchAll,
-  okrFetchOne,
-  requestSendReview,
 } from '../actions';
 import WithLongPolling from '../core/WithLongPolling';
 
@@ -59,7 +57,7 @@ const styles = {
   },
   Closed: {
     backgroundColor: '#e8f5e9',
-  }
+  },
 };
 
 const VirtualTableRow = ({ row, ...restProps }) => (
@@ -94,14 +92,18 @@ const sortingStateColumnExtensions = [
 
 class OKRList extends Component {
   render() {
+    const { classes } = this.props;
     const RowDetail = ({ row }) => {
       return (
         <React.Fragment>
+          <Typography component='div' dangerouslySetInnerHTML={{__html: row.html_content}}/>
           <Button color='primary' to={ `/okrs/${row.id}`}
             component={ Link } variant='outlined'>View and Edit</Button>{' '}
         </React.Fragment>)
     }
     return (
+      <div style={{marginTop: '20px'}}>
+      <Button to='/okrs/new' color="primary" variant="contained" component={ Link }>New</Button>
       <Paper>
         <Grid
           rows={ this.props.okrs }
@@ -118,6 +120,7 @@ class OKRList extends Component {
           <TableFilterRow showFilterSelector/>
         </Grid>
       </Paper>
+      </div>
     )
   }
 }

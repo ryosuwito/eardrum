@@ -7,6 +7,8 @@ import gradeOptions from '../reducers/gradeOptions';
 import notifications from '../reducers/notifications';
 import okrs from '../reducers/okrs';
 import okr from '../reducers/okr';
+import users from '../reducers/users';
+import user from '../reducers/user';
 
 
 export default combineReducers(
@@ -25,7 +27,11 @@ export default combineReducers(
     notifications,
     // okrs
     okrs,
-    // selectedOKRs,
+    // selected okr,
     okr,
+    // user list
+    users,
+    // user
+    user,
   }
 )
