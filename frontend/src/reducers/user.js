@@ -6,7 +6,7 @@ import ActionTypes from '../actions/types';
 const user = (state = {}, action) => {
   switch(action.type) {
     case ActionTypes.GET_CURRENT_USER:
-      return action.payload;
+      return _.cloneDeep(action.payload);
     case ActionTypes.AUTH_SIGN_OUT:
       return {}
     default:

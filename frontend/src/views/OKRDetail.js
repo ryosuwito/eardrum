@@ -241,7 +241,7 @@ class OKRDetail extends Component {
   }
 
   render() {
-    if (!this.props.new && this.props.okr.id != this.props.match.params.okrId) {
+    if (!this.props.new && (this.props.okr.id).toString() !== this.props.match.params.okrId) {
       return (<Typography component='h1'>Loading...</Typography>)
     }
 
@@ -310,6 +310,7 @@ class OKRDetail extends Component {
                   className={classes.textField}
                   variant='outlined'
                   margin="normal"
+                  placeholder='Simple markdown features are available'
                   autoFocus={ true }
                 />
               </FormControl>}

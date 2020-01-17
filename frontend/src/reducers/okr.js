@@ -6,7 +6,7 @@ import ActionTypes from '../actions/types';
 const okr = (state = {}, action) => {
   switch (action.type) {
     case ActionTypes.OKR_FETCH_ONE:
-      return action.payload;
+      return _.cloneDeep(action.payload);
     case ActionTypes.AUTH_SIGN_OUT:
       return {};
     default:

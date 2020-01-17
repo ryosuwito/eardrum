@@ -98,7 +98,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      tabValue: 0,
+      tabValue: this.getCurrentTab(),
     }
 
   }
@@ -109,6 +109,25 @@ class App extends Component {
 
   onChangeTab = (event, newValue) => {
     this.setState({tabValue: newValue});
+  }
+
+  componentDidUpdate() {
+    // TODO: Actually this is a mystery thing where I could not use this hook to update tabValue state.
+  }
+
+  getCurrentTab = () => {
+    const urlMap = [
+      [RegExp('^/requests'), 'home'],
+      [RegExp('^/okrs'), 'okrs'],
+      [RegExp('^/other'), 'other'],
+      // [RegExp(''), 'home'],
+    ]
+    for(let i = 0; i < urlMap.length; i++) {
+      if (window.location.pathname.match(urlMap[i][0]) !== null) {
+        return urlMap[i][1];
+      }
+    }
+    return 'home';
   }
 
   render() {
@@ -162,7 +181,7 @@ class App extends Component {
           <AppBar position="static" color="default" className={ classes.appBar }>
             <Toolbar>
               <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
-                <Button component={ Link } to='/'>Eardrum</Button>
+                <Button component={ Link } to='/' onClick={ () => this.onChangeTab(null, 'home') }>Eardrum</Button>
               </Typography>
               { (!this.props.auth.is_authenticated) && 
                 (
@@ -172,9 +191,9 @@ class App extends Component {
                 (
                   <React.Fragment>
                     <Tabs value={ this.state.tabValue } onChange={ this.onChangeTab }>
-                      <LinkTab label="Home" to="/" />
-                      <LinkTab label="OKR" to="/okrs"/>
-                      <LinkTab label="Other" to='/other' />
+                      <LinkTab label="Home" to="/" value='home' />
+                      <LinkTab label="OKR" to="/okrs" value='okrs'/>
+                      <LinkTab label="Other" to='/other' value='other'/>
                     </Tabs>
                     <Button to='/' color="primary" variant="outlined" component={ Link } onClick={ this.onSignOut }>Sign Out</Button>
                   </React.Fragment>

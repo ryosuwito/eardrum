@@ -17,7 +17,6 @@ import {
 } from '@devexpress/dx-react-grid-material-ui';
 import {
   RowDetailState,
-  DataTypeProvider,
   FilteringState,
   SortingState,
   IntegratedFiltering,
@@ -28,27 +27,6 @@ import {
 } from '../actions';
 import WithLongPolling from '../core/WithLongPolling';
 
-
-const DatetimeFormatter = ({ value }) => {
-  const time = new Date(value);
-  const twoLastDigits = value => ('0' + value % 100).slice(-2)
-  const x = twoLastDigits;
-  return `${x(time.getFullYear())}${x(time.getMonth()+1)}${x(time.getDay())} ${x(time.getHours())}:${x(time.getMinutes())}:${x(time.getSeconds())}`;
-}
-
-
-// const current_quarter_and_year = () => {
-//   const now = new Date();
-//   return `${Math.floor(now.getMonth()/3 + 1)},${now.getFullYear()}`
-// }
-
-
-const DatetimeTypeProvider = props => (
-  <DataTypeProvider
-    formatterComponent={ DatetimeFormatter }
-    {...props}
-    />
-)
 
 const columns = [
   // { name: 'id', title: 'Id' },
@@ -72,7 +50,6 @@ const sortingStateColumnExtensions = [
 
 class OKRList extends Component {
   render() {
-    const { classes } = this.props;
     const RowDetail = ({ row }) => {
       return (
         <React.Fragment>
