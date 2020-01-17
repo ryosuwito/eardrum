@@ -12,8 +12,8 @@ import {
   Grid,
   TableHeaderRow,
   TableRowDetail,
-  VirtualTable,
   TableFilterRow,
+  Table,
 } from '@devexpress/dx-react-grid-material-ui';
 import {
   RowDetailState,
@@ -49,26 +49,6 @@ const DatetimeTypeProvider = props => (
     {...props}
     />
 )
-
-
-const styles = {
-  Open: {
-    backgroundColor: '#e3f2fd',
-  },
-  Closed: {
-    backgroundColor: '#e8f5e9',
-  },
-};
-
-const VirtualTableRow = ({ row, ...restProps }) => (
-  <VirtualTable.Row
-    {...restProps}
-    // eslint-disable-next-line no-alert
-    style={{
-      ...styles[row.status],
-    }}
-  />
-);
 
 const columns = [
   // { name: 'id', title: 'Id' },
@@ -114,7 +94,7 @@ class OKRList extends Component {
           <IntegratedFiltering />
           <IntegratedSorting />
           <RowDetailState />
-          <VirtualTable height="700px" rowComponent={ VirtualTableRow }/>
+          <Table/>
           <TableHeaderRow showSortingControls/>
           <TableRowDetail contentComponent={ RowDetail } />
           <TableFilterRow showFilterSelector/>
