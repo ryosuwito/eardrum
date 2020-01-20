@@ -241,7 +241,7 @@ class OKRDetail extends Component {
   }
 
   render() {
-    if (!this.props.new && (this.props.okr.id).toString() !== this.props.match.params.okrId) {
+    if (!this.props.new && this.props.okr.id !== this.props.match.params.okrId) {
       return (<Typography component='h1'>Loading...</Typography>)
     }
 
