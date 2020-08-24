@@ -28,7 +28,7 @@ class LDAPBackend:
 
         try:
             server = Server(
-                getattr(settings, 'LDAP_SERVER', '10.0.0.201'),
+                getattr(settings, 'LDAP_SERVER'),
                 get_info=ALL,
             )
             Connection(
