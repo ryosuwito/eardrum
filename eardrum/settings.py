@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'markdownx',
     'auditlog',
     'okr_app',
+    'compliance',
 ]
 
 MIDDLEWARE = [
@@ -126,8 +127,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
-    'account.ldap_backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'account.ldap_backend.LDAPBackend',
 ]
 
 
