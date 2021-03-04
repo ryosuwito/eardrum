@@ -1,16 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Input, InputNumber, Popconfirm, Form, Typography } from 'antd';
+import React, { useState } from 'react';
+import {Table, Input, InputNumber, Popconfirm, Form, DatePicker, Select, Button as AntButton} from 'antd'
 import { Button } from '@material-ui/core';
+import moment from 'moment';
+import _ from 'lodash';
 const originData = [];
 
-for (let i = 0; i < 100; i++) {
-  originData.push({
-    key: i.toString(),
-    name: `Edrward ${i}`,
-    age: 32,
-    address: `London Park no. ${i}`,
-  });
-}
+const dateFormat = 'DD/MM/YYYY'
 
 const EditableCell = ({
   editing,
@@ -20,9 +15,29 @@ const EditableCell = ({
   record,
   index,
   children,
+  options,
   ...restProps
 }) => {
-  const inputNode = inputType === 'number' ? <InputNumber /> : <Input />;
+  const inputComponent = {
+    number: <InputNumber />,
+    text: <Input />,
+    date: <DatePicker format={dateFormat} />,
+    select: (
+      <Select>
+        {Array.isArray(options) &&
+          options.map((option) => {
+            return (
+              <Select.Option key={option} value={option}>
+                {option}
+              </Select.Option>
+            )
+          })}
+      </Select>
+    ),
+  }
+
+  const inputNode = inputComponent[inputType];
+
   return (
     <td {...restProps}>
       {editing ? (
@@ -34,7 +49,7 @@ const EditableCell = ({
           rules={[
             {
               required: true,
-              message: `Please Input ${title}!`,
+              message: `Please input`,
             },
           ]}
         >
@@ -47,14 +62,14 @@ const EditableCell = ({
   );
 };
 
-const EditableTable = ({ dataSource, setData, initColumns }) => {
+const EditableTable = ({ dataSource, setData, initColumns, disabled }) => {
   const [form] = Form.useForm();
   const [editingKey, setEditingKey] = useState('');
 
   const isEditing = (record) => record.key === editingKey;
 
   const edit = (record) => {
-    form.setFieldsValue({ ...record })
+    form.setFieldsValue({...record, ...(record.date && {date: moment(record.date, dateFormat)})})
     setEditingKey(record.key);
   };
 
@@ -65,11 +80,12 @@ const EditableTable = ({ dataSource, setData, initColumns }) => {
   const save = async (key) => {
     try {
       const row = await form.validateFields();
+      const newRow = {...row, ...(row.date && {date: moment(row.date).format(dateFormat)})};
       const newData = [...dataSource];
       const index = newData.findIndex((item) => key === item.key);
 
       const item = newData[index];
-      newData.splice(index, 1, { ...item, ...row });
+      newData.splice(index, 1, { ...item, ...newRow });
       console.log(newData);
       setData(newData);
       setEditingKey('');
@@ -113,6 +129,30 @@ const EditableTable = ({ dataSource, setData, initColumns }) => {
       },
     },
   ];
+
+  const addNewRow = () => {
+    const defaultValue = {
+      text: '',
+      select: null,
+      number: 0,
+      date: moment(new Date()).format(dateFormat),
+    };
+    const newDataSource = _.cloneDeep(dataSource);
+
+    const data = {};
+    const newKey = new Date().getTime();
+    data.key = newKey;
+
+    initColumns.forEach((col) => {
+      if (col.title !== '#') {
+        data[col.dataIndex] = col.inputType ? defaultValue[col.inputType] : defaultValue.text;
+      }
+    });
+
+    newDataSource.push(data);
+    setData(newDataSource);
+  };
+
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
@@ -122,16 +162,18 @@ const EditableTable = ({ dataSource, setData, initColumns }) => {
       ...col,
       onCell: (record) => ({
         record,
-        inputType: col.inputType? col.inputType: 'text',
+        inputType: col.inputType ? col.inputType : 'text',
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
+        ...(col.inputType === 'select' && {options: col.options}),
       }),
     };
   });
 
   return (
     <Form form={form} component={false}>
+      <AntButton onClick={addNewRow} disabled={disabled}>New row</AntButton>
       <Table
         components={{
           body: {

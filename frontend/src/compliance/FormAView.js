@@ -4,11 +4,15 @@ import {
   message,
   Spin,
   Table,
+  Breadcrumb,
 } from 'antd';
-import { useHistory, useParams } from 'react-router-dom';
+import {MenuOutlined} from '@ant-design/icons';
+import { useHistory, useParams, Link } from 'react-router-dom';
+import Container from './components/Container';
 
 import messages from './messages'
 import { useFetchOne } from './hooks';
+import routes from './routes';
 
 
 const formText = messages.a.text;
@@ -43,14 +47,29 @@ const FormAView = function() {
     return ret;
   })
 
-  let columns = formText.account_headers.map((header, idx) => ({
-    title: <b>{ `${header}` }</b>,
-    dataIndex: idx,
-    key: `${idx}`,
-  }));
+  let columns = [{title: '#', render: (text, record, index) => index + 1}];
+
+  columns.push(
+    ...formText.account_headers.map((header, idx) => ({
+      title: <b>{`${header}`}</b>,
+      dataIndex: idx,
+      key: `${idx}`,
+    }))
+  );
+
 
   return (
-    <div style={ {marginTop: '100px'}}>
+    <Container>
+      <Breadcrumb style={{marginBottom: '100px'}}>
+        <Breadcrumb.Item>
+          <MenuOutlined /> <Link to={routes.formA.url()}>{messages.a.name} Form List</Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>{messages.a.name}</Breadcrumb.Item>
+      </Breadcrumb>
+
+      <h1 style={{textAlign: 'center'}}>
+        {messages.a.name}
+      </h1>
       <p>{ formText.overview }</p>
       <p>{ formText.non_required_title }</p>
       <ol>
@@ -66,7 +85,7 @@ const FormAView = function() {
       <p>{ formText.note }</p>
       <Table bordered columns={ columns } dataSource={ dataSource} />
       <p>{ formText.policy }</p>
-    </div>
+    </Container>
   )
 }
 

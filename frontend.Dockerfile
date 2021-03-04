@@ -7,7 +7,5 @@ RUN mkdir -p /usr/src/app
 
 COPY frontend /usr/src/app/frontend
 WORKDIR /usr/src/app/frontend
-RUN npm install && npm run build
-
-COPY . /usr/src/app
-WORKDIR /usr/src/app
+RUN npm install
+RUN npm run build

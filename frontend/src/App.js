@@ -33,8 +33,7 @@ import { configFetchGradeOptions } from './actions';
 
 import WithLongPolling from './core/WithLongPolling';
 import Notifier from './core/Notifier';
-
-import 'antd/dist/antd.css';
+import './styles/index.css'
 
 
 const styles = theme => ({
@@ -188,7 +187,7 @@ class App extends Component {
               <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
                 <Button component={ Link } to='/' onClick={ () => this.onChangeTab(null, 'home') }>Eardrum</Button>
               </Typography>
-              { (!this.props.auth.is_authenticated) && 
+              { (!this.props.auth.is_authenticated) &&
                 (
                   <Button to='/signin' color="primary" component={ Link } variant="outlined">Sign In</Button>
                 ) }

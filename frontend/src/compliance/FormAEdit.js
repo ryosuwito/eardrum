@@ -4,21 +4,25 @@ import {
   Spin,
   Button,
   message,
+  Breadcrumb,
 } from 'antd';
 import {
   useHistory,
   useParams,
+  Link,
 } from 'react-router-dom';
-import axios from 'axios'
+import axios from 'axios';
 import _ from 'lodash';
-
+import {EditOutlined, PlusOutlined, MenuOutlined} from '@ant-design/icons';
+import moment from 'moment';
+import Container from './components/Container';
 import EditableTable from './components/EditableTable';
 
 import { useFetchOne } from './hooks';
 import messages from './messages';
 import routes from './routes';
 
-
+const dateFormat = 'DD/MM/YYYY'
 const formText = messages.a.text;
 
 
@@ -51,7 +55,7 @@ const FormAEdit = () => {
   }, [data, error]);
 
   useEffect(() => {
-    
+
   })
 
   const MODE = {
@@ -70,32 +74,28 @@ const FormAEdit = () => {
     return (<p>{ error.toString() }</p>)
   }
 
-  function newAccount() {
-    var newAccounts = _.cloneDeep(accounts)
-
-    let newAccount = {};
-    formText.account_headers.forEach((_, idx) => { newAccount[idx] = null });
-    let lastKey = accounts.length === 0? 0: accounts[accounts.length-1].key;
-    newAccount.key = lastKey + 1;
-
-    newAccounts.push(newAccount)
-    setAccounts(newAccounts);
-  }
-
   function onOptionChange(e) {
     setOptionValue(e.target.value);
   }
 
-  let columns = formText.account_headers.map((header, idx) => ({
-    title: <b>{ `${header}` }</b>,
-    dataIndex: idx,
-    key: `${idx}`,
-    editable: true,
-  }));
+  let columns = [{title: '#', render: (text, record, index) => index + 1}]
+
+  columns.push(
+    ...formText.account_headers.map((header, idx) => ({
+      title: <b>{`${header}`}</b>,
+      dataIndex: idx,
+      key: `${idx}`,
+      editable: true,
+    }))
+  )
 
   const hasAccounts = optionValue === formText.options[1].key;
 
   function getAccounts() {
+    if (!hasAccounts) {
+      return []
+    }
+
     let arrAccounts = accounts.map(account => {
       let arrAccount = [];
       for(let i = 0; i < formText.account_headers.length; i++) {
@@ -108,14 +108,15 @@ const FormAEdit = () => {
 
   async function onSave() {
     try {
-      const data = {
+      const formData = {
         typ: 'a',
         data: {
           optionValue,
+          submissionDate: data.submissionDate,
           accounts: getAccounts(accounts),
         }
       }
-      const res = await axios.patch(routes.api.detailsURL(pk), data);
+      const res = await axios.patch(routes.api.detailsURL(pk), formData);
       console.log(res);
       history.push(routes.formA.url());
     } catch (err) {
@@ -130,6 +131,7 @@ const FormAEdit = () => {
         typ: 'a',
         data: {
           optionValue,
+          submissionDate: moment(new Date()).format(dateFormat),
           accounts: getAccounts(accounts),
         }
       }
@@ -143,7 +145,28 @@ const FormAEdit = () => {
   }
 
   return (
-    <div style={ {marginTop: '100px'}}>
+    <Container>
+      <Breadcrumb style={{marginBottom: '100px'}}>
+        <Breadcrumb.Item>
+          <MenuOutlined /> <Link to={routes.formA.url()}>{messages.a.name} Form List</Link>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>
+          {mode === MODE.edit ? (
+            <>
+              <EditOutlined /> Edit {messages.a.name}
+            </>
+          ) : (
+            <>
+              <PlusOutlined /> New {messages.a.name}
+            </>
+          )}
+        </Breadcrumb.Item>
+      </Breadcrumb>
+
+
+      <h1 style={{textAlign: 'center'}}>
+        {messages.a.name}
+      </h1>
       <p>{ formText.overview }</p>
       <p>{ formText.non_required_title }</p>
       <ol>
@@ -155,15 +178,14 @@ const FormAEdit = () => {
           <Radio value={ option.key } key={ `option-key-${idx}`}>
             { option.label }
           </Radio>))}
-      </Radio.Group> 
+      </Radio.Group>
       <p>{ formText.note }</p>
-      <Button onClick={ newAccount } disabled={ !hasAccounts }>New Account</Button>
-      <EditableTable initColumns={ columns } dataSource={ hasAccounts? accounts: [] } setData={ setAccounts }/>
+      <EditableTable initColumns={ columns } dataSource={ hasAccounts? accounts: [] } setData={ setAccounts } disabled={ !hasAccounts }/>
       <p>{ formText.policy }</p>
 
       { mode === MODE.new && <Button onClick={ onSubmit }>Submit</Button>}
       { mode === MODE.edit && <Button onClick={ onSave }>Save</Button>}
-    </div>
+    </Container>
   )
 }
 

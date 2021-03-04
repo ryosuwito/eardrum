@@ -9,12 +9,14 @@ from rest_framework import (
 )
 
 from .models import Compliance
-from .serializers import ComplianceSerializer
+from .serializers import (
+    ComplianceSerializer,
+    ComplianceAdminSerializer,
+)
 
 
 class ComplianceViewset(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = ComplianceSerializer
     queryset = Compliance.objects.all()
 
     def get_queryset(self):
@@ -22,6 +24,12 @@ class ComplianceViewset(viewsets.ModelViewSet):
             return self.queryset.all()
         else:
             return self.queryset.filter(submit_by=self.request.user.username)
+
+    def get_serializer_class(self):
+        if self.request.user.is_superuser:
+            return ComplianceAdminSerializer
+
+        return ComplianceSerializer
 
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)
