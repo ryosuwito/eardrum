@@ -1,0 +1,25 @@
+stages:
+  - coding-style
+  - build
+
+python-coding-style-check:
+  image: python:3.6-slim
+  stage: coding-style
+  tags:
+    - docker
+  script:
+    - pip install -U pip
+    - pip install flake8
+    - flake8 .
+
+build-docker-image:
+  stage: build
+  tags:
+    - docker-build
+  script:
+    - tag=$(git describe --tags) && echo $tag
+    - imagetag=docker.dtl:5000/ado/docker-images/eardrum/r48:$tag && echo $imagetag
+    - docker build -t eardrum-frontend -f frontend.Dockerfile .
+    - docker build -t $imagetag -f eardrum.Dockerfile .
+    - docker push $imagetag
+  when: manual
