@@ -33,7 +33,11 @@ class ComplianceViewset(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         data = copy.deepcopy(request.data)
+
         data['submit_by'] = request.user.username
+        if data.get('status') is None:
+            data['status'] = 'pending'
+
         if not isinstance(data.get('data'), str):
             data['data'] = json.dumps(data.get('data'))
 
@@ -47,8 +51,7 @@ class ComplianceViewset(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         data = copy.deepcopy(request.data)
-        data['submit_by'] = request.user.username
-        if not isinstance(data.get('data'), str):
+        if data.get('data', None) is not None and not isinstance(data.get('data'), str):
             data['data'] = json.dumps(data.get('data'))
         serializer = self.get_serializer(instance, data=data, partial=partial)
         serializer.is_valid(raise_exception=True)

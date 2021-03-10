@@ -1,6 +1,3 @@
-/* eslint-disable prefer-promise-reject-errors */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-shadow */
 import React, { useState, useEffect } from 'react';
 import { Divider, Breadcrumb, Select, Button, message, Radio, Spin, Form } from 'antd';
 import { MenuOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';

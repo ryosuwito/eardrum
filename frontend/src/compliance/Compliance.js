@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 import React, {useEffect, useState} from 'react'
 import {Popconfirm, Table, Space, Menu, Dropdown, Button, message, Tabs} from 'antd'
 import {Link, useParams, useHistory } from 'react-router-dom'

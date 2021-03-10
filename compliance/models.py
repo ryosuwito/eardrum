@@ -8,7 +8,7 @@ from auditlog.registry import auditlog
 class Compliance(models.Model):
     submit_by = models.CharField(max_length=255, blank=True, null=True, db_index=True)
     typ = models.CharField(max_length=255)
-    status = models.CharField(max_length=255, blank=True, default='pending')
+    status = models.CharField(max_length=255, blank=True, null=True)
     data = models.TextField()
 
     created_at = models.DateTimeField(auto_now_add=True)
