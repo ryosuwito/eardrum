@@ -59,7 +59,7 @@ const FormCView = () => {
           padding: '6px',
           paddingTop: 0,
           border: '1px solid transparent',
-          borderColor: 'lightgray',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
           borderTop: 'none',
         }}>
         <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
@@ -86,7 +86,7 @@ const FormCView = () => {
           padding: '6px',
           paddingTop: 0,
           border: '1px solid transparent',
-          borderColor: 'lightgray',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
           borderTop: 'none',
         }}>
         <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
@@ -102,7 +102,7 @@ const FormCView = () => {
           padding: '6px',
           paddingTop: 0,
           border: '1px solid transparent',
-          borderColor: 'lightgray',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
           borderTop: 'none',
         }}>
         <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>

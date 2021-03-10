@@ -191,7 +191,7 @@ const EditEQTRForm = () => {
             padding: '6px',
             paddingTop: 0,
             border: '1px solid transparent',
-            borderColor: 'lightgray',
+            borderColor: 'rgba(0, 0, 0, 0.06)',
             borderTop: 'none',
           }}>
           <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
@@ -209,9 +209,11 @@ const EditEQTRForm = () => {
             <Radio.Group onChange={(event) => setOptionValue(event.target.value)} value={optionValue}>
               {formText.box1.radioGroupOptions.map((option, index) => {
                 return (
-                  <Radio key={index} value={option.key} style={{ whiteSpace: 'break-spaces' }}>
-                    {option.label}
-                  </Radio>
+                  <p>
+                    <Radio key={index} value={option.key}>
+                      {option.label}
+                    </Radio>
+                  </p>
                 );
               })}
             </Radio.Group>
@@ -230,7 +232,7 @@ const EditEQTRForm = () => {
           padding: '6px',
           paddingTop: 0,
           border: '1px solid transparent',
-          borderColor: 'lightgray',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
           borderTop: 'none',
         }}>
         <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
@@ -246,7 +248,7 @@ const EditEQTRForm = () => {
           padding: '6px',
           paddingTop: 0,
           border: '1px solid transparent',
-          borderColor: 'lightgray',
+          borderColor: 'rgba(0, 0, 0, 0.06)',
           borderTop: 'none',
         }}>
         <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
