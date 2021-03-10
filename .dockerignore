@@ -240,3 +240,5 @@ review/templates/review/index.html
 
 # assets
 assets/*
+
+# localconfigs
