@@ -35,8 +35,6 @@ class ComplianceViewset(viewsets.ModelViewSet):
         data = copy.deepcopy(request.data)
 
         data['submit_by'] = request.user.username
-        if data.get('status') is None:
-            data['status'] = 'pending'
 
         if not isinstance(data.get('data'), str):
             data['data'] = json.dumps(data.get('data'))

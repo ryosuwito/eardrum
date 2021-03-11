@@ -260,7 +260,7 @@ const ComplianceApp = () => {
     <Container>
      <Tabs onChange={onTabKeyChange} type='card' activeKey={typ}>
         {Object.entries(messages).map(([typ, form]) => {
-          const specificFormList = forms.filter((form) => form.typ === typ);
+          const specificFormList = forms.filter((form) => form.typ === typ).map(form => ({...form, status: form.status || 'pending'}));
 
           if (['a', 'b', 'c'].includes(typ)) {
             return (
