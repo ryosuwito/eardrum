@@ -6,7 +6,7 @@ import {
   Spin,
   message,
   } from 'antd';
-import { MenuOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
 import _ from 'lodash';
@@ -93,17 +93,17 @@ const FormDEdit = () => {
       <Breadcrumb style={{ marginBottom: '100px' }}>
         <Breadcrumb.Item>
           <Link to={routes.formD.url()}>
-            <MenuOutlined /> {formName} Form List
+          {formName}
           </Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           {mode === MODE.edit ? (
             <>
-              <EditOutlined /> Edit {formName}
+              <EditOutlined /> Edit
             </>
           ) : (
             <>
-              <PlusOutlined /> New {formName}
+              <PlusOutlined /> New
             </>
           )}
         </Breadcrumb.Item>
@@ -127,18 +127,17 @@ const FormDEdit = () => {
         </div>
       </div>
 
-      {mode === MODE.edit && (
-        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
-          <Button type='primary' onClick={submitForm}>
-            Update
-          </Button>
-        </Space>
-      )}
-
       {mode === MODE.new && (
         <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
-          <Button type='primary' onClick={submitForm}>
-            Submit
+          <Button type='primary' onClick={submitForm} loading={updateOneLoading}>
+            Create
+          </Button>
+      </Space>
+      )}
+      {mode === MODE.edit && (
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={submitForm} loading={updateOneLoading}>
+            Update
           </Button>
         </Space>
       )}

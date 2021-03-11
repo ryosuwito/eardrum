@@ -5,10 +5,11 @@ import {
   Spin,
   Table,
   Breadcrumb,
+  Button,
 } from 'antd';
-import {MenuOutlined} from '@ant-design/icons';
 import { useHistory, useParams, Link } from 'react-router-dom';
 import Container from './components/Container';
+import {ArrowLeftOutlined} from '@ant-design/icons';
 
 import messages from './messages'
 import { useFetchOne } from './hooks';
@@ -23,6 +24,7 @@ const FormAView = function() {
 
   const { pk } = useParams();
   console.log(pk);
+  const history = useHistory()
 
   const [data, error] = useFetchOne(pk, 'a');
   useEffect(() => {
@@ -62,9 +64,9 @@ const FormAView = function() {
     <Container>
       <Breadcrumb style={{marginBottom: '100px'}}>
         <Breadcrumb.Item>
-          <MenuOutlined /> <Link to={routes.formA.url()}>{messages.a.name} Form List</Link>
+          <Link to={routes.formA.url()}>{messages.a.name}</Link>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>{messages.a.name}</Breadcrumb.Item>
+        <Breadcrumb.Item>View</Breadcrumb.Item>
       </Breadcrumb>
 
       <h1 style={{textAlign: 'center'}}>
@@ -85,6 +87,10 @@ const FormAView = function() {
       <p>{ formText.note }</p>
       <Table bordered columns={ columns } dataSource={ dataSource} />
       <p>{ formText.policy }</p>
+
+       <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formA.url())}>
+          Go back
+        </Button>
     </Container>
   )
 }

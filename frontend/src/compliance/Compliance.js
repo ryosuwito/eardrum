@@ -14,35 +14,54 @@ import messages from './messages';
 const {TabPane} = Tabs
 
 
+const getPeriodFilterProps = (data, field) => {
+  return {
+    filters: [...new Set(data.map((item) => item.json_data[field]))].map((item) => ({
+      text: item,
+      value: item,
+    })),
+    filterMultiple: true,
+    onFilter: (value, record) => `${record.json_data[field]}`.indexOf(value) === 0,
+  }
+}
+
 const columns = {
-  a: [
+  a: (data) => [
     {
       title: 'Period',
       render: (text, record) => {
-        const data = record.json_data;
-        return data.submissionDate;
+        const data = record.json_data
+        return data.submissionDate
       },
+      ...getPeriodFilterProps(data, 'submissionDate'),
     },
   ],
-  b: [
+  b: (data) => [
     {
       title: 'Period',
       render: (text, record) => {
-        const data = record.json_data;
-        return data.year;
+        const data = record.json_data
+        return data.year
       },
+      ...getPeriodFilterProps(data, 'year'),
     },
   ],
-  c: [
+  c: (data) => [
     {
       title: 'Period',
       render: (text, record) => {
-        const data = record.json_data;
-        return `${data.quarter}/${data.year}`;
+        const data = record.json_data
+        return `${data.quarter}/${data.year}`
       },
+      filters: [...new Set(data.map((item) => `${item.json_data.quarter}/${item.json_data.year}`))].map((item) => ({
+        text: item,
+        value: item,
+      })),
+      filterMultiple: true,
+      onFilter: (value, record) => `${record.json_data.quarter}/${record.json_data.year}`.indexOf(value) === 0,
     },
   ],
-};
+}
 
 const FormList = ({columns, formType, isLoading, removeForm, data}) => {
   const [_, formRoute] = Object.entries(routes).find(([key, route]) => route.type === formType);
@@ -98,14 +117,14 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
     return null;
   }
 
-  const AprroveRejectButton = ({ record }) => {
+  const Actions = (record) => {
     const pk = record.id;
-    const [save, loading, response, error] = useUpdateOne(pk);
+    const [save, updateOneLoading, updateOneRes, updateOneError] = useUpdateOne(pk);
 
     useEffect(() => {
-      if (loading === false) {
-        if (response !== null) {
-          changeFormStatus(pk, response.data.status)
+      if (updateOneLoading === false) {
+        if (updateOneRes !== null) {
+          changeFormStatus(pk, updateOneRes.data.status)
           message.success('Form status was changed successfully!');
         }
 
@@ -114,7 +133,7 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
           message.error('Errors occured while changing form status.');
         }
       }
-    }, [loading, response, error])
+    }, [updateOneLoading, updateOneRes, updateOneError])
 
     const changeStatus = (status) => () => {
       save({ status, data: record.json_data });
@@ -124,16 +143,24 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
     const rejectForm = changeStatus('rejected');
 
     return (
-      <div style={{ display: 'flex' }}>
-        <Popconfirm onConfirm={approveForm} title='Are you sure?'>
-          <Button type='link'>Approve</Button>
-        </Popconfirm>
-        <Popconfirm onConfirm={rejectForm} title='Are you sure?'>
-          <Button type='link' danger>
-            Reject
-          </Button>
-        </Popconfirm>
-      </div>
+      <Space size='middle'>
+        <Link to={routes.formD.view.url(record.id)}>View</Link>
+        {!loading && res.data.is_admin && (
+          <>
+            {' '}
+            <Popconfirm onConfirm={approveForm} title='Are you sure?'>
+              <Button type='link'>Approve</Button>
+            </Popconfirm>
+            <Popconfirm onConfirm={rejectForm} title='Are you sure?'>
+              <Button type='link' danger>
+                Reject
+              </Button>
+            </Popconfirm>
+          </>
+        )}
+        <Link to={routes.formD.edit.url(record.id)}>Edit</Link>
+        <DeleteButtonWithPopConfirm pk={record.id} removeForm={removeForm} />
+      </Space>
     );
   };
 
@@ -144,6 +171,7 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
         const data = record.json_data
         return data.submissionDate
       },
+      ...getPeriodFilterProps(data, 'submissionDate'),
     },
     {
       title: 'Submitted by',
@@ -156,20 +184,14 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
     {
       title: 'Status',
       dataIndex: 'status',
+      filters: [...new Set(data.map((item) => item.status))].map((status) => ({text: status, value: status})),
+      filterMultiple: true,
+      onFilter: (value, record) => record.status.indexOf(value) === 0,
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (text, record) => {
-        return (
-          <Space size='middle'>
-            <Link to={ routes.formD.view.url(record.id) }>View</Link>
-            {!loading && res.data.is_admin && <AprroveRejectButton record={record} />}
-            <Link to={routes.formD.edit.url(record.id)}>Edit</Link>
-            <DeleteButtonWithPopConfirm pk={record.id} removeForm={removeForm} />
-          </Space>
-        );
-      },
+      render: Actions,
     },
   ]
 
@@ -266,7 +288,7 @@ const ComplianceApp = () => {
             return (
               <TabPane tab={form.name} key={typ}>
                 <FormList
-                  columns={columns[typ]}
+                  columns={columns[typ](specificFormList)}
                   data={specificFormList}
                   isLoading={isLoading}
                   removeForm={removeForm}

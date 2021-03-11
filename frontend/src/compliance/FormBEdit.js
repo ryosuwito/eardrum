@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Breadcrumb, Spin, Select, Button, Form, message, Upload, Radio } from 'antd';
-import { MenuOutlined, UploadOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Breadcrumb, Spin, Select, Button, Form, message, Upload, Radio, Space } from 'antd';
+import { UploadOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
 import messages from './messages';
@@ -185,18 +185,16 @@ const FormBEdit = () => {
     <Container>
       <Breadcrumb style={{ marginBottom: '100px' }}>
         <Breadcrumb.Item>
-          <Link to={routes.formB.url()}>
-            <MenuOutlined /> {formName} Form List
-          </Link>
+          <Link to={routes.formB.url()}>{formName}</Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           {mode === MODE.edit ? (
             <>
-              <EditOutlined /> Edit {formName}
+              <EditOutlined /> Edit
             </>
           ) : (
             <>
-              <PlusOutlined /> New {formName}
+              <PlusOutlined /> New
             </>
           )}
         </Breadcrumb.Item>
@@ -257,16 +255,19 @@ const FormBEdit = () => {
         </div>
       </div>
 
-      {mode === MODE.edit && (
-        <Button type='primary' onClick={updateForm} loading={isSubmitting}>
-          Update
-        </Button>
-      )}
-
       {mode === MODE.new && (
-        <Button type='primary' onClick={createForm} loading={isSubmitting}>
-          Submit
-        </Button>
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={createForm} loading={isSubmitting}>
+            Create
+          </Button>
+        </Space>
+      )}
+      {mode === MODE.edit && (
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={updateForm} loading={isSubmitting}>
+            Update
+          </Button>
+        </Space>
       )}
     </Container>
   );

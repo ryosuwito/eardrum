@@ -5,6 +5,7 @@ import {
   Button,
   message,
   Breadcrumb,
+  Space,
 } from 'antd';
 import {
   useHistory,
@@ -13,7 +14,7 @@ import {
 } from 'react-router-dom';
 import axios from 'axios';
 import _ from 'lodash';
-import {EditOutlined, PlusOutlined, MenuOutlined} from '@ant-design/icons';
+import {EditOutlined, PlusOutlined} from '@ant-design/icons';
 import moment from 'moment';
 import Container from './components/Container';
 import EditableTable from './components/EditableTable';
@@ -148,16 +149,16 @@ const FormAEdit = () => {
     <Container>
       <Breadcrumb style={{marginBottom: '100px'}}>
         <Breadcrumb.Item>
-          <MenuOutlined /> <Link to={routes.formA.url()}>{messages.a.name} Form List</Link>
+          <Link to={routes.formA.url()}>{messages.a.name}</Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           {mode === MODE.edit ? (
             <>
-              <EditOutlined /> Edit {messages.a.name}
+              <EditOutlined /> Edit
             </>
           ) : (
             <>
-              <PlusOutlined /> New {messages.a.name}
+              <PlusOutlined /> New
             </>
           )}
         </Breadcrumb.Item>
@@ -183,8 +184,16 @@ const FormAEdit = () => {
       <EditableTable initColumns={ columns } dataSource={ hasAccounts? accounts: [] } setData={ setAccounts } disabled={ !hasAccounts }/>
       <p>{ formText.policy }</p>
 
-      { mode === MODE.new && <Button onClick={ onSubmit }>Submit</Button>}
-      { mode === MODE.edit && <Button onClick={ onSave }>Save</Button>}
+     {mode === MODE.new && (
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={onSubmit}>Create</Button>
+        </Space>
+      )}
+      {mode === MODE.edit && (
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={onSave}>Update</Button>
+        </Space>
+      )}
     </Container>
   )
 }

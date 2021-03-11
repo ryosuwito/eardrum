@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Spin, Select, List, message, Radio } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
-import { Link, useParams } from 'react-router-dom';
+import { Breadcrumb, Spin, Select, List, message, Radio, Button } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import messages from './messages';
 import routes from './routes';
 import Container from './components/Container';
@@ -14,6 +14,7 @@ const FormBView = () => {
   const { pk } = useParams();
   const [fileList, setFileList] = useState([]);
   const [data, error] = useFetchOne(pk, 'b');
+  const history = useHistory();
 
   const dataUrlToFile = async (dataUrl, fileName, type) => {
     try {
@@ -64,11 +65,9 @@ const FormBView = () => {
     <Container>
       <Breadcrumb style={{ marginBottom: '100px' }}>
         <Breadcrumb.Item>
-          <Link to={routes.formB.url()}>
-            <MenuOutlined /> {formName} Form List
-          </Link>
+          <Link to={routes.formB.url()}>{formName}</Link>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>{formName}</Breadcrumb.Item>
+        <Breadcrumb.Item>View</Breadcrumb.Item>
       </Breadcrumb>
 
       <h1 style={{ textAlign: 'center' }}>{formName}</h1>
@@ -106,6 +105,10 @@ const FormBView = () => {
           />
         </div>
       </div>
+
+      <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formB.url())} style={{marginTop: '10px' }}>
+        Go back
+      </Button>
     </Container>
   );
 };

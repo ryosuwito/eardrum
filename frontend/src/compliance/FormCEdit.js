@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Breadcrumb, Select, Button, message, Radio, Spin, Form } from 'antd';
-import { MenuOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Divider, Breadcrumb, Select, Button, message, Radio, Spin, Form, Space } from 'antd';
+import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import moment from 'moment';
@@ -125,18 +125,16 @@ const EditEQTRForm = () => {
     <Container>
       <Breadcrumb style={{ marginBottom: '100px' }}>
         <Breadcrumb.Item>
-          <Link to={routes.formC.url()}>
-            <MenuOutlined /> {formName} Form List
-          </Link>
+          <Link to={routes.formC.url()}>{formName}</Link>
         </Breadcrumb.Item>
         <Breadcrumb.Item>
           {mode === MODE.edit ? (
             <>
-              <EditOutlined /> Edit {formName}
+              <EditOutlined /> Edit
             </>
           ) : (
             <>
-              <PlusOutlined /> New {formName}
+              <PlusOutlined /> New
             </>
           )}
         </Breadcrumb.Item>
@@ -209,8 +207,8 @@ const EditEQTRForm = () => {
             <Radio.Group onChange={(event) => setOptionValue(event.target.value)} value={optionValue}>
               {formText.box1.radioGroupOptions.map((option, index) => {
                 return (
-                  <p>
-                    <Radio key={index} value={option.key}>
+                  <p key={index}>
+                    <Radio value={option.key}>
                       {option.label}
                     </Radio>
                   </p>
@@ -260,16 +258,19 @@ const EditEQTRForm = () => {
       <div style={{ marginTop: '10px' }}>
         <strong>{formText.confirm}</strong>
       </div>
-      {mode === MODE.edit && (
-        <Button type='primary' onClick={submitForm}>
-          Update
-        </Button>
-      )}
-
       {mode === MODE.new && (
-        <Button type='primary' onClick={submitForm}>
-          Submit
-        </Button>
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={submitForm} loading={updateOneLoading}>
+            Create
+          </Button>
+        </Space>
+      )}
+      {mode === MODE.edit && (
+        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
+          <Button type='primary' onClick={submitForm} loading={updateOneLoading}>
+            Update
+          </Button>
+        </Space>
       )}
     </Container>
   );

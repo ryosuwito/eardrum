@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Divider, Breadcrumb, Select, Table, message, Radio, Spin } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
-import { Link, useParams } from 'react-router-dom';
+import { Divider, Breadcrumb, Select, Table, message, Radio, Spin, Button } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Link, useParams, useHistory } from 'react-router-dom';
 import messages from './messages';
 import routes from './routes';
 import Container from './components/Container';
@@ -15,6 +15,7 @@ const formName = messages.c.name;
 const FormCView = () => {
   const { pk } = useParams();
   const [data, error] = useFetchOne(pk, 'c');
+  const history = useHistory();
 
   useEffect(() => {
     if (error !== null) {
@@ -41,9 +42,9 @@ const FormCView = () => {
     <Container>
       <Breadcrumb style={{ marginBottom: '100px' }}>
         <Breadcrumb.Item>
-          <MenuOutlined /> <Link to={routes.formC.url()}>{formName} Form List</Link>
+          <Link to={routes.formC.url()}>{formName}</Link>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>{formName}</Breadcrumb.Item>
+        <Breadcrumb.Item>View</Breadcrumb.Item>
       </Breadcrumb>
 
       <h1 style={{ textAlign: 'center' }}>{formName}</h1>
@@ -111,6 +112,10 @@ const FormCView = () => {
 
         <CheckBoxGroup titles={formText.box3.checkboxGroupTitles} />
       </div>
+
+      <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formC.url())} style={{marginTop: '10px' }}>
+        Go back
+      </Button>
     </Container>
   );
 };

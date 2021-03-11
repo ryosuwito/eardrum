@@ -3,10 +3,11 @@ import {
   Breadcrumb,
   Spin,
   message,
-  Table
+  Table,
+  Button,
   } from 'antd';
-import { MenuOutlined } from '@ant-design/icons';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
+import {ArrowLeftOutlined} from '@ant-design/icons';
 import messages from './messages';
 import routes from './routes';
 import { useFetchOne } from './hooks';
@@ -19,6 +20,7 @@ const formName = messages.d.name;
 const FormDView = () => {
   const { pk } = useParams();
   const [data, error] = useFetchOne(pk, 'd');
+  const history = useHistory();
 
   useEffect(() => {
     if (error !== null) {
@@ -44,9 +46,9 @@ const FormDView = () => {
     <Container>
       <Breadcrumb style={{ marginBottom: '100px' }}>
         <Breadcrumb.Item>
-          <MenuOutlined /> <Link to={routes.formD.url()}>{formName} Form List</Link>
+          <Link to={routes.formD.url()}>{formName}</Link>
         </Breadcrumb.Item>
-        <Breadcrumb.Item>{formName}</Breadcrumb.Item>
+        <Breadcrumb.Item>View</Breadcrumb.Item>
       </Breadcrumb>
       <h1 style={{ textAlign: 'center' }}>{formName}</h1>
       <Table columns={columns} dataSource={dataSource} />
@@ -61,6 +63,9 @@ const FormDView = () => {
           <i>{formText.note}</i>
         </div>
       </div>
+      <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formD.url())} style={{marginTop: '10px' }}>
+        Go back
+      </Button>
     </Container>
   );
 };
