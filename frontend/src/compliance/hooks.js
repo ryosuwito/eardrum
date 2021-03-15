@@ -8,34 +8,37 @@ import moment from 'moment';
 
 const dateFormat = 'DD/MM/YYYY';
 
-function FormA(optionValue, submissionDate, accounts) {
+function FormA(optionValue, submissionDate, accounts, submitBy) {
   this.optionValue = optionValue || null
   this.accounts = accounts || []
   this.submissionDate = submissionDate || null
+  this.submitBy = submitBy || null
 
   return this
 }
 
 function newFormA() {
-  return new FormA(null, null, [])
+  return new FormA(null, moment(new Date()).format(dateFormat), [], null)
 }
 
-function FormB(optionValue, year, fileList) {
+function FormB(optionValue, year, fileList, submitBy) {
   this.optionValue = optionValue || null
   this.year = year || null
   this.fileList = fileList || []
+  this.submitBy = submitBy || null
 
   return this
 }
 
 function newFormB() {
-  return new FormB(null, new Date().getFullYear(), [])
+  return new FormB(null, new Date().getFullYear(), [], null)
 }
 
-function FormC(optionValue, quarter, year, tickers) {
+function FormC(optionValue, quarter, year, tickers, submitBy) {
   this.optionValue = optionValue || null
   this.quarter = quarter || null
   this.year = year || null
+  this.submitBy = submitBy || null
 
   // tickers: short form for Stock tickers
   this.tickers = tickers || []
@@ -44,28 +47,29 @@ function FormC(optionValue, quarter, year, tickers) {
 }
 
 function newFormC() {
-  return new FormC(null, messages.c.text.quarters[0], new Date().getFullYear(), [])
+  return new FormC(null, messages.c.text.quarters[0], new Date().getFullYear(), [], null)
 }
 
-function FormD(submissionDate, issuers) {
+function FormD(submissionDate, issuers, submitBy) {
   this.submissionDate = submissionDate || null
   this.issuers = issuers || []
+  this.submitBy = submitBy || null
 
   return this
 }
 
 function newFormD() {
-  return new FormD(moment(new Date()).format(dateFormat), [])
+  return new FormD(moment(new Date()).format(dateFormat), [], null)
 }
 
 function dataFactory(data, formType) {
   switch(formType) {
     case 'a':
-      return data === null? newFormA(): new FormA(data.json_data.optionValue, data.json_data.submissionDate, data.json_data.accounts);
+      return data === null? newFormA(): new FormA(data.json_data.optionValue, data.json_data.submissionDate, data.json_data.accounts, data.submit_by);
     case 'b':
       return data === null
         ? newFormB()
-        : new FormB(data.json_data.optionValue, data.json_data.year, data.json_data.fileList)
+        : new FormB(data.json_data.optionValue, data.json_data.year, data.json_data.fileList, data.submit_by)
     case 'c':
       return data === null
         ? newFormC()
@@ -73,10 +77,11 @@ function dataFactory(data, formType) {
             data.json_data.optionValue,
             data.json_data.quarter,
             data.json_data.year,
-            data.json_data.tickers
+            data.json_data.tickers,
+            data.submit_by
           )
     case 'd':
-        return data === null ? newFormD() : new FormD(data.json_data.submissionDate, data.json_data.issuers)
+        return data === null ? newFormD() : new FormD(data.json_data.submissionDate, data.json_data.issuers, data.submit_by)
   }
 
   return null;

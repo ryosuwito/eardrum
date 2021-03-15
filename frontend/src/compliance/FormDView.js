@@ -5,6 +5,7 @@ import {
   message,
   Table,
   Button,
+  Space,
   } from 'antd';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import {ArrowLeftOutlined} from '@ant-design/icons';
@@ -51,21 +52,29 @@ const FormDView = () => {
         <Breadcrumb.Item>View</Breadcrumb.Item>
       </Breadcrumb>
       <h1 style={{ textAlign: 'center' }}>{formName}</h1>
-      <Table columns={columns} dataSource={dataSource} />
-      <div style={{ marginTop: '16px' }}>
-        <div>{formText.list.title}</div>
-        <ol type='a'>
-          {formText.list.items.map((item) => {
-            return <li key={item}>{item}</li>;
-          })}
-        </ol>
-        <div>
-          <i>{formText.note}</i>
+      <div style={{ padding: '0px 50px 0px' }}>
+        <Table columns={columns} dataSource={dataSource} />
+        <div style={{ marginTop: '16px' }}>
+          <div>{formText.list.title}</div>
+          <ol type='a'>
+            {formText.list.items.map((item) => {
+              return <li key={item}>{item}</li>;
+            })}
+          </ol>
+          <div>
+            <i>{formText.note}</i>
+          </div>
         </div>
+        <Space style={{ width: '100%', marginTop: '10px' }} align='end' direction='vertical'>
+          <div>
+            <div>Submitted by: {data.submitBy}</div>
+            <div>Date: {data.submissionDate}</div>
+          </div>
+        </Space>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => history.goBack()} style={{ marginTop: '50px' }}>
+          Go back
+        </Button>
       </div>
-      <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formD.url())} style={{marginTop: '10px' }}>
-        Go back
-      </Button>
     </Container>
   );
 };

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import {Popconfirm, Table, Space, Menu, Dropdown, Button, message, Tabs} from 'antd'
+import {Popconfirm, Table, Space, Menu, Dropdown, Button, message, Tabs, Tag} from 'antd'
 import {Link, useParams, useHistory } from 'react-router-dom'
 import axios from 'axios';
 import Container from './components/Container';
@@ -13,6 +13,7 @@ import messages from './messages';
 
 const {TabPane} = Tabs
 
+const dateFormat = 'DD/MM/YYYY';
 
 const getPeriodFilterProps = (data, field) => {
   return {
@@ -28,7 +29,8 @@ const getPeriodFilterProps = (data, field) => {
 const columns = {
   a: (data) => [
     {
-      title: 'Period',
+      title: `Period (${dateFormat})`,
+      width: '34%',
       render: (text, record) => {
         const data = record.json_data
         return data.submissionDate
@@ -39,6 +41,7 @@ const columns = {
   b: (data) => [
     {
       title: 'Period',
+      width: '34%',
       render: (text, record) => {
         const data = record.json_data
         return data.year
@@ -49,6 +52,7 @@ const columns = {
   c: (data) => [
     {
       title: 'Period',
+      width: '34%',
       render: (text, record) => {
         const data = record.json_data
         return `${data.quarter}/${data.year}`
@@ -73,6 +77,7 @@ const FormList = ({columns, formType, isLoading, removeForm, data}) => {
       title: 'Submitted by',
       dataIndex: 'submit_by',
       key: 'submit_by',
+      width: '33%',
       filters: [...new Set(data.map((item) => item.submit_by))].map((submitBy) => ({
         text: submitBy,
         value: submitBy,
@@ -83,6 +88,7 @@ const FormList = ({columns, formType, isLoading, removeForm, data}) => {
     {
       title: 'Action',
       key: 'action',
+      width: '33%',
       render: (text, record) => {
         return (
           <Space size='middle'>
@@ -117,9 +123,17 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
     return null;
   }
 
+  const status = {
+    approved: 'approved',
+    pending: 'pending',
+    rejected: 'rejected',
+  };
+
   const Actions = (record) => {
     const pk = record.id;
     const [save, updateOneLoading, updateOneRes, updateOneError] = useUpdateOne(pk);
+
+    const isButtonDisabled = [status.approved, status.rejected].includes(record.status);
 
     useEffect(() => {
       if (updateOneLoading === false) {
@@ -136,11 +150,11 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
     }, [updateOneLoading, updateOneRes, updateOneError])
 
     const changeStatus = (status) => () => {
-      save({ status, data: record.json_data });
+      save({ status });
     };
 
-    const approveForm = changeStatus('approved');
-    const rejectForm = changeStatus('rejected');
+    const approveForm = changeStatus(status.approved);
+    const rejectForm = changeStatus(status.rejected);
 
     return (
       <Space size='middle'>
@@ -148,25 +162,25 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
         {!loading && res.data.is_admin && (
           <>
             {' '}
-            <Popconfirm onConfirm={approveForm} title='Are you sure?'>
-              <Button type='link'>Approve</Button>
+            <Popconfirm onConfirm={approveForm} title='Are you sure?' disabled={isButtonDisabled}>
+              <Button type='link' disabled={isButtonDisabled}>Approve</Button>
             </Popconfirm>
-            <Popconfirm onConfirm={rejectForm} title='Are you sure?'>
-              <Button type='link' danger>
+            <Popconfirm onConfirm={rejectForm} title='Are you sure?' disabled={isButtonDisabled}>
+              <Button type='link' danger disabled={isButtonDisabled}>
                 Reject
               </Button>
             </Popconfirm>
           </>
         )}
-        <Link to={routes.formD.edit.url(record.id)}>Edit</Link>
-        <DeleteButtonWithPopConfirm pk={record.id} removeForm={removeForm} />
+        <Link to={routes.formD.edit.url(record.id)} disabled={isButtonDisabled}>Edit</Link>
+        <DeleteButtonWithPopConfirm pk={record.id} disabled={isButtonDisabled} removeForm={removeForm} />
       </Space>
     );
   };
 
   const columns = [
     {
-      title: 'Period',
+      title: `Period (${dateFormat})`,
       render: (text, record) => {
         const data = record.json_data
         return data.submissionDate
@@ -184,6 +198,14 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
     {
       title: 'Status',
       dataIndex: 'status',
+      render: (text, record) => {
+        const statusColors = {
+          [status.pending]: 'default',
+          [status.approved]: 'success',
+          [status.rejected]: 'error',
+        };
+        return <Tag color={statusColors[record.status]}>{record.status}</Tag>;
+      },
       filters: [...new Set(data.map((item) => item.status))].map((status) => ({text: status, value: status})),
       filterMultiple: true,
       onFilter: (value, record) => record.status.indexOf(value) === 0,
@@ -208,7 +230,7 @@ const FormDList = ({isLoading, removeForm, changeFormStatus, data}) => {
   );
 }
 
-const DeleteButtonWithPopConfirm = ({ pk, removeForm }) => {
+const DeleteButtonWithPopConfirm = ({ pk, removeForm, disabled }) => {
   const [deleteForm, loading, response, error] = useDeleteOne(pk);
 
   useEffect(() => {
@@ -225,8 +247,8 @@ const DeleteButtonWithPopConfirm = ({ pk, removeForm }) => {
   }, [loading, response, error, removeForm]);
 
   return (
-    <Popconfirm onConfirm={deleteForm} title='Are you sure?'>
-      <Button type='link' danger>
+    <Popconfirm onConfirm={deleteForm} title='Are you sure?' disabled={disabled}>
+      <Button type='link' danger disabled={disabled}>
         Delete
       </Button>
     </Popconfirm>
