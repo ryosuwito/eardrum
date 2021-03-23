@@ -24,9 +24,10 @@ import {
   okrFetchOne,
   onSaveOKR,
   onCreateOKR,
-  enqueueSnackbar,
   onDeleteOKR,
-} from '../actions';
+} from './actions';
+
+import { enqueueSnackbar } from '../actions';
 
 
 const styles = theme => ({
@@ -233,7 +234,7 @@ class OKRDetail extends Component {
           options: {
             variant: 'error',
           }
-        }))       
+        }))
       }
     } else {
       this.setState({dialogOpen: false})
@@ -246,7 +247,7 @@ class OKRDetail extends Component {
     }
 
     const { classes } = this.props;
-  
+
     return (
       <Paper className={ classes.root }>
         <div>

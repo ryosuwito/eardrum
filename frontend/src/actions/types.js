@@ -1,9 +1,12 @@
-const ActionTypes = {
-
+export const AuthType = {
   // AUTHENTICATION
   AUTH_SIGN_IN: 'auth_sign_in',
   AUTH_SIGN_IN_ERROR: 'auth_sign_in_error',
   AUTH_SIGN_OUT: 'auth_sign_out',
+};
+
+const ActionTypes = {
+  ...AuthType,
 
   // USER
   USER_FETCH_ALL: 'user_fetch_all',
@@ -31,12 +34,6 @@ const ActionTypes = {
   REQUEST_FETCH_ONE_ERROR: 'request_fetch_one_error',
   REQUEST_SEND_REVIEW: 'request_send_review',
   REQUEST_SEND_REVIEW_ERROR: 'request_send_review_error',
-
-  // OKR
-  OKR_FETCH_ALL: 'okr_fetch_all',
-  OKR_FETCH_ALL_ERROR: 'okr_fetch_all_error',
-  OKR_FETCH_ONE: 'okr_fetch_one',
-  OKR_FETCH_ONE_ERROR: 'okr_fetch_one_error',
 
   // CONFIG
   CONFIG_FETCH_GRADE_OPTIONS: 'config_fetch_grade_options',

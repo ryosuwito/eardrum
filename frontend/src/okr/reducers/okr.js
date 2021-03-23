@@ -2,7 +2,6 @@ import _ from 'lodash';
 
 import ActionTypes from '../actions/types';
 
-
 const okr = (state = {}, action) => {
   switch (action.type) {
     case ActionTypes.OKR_FETCH_ONE:
@@ -15,4 +14,3 @@ const okr = (state = {}, action) => {
 }
 
 export default okr;
-

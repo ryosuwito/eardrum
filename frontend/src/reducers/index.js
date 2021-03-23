@@ -5,8 +5,8 @@ import requests from '../reducers/requests';
 import request from '../reducers/request';
 import gradeOptions from '../reducers/gradeOptions';
 import notifications from '../reducers/notifications';
-import okrs from '../reducers/okrs';
-import okr from '../reducers/okr';
+import okrs from '../okr/reducers/okrs';
+import okr from '../okr/reducers/okr';
 import users from '../reducers/users';
 import user from '../reducers/user';
 

@@ -23,9 +23,8 @@ import FAQ from './views/FAQ';
 import SignInView from './views/SignInView';
 import RequestList from './views/RequestList';
 import RequestDetails from './views/RequestDetails';
-import OKRList from './views/OKRList';
-import OKRDetail from './views/OKRDetail';
 
+import OKRApp from './okr';
 import ComplianceApp from './compliance';
 
 import { signOut, getCurrentUser, accountFetchAll, } from './actions/index';
@@ -212,8 +211,7 @@ class App extends Component {
               <SignInRoute path="/signin" component={ SignInView } />
               <PrivateRoute exact={ true } path="/" component={ RequestList } />
               <PrivateRoute exact={ true } path="/other" component={ FAQ } />
-              <PrivateRoute exact={ true } path="/okrs/:okrId" component={ OKRDetail } />
-              <PrivateRoute exact={ true } path="/okrs" component={ OKRList } />
+              <PrivateRoute path="/okrs" component={OKRApp} />
               <PrivateRoute path="/requests/:requestId/details" component={ RequestDetails } />
               <PrivateRoute path="/compliance" component={ ComplianceApp } />
             </Switch>
