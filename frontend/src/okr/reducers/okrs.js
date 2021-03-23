@@ -2,7 +2,6 @@ import _ from 'lodash';
 
 import ActionTypes from '../actions/types';
 
-
 const okrs = (state = {}, action) => {
   switch (action.type) {
     case ActionTypes.OKR_FETCH_ALL:
