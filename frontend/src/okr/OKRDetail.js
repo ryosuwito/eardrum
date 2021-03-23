@@ -19,6 +19,7 @@ import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import Divider from '@material-ui/core/Divider';
 import { Dialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core'
+import { Breadcrumb } from 'antd';
 import WithLongPolling from '../core/WithLongPolling';
 import {
   okrFetchOne,
@@ -250,6 +251,12 @@ class OKRDetail extends Component {
 
     return (
       <Paper className={ classes.root }>
+        <Breadcrumb style={{ marginBottom: '24px', paddingTop: '10px' }}>
+          <Breadcrumb.Item>
+            <Link to='/okrs'>OKR</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>{this.props.new ? 'New' : 'View & Edit'}</Breadcrumb.Item>
+        </Breadcrumb>
         <div>
           {!this.props.new && (<SimpleDialog open={this.state.dialogOpen} onClose={ this.onCloseDialog } okr={ this.props.okr }/>)}
           <Grid className={ classes.questionGroup } container justify='space-between'>
