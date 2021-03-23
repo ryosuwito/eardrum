@@ -6,6 +6,7 @@ import {
   Table,
   Breadcrumb,
   Button,
+  Space,
 } from 'antd';
 import { useHistory, useParams, Link } from 'react-router-dom';
 import Container from './components/Container';
@@ -72,25 +73,32 @@ const FormAView = function() {
       <h1 style={{textAlign: 'center'}}>
         {messages.a.name}
       </h1>
-      <p>{ formText.overview }</p>
-      <p>{ formText.non_required_title }</p>
-      <ol>
-        { formText.non_required_items.map( (non_required_account, idx) => (<li key={`no-required-account-key-${idx}`}><p>{ non_required_account }</p></li>))}
-      </ol>
-      <p>{ formText.option_title }</p>
-      <Radio.Group value={ data.optionValue } disabled={ true }>
-        { formText.options.map( (option, idx) => (
-          <Radio value={ option.key } key={ `option-key-${idx}`}>
-            { option.label }
-          </Radio>))}
-      </Radio.Group>
-      <p>{ formText.note }</p>
-      <Table bordered columns={ columns } dataSource={ dataSource} />
-      <p>{ formText.policy }</p>
-
-       <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formA.url())}>
-          Go back
-        </Button>
+      <div style={{padding: '0px 50px 0px'}}>
+        <p>{ formText.overview }</p>
+        <p>{ formText.non_required_title }</p>
+        <ol>
+          { formText.non_required_items.map( (non_required_account, idx) => (<li key={`no-required-account-key-${idx}`}><p>{ non_required_account }</p></li>))}
+        </ol>
+        <p>{ formText.option_title }</p>
+        <Radio.Group value={ data.optionValue } disabled={ true }>
+          { formText.options.map( (option, idx) => (
+            <Radio value={ option.key } key={ `option-key-${idx}`}>
+              { option.label }
+            </Radio>))}
+        </Radio.Group>
+        <p>{ formText.note }</p>
+        <Table bordered columns={ columns } dataSource={ dataSource} />
+        <p>{ formText.policy }</p>
+        <Space style={{ width: '100%' }} align='end' direction='vertical'>
+          <div>
+            <div>Submitted by: {data.submitBy}</div>
+            <div>Date: {data.submissionDate}</div>
+          </div>
+        </Space>
+         <Button icon={<ArrowLeftOutlined />} onClick={() => history.goBack()} style={{marginTop: '50px' }}>
+            Go back
+          </Button>
+      </div>
     </Container>
   )
 }

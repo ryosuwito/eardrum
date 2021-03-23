@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Breadcrumb, Spin, Select, List, message, Radio, Button } from 'antd';
+import { Breadcrumb, Spin, Select, List, message, Radio, Button, Space } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Link, useParams, useHistory } from 'react-router-dom';
 import messages from './messages';
@@ -71,44 +71,49 @@ const FormBView = () => {
       </Breadcrumb>
 
       <h1 style={{ textAlign: 'center' }}>{formName}</h1>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <p style={{ marginBottom: 0 }}>{formText.yearSelectTitle}</p>{' '}
-        <Select value={data.year} style={{ width: 120 }} disabled />
-      </div>
-      <div style={{ marginTop: '10px' }}>
-        <p> {formText.options_title}</p>
-        <Radio.Group value={data.optionValue} disabled>
-          {formText.options.map((option, idx) => {
-            return (
-              <Radio value={option.key} key={idx} style={{ whiteSpace: 'break-spaces', display: 'block' }}>
-                {option.label}
-              </Radio>
-            );
-          })}
-        </Radio.Group>
-      </div>
-      <div style={{ marginLeft: '10px', marginTop: '6px' }}>
-        <div>
-          <div>Attach file(s)</div>
-
-          <List
-            size='small'
-            bordered
-            dataSource={fileList}
-            renderItem={(item) => (
-              <List.Item>
-                <a href={item.url} download={item.name}>
-                  {item.name}
-                </a>
-              </List.Item>
-            )}
-          />
+      <div style={{ padding: '0px 50px 0px' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <p style={{ marginBottom: 0 }}>{formText.yearSelectTitle}</p>{' '}
+          <Select value={data.year} style={{ width: 120 }} disabled />
         </div>
+        <div style={{ marginTop: '10px' }}>
+          <p> {formText.options_title}</p>
+          <Radio.Group value={data.optionValue} disabled>
+            {formText.options.map((option, idx) => {
+              return (
+                <Radio value={option.key} key={idx} style={{ whiteSpace: 'break-spaces', display: 'block' }}>
+                  {option.label}
+                </Radio>
+              );
+            })}
+          </Radio.Group>
+        </div>
+        <div style={{ marginLeft: '10px', marginTop: '6px' }}>
+          <div>
+            <div>Attach file(s)</div>
+            <List
+              size='small'
+              bordered
+              dataSource={fileList}
+              renderItem={(item) => (
+                <List.Item>
+                  <a href={item.url} download={item.name}>
+                    {item.name}
+                  </a>
+                </List.Item>
+              )}
+            />
+          </div>
+        </div>
+        <Space style={{ width: '100%', marginTop: '10px' }} align='end' direction='vertical'>
+          <div>
+            <div>Submitted by: {data.submitBy}</div>
+          </div>
+        </Space>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => history.goBack()} style={{ marginTop: '50px' }}>
+          Go back
+        </Button>
       </div>
-
-      <Button icon={<ArrowLeftOutlined />} onClick={() => history.push(routes.formB.url())} style={{marginTop: '10px' }}>
-        Go back
-      </Button>
     </Container>
   );
 };

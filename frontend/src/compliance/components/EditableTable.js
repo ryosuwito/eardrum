@@ -19,7 +19,7 @@ const EditableCell = ({
   ...restProps
 }) => {
   const inputComponent = {
-    number: <InputNumber />,
+    number: <InputNumber min={0} />,
     text: <Input />,
     date: <DatePicker format={dateFormat} />,
     select: (

@@ -3,7 +3,7 @@ const messages = {
     name: 'Form A: Brokerage Account Disclosure',
     text: {
       overview:
-        'Every employee must disclose to the CCO any and all brokerage accounts in the name of the employee, over which the employee exercises discretion (expressor or in fact) or in which the employee has an interest.',
+        'Every employee must disclose to the CCO any and all brokerage accounts in the name of the employee, over which the employee exercises discretion (express or in fact) or in which the employee has an interest.',
       non_required_title: 'Disclosure is not required for any account:',
       non_required_items: [
         'over which the employee has no control or discretionary trading authority (including Managed Accounts), or',
@@ -79,7 +79,7 @@ const messages = {
             dataIndex: 'listedOn',
           },
           {
-            title: 'Total value on the date of accquisition/sale(SGD)',
+            title: 'Total value on the date of sale/acquisition (SGD)',
             dataIndex: 'totalValue',
             inputType: 'number',
           },
@@ -90,13 +90,11 @@ const messages = {
             options: ['Long', 'Sell', 'Short'],
           },
           {
-            title: 'Date of sale/accquisition or other(DD/MM/YYYY)',
+            title: 'Date of sale/acquisition (DD/MM/YYYY)',
             dataIndex: 'date',
             inputType: 'date',
           },
         ],
-        lastRadioItemNote:
-          'Complete the details below in case of personal account dealing on a single stock on the same day and exceeding the amount of S$10,000 (ten thousand):',
       },
       box2: {
         title: 'I hereby confirm that:',

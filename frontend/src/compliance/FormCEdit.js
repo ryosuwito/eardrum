@@ -1,24 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Divider, Breadcrumb, Select, Button, message, Radio, Spin, Form, Space } from 'antd';
+import { Divider, Breadcrumb, Select, Button, message, Radio, Spin, Form, Space, Popconfirm } from 'antd';
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import moment from 'moment';
 import messages from './messages';
 import routes from './routes';
 import Container from './components/Container';
 import CheckBoxGroup from './components/CheckBoxGroup';
 import EditableTable from './components/EditableTable';
-import { useFetchOne, useUpdateOne } from './hooks';
+import { useFetchOne, useUpdateOne, useCurrentUser } from './hooks';
 import './styles/formC.css';
 
 const formText = messages.c.text;
 const formName = messages.c.name;
 
 const { Option } = Select;
-const dateFormat = 'DD/MM/YYYY';
+const errMsg = 'There are no valid rows in the table. To submit the form, at least one row must be filled!';
 
-const EditEQTRForm = () => {
+const FormCEdit = () => {
   const [optionValue, setOptionValue] = useState();
   const history = useHistory();
   const [isLoading, setIsLoading] = useState(true);
@@ -34,6 +33,9 @@ const EditEQTRForm = () => {
     new: 'new',
   };
   const mode = pk === undefined ? MODE.new : MODE.edit;
+  const [currentUserLoading, currentUserRes, currentUserErr] = useCurrentUser();
+  const [hasNoValidRows, setHasNoValidRows] = useState();
+  const isSubmittable = !exceedingLimit || (exceedingLimit && !hasNoValidRows);
 
   useEffect(() => {
     if (!isLoading && data !== null) {
@@ -58,6 +60,13 @@ const EditEQTRForm = () => {
   }, [data, error]);
 
   useEffect(() => {
+    if (!currentUserLoading && currentUserErr !== null) {
+      console.log(currentUserErr);
+      message.error('Errors occured while fetching user!.');
+    }
+  }, [currentUserLoading, currentUserErr]);
+
+  useEffect(() => {
     if (updateOneRes !== null) {
       message.success('Employee Quarterly Trade Report was submitted successfully!', 1);
       history.push(routes.formC.url());
@@ -69,6 +78,28 @@ const EditEQTRForm = () => {
     }
   }, [updateOneRes, updateOneErr]);
 
+  const isObjEmpty = (obj) => !Object.values(obj).some((val) => val);
+
+  useEffect(() => {
+    if (!exceedingLimit) {
+      setHasNoValidRows(false);
+      return;
+    }
+
+    const validRow = tickers.findIndex((item) => {
+      const cloneItem = { ...item };
+      delete cloneItem.key;
+      delete cloneItem.date;
+      return !isObjEmpty(cloneItem);
+    });
+
+    if (validRow < 0) {
+      setHasNoValidRows(true);
+    } else {
+      setHasNoValidRows(false);
+    }
+  }, [exceedingLimit, tickers]);
+
   if (isLoading) {
     return <Spin size='large' />;
   }
@@ -77,37 +108,23 @@ const EditEQTRForm = () => {
     return <p>{error.toString()}</p>;
   }
 
-  const addNewRow = () => {
-    const defaultValue = {
-      text: '',
-      select: null,
-      number: 0,
-      date: moment(new Date()).format(dateFormat),
-    };
-    const newTickers = _.cloneDeep(tickers);
-
-    const ticker = {};
-
-    formText.box1.columns.forEach((col) => {
-      ticker[col.dataIndex] = col.inputType ? defaultValue[col.inputType] : defaultValue.text;
-    });
-
-    let lastKey = tickers.length === 0 ? 0 : tickers[tickers.length - 1].key;
-
-    ticker.key = lastKey + 1;
-
-    newTickers.push(ticker);
-    setTickers(newTickers);
+  const getTickers = () => {
+    return _.cloneDeep(tickers)
+      .map((row) => {
+        delete row.key;
+        return row;
+      })
+      .filter((obj) => {
+        const cloneObj = { ...obj };
+        delete cloneObj.date;
+        return !isObjEmpty(cloneObj);
+      });
   };
 
   const submitForm = async () => {
     await form.validateFields();
-    const newTickers = exceedingLimit
-      ? _.cloneDeep(tickers).map((row) => {
-          delete row.key;
-          return row;
-        })
-      : [];
+
+    const newTickers = exceedingLimit ? getTickers() : [];
 
     const formValues = form.getFieldsValue();
     const { year, quarter, radioGroup: optionValue } = formValues;
@@ -141,51 +158,93 @@ const EditEQTRForm = () => {
       </Breadcrumb>
 
       <h1 style={{ textAlign: 'center' }}>{formName}</h1>
-      <Form layout='vertical' form={form}>
-        <p>{formText.title} </p>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <p style={{ marginBottom: 0 }}>{formText.quarterYearSelectTitle} </p>
-          <Form.Item
-            name='quarter'
-            rules={[
-              {
-                required: true,
-                message: 'Please select quarter!',
-              },
-            ]}
-            style={{ display: 'inline-block', marginLeft: '10px', marginBottom: 0 }}>
-            <Select style={{ width: 120 }}>
-              {formText.quarters.map((q) => {
-                return (
-                  <Option key={q} value={q}>
-                    {q}
+      <div style={{ padding: '0px 50px 0px' }}>
+        <Form layout='vertical' form={form}>
+          <p>{formText.title} </p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p style={{ marginBottom: 0 }}>{formText.quarterYearSelectTitle} </p>
+            <Form.Item
+              name='quarter'
+              rules={[
+                {
+                  required: true,
+                  message: 'Please select quarter!',
+                },
+              ]}
+              style={{ display: 'inline-block', marginLeft: '10px', marginBottom: 0 }}>
+              <Select style={{ width: 120 }}>
+                {formText.quarters.map((q) => {
+                  return (
+                    <Option key={q} value={q}>
+                      {q}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+            ,{' '}
+            <Form.Item
+              name='year'
+              rules={[
+                {
+                  required: true,
+                  message: 'Please select year!',
+                },
+              ]}
+              style={{ display: 'inline-block', margin: 0 }}>
+              <Select style={{ width: 120 }}>
+                {Array.from({ length: 3 }).map((_, index) => (
+                  <Option key={index} value={form.getFieldValue('year') + index - 1}>
+                    {form.getFieldValue('year') + index - 1}
                   </Option>
-                );
-              })}
-            </Select>
-          </Form.Item>
-          ,{' '}
-          <Form.Item
-            name='year'
-            rules={[
-              {
-                required: true,
-                message: 'Please select year!',
-              },
-            ]}
-            style={{ display: 'inline-block', margin: 0 }}>
-            <Select style={{ width: 120 }}>
-              {Array.from({ length: 3 }).map((_, index) => (
-                <Option key={index} value={form.getFieldValue('year') + index - 1}>
-                  {form.getFieldValue('year') + index - 1}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </div>
+                ))}
+              </Select>
+            </Form.Item>
+          </div>
+          <div
+            style={{
+              marginTop: '10px',
+              padding: '6px',
+              paddingTop: 0,
+              border: '1px solid transparent',
+              borderColor: 'rgba(0, 0, 0, 0.06)',
+              borderTop: 'none',
+            }}>
+            <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
+              {formText.box1.title}
+            </Divider>
+            <Form.Item
+              name='radioGroup'
+              style={{ margin: 0 }}
+              rules={[
+                {
+                  required: true,
+                  message: 'Please choose 1 option!',
+                },
+              ]}>
+              <Radio.Group onChange={(event) => setOptionValue(event.target.value)} value={optionValue}>
+                {formText.box1.radioGroupOptions.map((option, index) => {
+                  return (
+                    <div key={index}>
+                      <Radio value={option.key}>
+                        <span style={{ whiteSpace: 'normal' }}>{option.label}</span>
+                      </Radio>
+                    </div>
+                  );
+                })}
+              </Radio.Group>
+            </Form.Item>
+            <div>
+              <div className='hide-message'>
+                <EditableTable initColumns={columns} dataSource={exceedingLimit ? tickers : []} setData={setTickers} disabled={!exceedingLimit}/>
+                {hasNoValidRows && <p style={{ color: "#ff4d4f" }}>{errMsg}</p>}
+              </div>
+            </div>
+          </div>
+        </Form>
         <div
           style={{
-            marginTop: '10px',
+            marginTop: '24px',
             padding: '6px',
             paddingTop: 0,
             border: '1px solid transparent',
@@ -193,87 +252,73 @@ const EditEQTRForm = () => {
             borderTop: 'none',
           }}>
           <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
-            {formText.box1.title}
+            {formText.box2.title}
           </Divider>
-          <Form.Item
-            name='radioGroup'
-            style={{ margin: 0 }}
-            rules={[
-              {
-                required: true,
-                message: 'Please choose 1 option!',
-              },
-            ]}>
-            <Radio.Group onChange={(event) => setOptionValue(event.target.value)} value={optionValue}>
-              {formText.box1.radioGroupOptions.map((option, index) => {
-                return (
-                  <p key={index}>
-                    <Radio value={option.key}>
-                      {option.label}
-                    </Radio>
-                  </p>
-                );
-              })}
-            </Radio.Group>
-          </Form.Item>
-          <p>{formText.box1.lastRadioItemNote}</p>
-          <div>
-            <div className='hide-message'>
-              <EditableTable initColumns={columns} dataSource={exceedingLimit ? tickers : []} setData={setTickers} disabled={!exceedingLimit}/>
-            </div>
-          </div>
+          <CheckBoxGroup titles={formText.box2.checkboxGroupTitles} />
         </div>
-      </Form>
-      <div
-        style={{
-          marginTop: '24px',
-          padding: '6px',
-          paddingTop: 0,
-          border: '1px solid transparent',
-          borderColor: 'rgba(0, 0, 0, 0.06)',
-          borderTop: 'none',
-        }}>
-        <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
-          {formText.box2.title}
-        </Divider>
+        <div
+          style={{
+            marginTop: '24px',
+            padding: '6px',
+            paddingTop: 0,
+            border: '1px solid transparent',
+            borderColor: 'rgba(0, 0, 0, 0.06)',
+            borderTop: 'none',
+          }}>
+          <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
+            {formText.box3.title}
+          </Divider>
+          <CheckBoxGroup titles={formText.box3.checkboxGroupTitles} />
+        </div>
+        <div style={{ marginTop: '10px' }}>
+          <strong>{formText.confirm}</strong>
+        </div>
 
-        <CheckBoxGroup titles={formText.box2.checkboxGroupTitles} />
-      </div>
-
-      <div
-        style={{
-          marginTop: '24px',
-          padding: '6px',
-          paddingTop: 0,
-          border: '1px solid transparent',
-          borderColor: 'rgba(0, 0, 0, 0.06)',
-          borderTop: 'none',
-        }}>
-        <Divider style={{ position: 'relative', marginBottom: '0px', top: '-12px' }} orientation='left'>
-          {formText.box3.title}
-        </Divider>
-
-        <CheckBoxGroup titles={formText.box3.checkboxGroupTitles} />
-      </div>
-      <div style={{ marginTop: '10px' }}>
-        <strong>{formText.confirm}</strong>
-      </div>
-      {mode === MODE.new && (
-        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
-          <Button type='primary' onClick={submitForm} loading={updateOneLoading}>
-            Create
-          </Button>
+        <Space style={{ width: '100%' }} align='end' direction='vertical'>
+          {!currentUserLoading && currentUserRes !== null && (
+            <div>
+              <div>Submitted by: {currentUserRes.data.username}</div>
+            </div>
+          )}
         </Space>
-      )}
-      {mode === MODE.edit && (
-        <Space style={{ width: '100%', marginBottom: '10px' }} align='end' direction='vertical'>
-          <Button type='primary' onClick={submitForm} loading={updateOneLoading}>
-            Update
-          </Button>
-        </Space>
-      )}
+      </div>
+
+      <Space style={{ width: '100%' }} align='end' direction='vertical'>
+        {mode === MODE.new && (
+          <div style={{ marginTop: '50px' }}>
+            <Button
+              type='primary'
+              onClick={submitForm}
+              disabled={!isSubmittable}
+              loading={updateOneLoading}
+              style={{ marginRight: '6px' }}>
+              Create
+            </Button>
+            <Popconfirm onConfirm={() => history.push(routes.formC.url())} title='Are you sure?'>
+              <Button>Cancel</Button>
+            </Popconfirm>
+          </div>
+        )}
+
+        {mode === MODE.edit && (
+          <div style={{ marginTop: '50px' }}>
+            <Button
+              type='primary'
+              onClick={submitForm}
+              disabled={!isSubmittable}
+              loading={updateOneLoading}
+              style={{ marginRight: '6px' }}>
+              Update
+            </Button>
+
+            <Popconfirm onConfirm={() => history.push(routes.formC.url())} title='Are you sure?'>
+              <Button>Cancel</Button>
+            </Popconfirm>
+          </div>
+        )}
+      </Space>
     </Container>
   );
 };
 
-export default EditEQTRForm;
+export default FormCEdit;
