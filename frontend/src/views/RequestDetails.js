@@ -17,6 +17,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import Divider from '@material-ui/core/Divider';
+import { Breadcrumb } from 'antd';
 
 import WithLongPolling from '../core/WithLongPolling';
 import {
@@ -147,9 +148,15 @@ class RequestDetails extends Component {
     const questions = this.props.request.bucket.ordered_questions;
     const GradeOptions = () => (gradeOptions.map(obj =>
       (<option key={ `option-${obj.name}` } value={ obj.name }>{ obj.name }</option>)))
-   
+
     return (
       <Paper className={ classes.root }>
+        <Breadcrumb style={{ paddingTop: '10px' }}>
+          <Breadcrumb.Item>
+            <Link to='/'>Request</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>View & Edit</Breadcrumb.Item>
+        </Breadcrumb>
         <React.Fragment>
           <div style={ {height: '50px'} }/>
           <Typography variant='h4'>{ request.bucket_title }</Typography>
@@ -246,7 +253,7 @@ RequestDetails.propTypes = {
 const mapStateToProps = (state) => {
   return ({
     request: {..._.cloneDeep(state.request), bucket_title: !state.request.bucket? null: state.request.bucket.title},
-    gradeOptions: [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.gradeOptions)], 
+    gradeOptions: [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.gradeOptions)],
   })
 }
 
