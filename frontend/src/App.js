@@ -21,9 +21,8 @@ import {
 
 import FAQ from './views/FAQ';
 import SignInView from './views/SignInView';
-import RequestList from './views/RequestList';
-import RequestDetails from './views/RequestDetails';
 
+import PerformanceApp from './performance';
 import OKRApp from './okr';
 import ComplianceApp from './compliance';
 
@@ -119,7 +118,7 @@ class App extends Component {
 
   getCurrentTab = () => {
     const urlMap = [
-      [RegExp('^/requests'), 'home'],
+      [RegExp('^/performance'), 'performance'],
       [RegExp('^/okrs'), 'okrs'],
       [RegExp('^/other'), 'other'],
       [RegExp('^/compliance'), 'compliance'],
@@ -130,7 +129,7 @@ class App extends Component {
         return urlMap[i][1];
       }
     }
-    return 'home';
+    return 'performance';
   }
 
   render() {
@@ -184,7 +183,7 @@ class App extends Component {
           <AppBar position="static" color="default" className={ classes.appBar }>
             <Toolbar>
               <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
-                <Button component={ Link } to='/' onClick={ () => this.onChangeTab(null, 'home') }>Eardrum</Button>
+                <Button component={ Link } to='/' onClick={ () => this.onChangeTab(null, 'performance') }>Eardrum</Button>
               </Typography>
               { (!this.props.auth.is_authenticated) &&
                 (
@@ -194,7 +193,7 @@ class App extends Component {
                 (
                   <React.Fragment>
                     <Tabs value={ this.state.tabValue } onChange={ this.onChangeTab }>
-                      <LinkTab label="Home" to="/" value='home' />
+                      <LinkTab label="Performance" to="/" value='performance' />
                       <LinkTab label="OKR" to="/okrs" value='okrs'/>
                       <LinkTab label="Other" to='/other' value='other'/>
                       <LinkTab label="compliance" to='/compliance' value='compliance' />
@@ -209,11 +208,10 @@ class App extends Component {
           <main className={ classes.layout }>
             <Switch>
               <SignInRoute path="/signin" component={ SignInView } />
-              <PrivateRoute exact={ true } path="/" component={ RequestList } />
               <PrivateRoute exact={ true } path="/other" component={ FAQ } />
               <PrivateRoute path="/okrs" component={OKRApp} />
-              <PrivateRoute path="/requests/:requestId/details" component={ RequestDetails } />
               <PrivateRoute path="/compliance" component={ ComplianceApp } />
+              <PrivateRoute path="/" component={ PerformanceApp } />
             </Switch>
           </main>
 

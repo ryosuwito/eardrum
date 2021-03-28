@@ -23,7 +23,7 @@ import WithLongPolling from '../core/WithLongPolling';
 import {
   requestFetchOne,
   requestSendReview,
-} from '../actions';
+} from './actions';
 
 
 const styles = theme => ({
@@ -153,7 +153,7 @@ class RequestDetails extends Component {
       <Paper className={ classes.root }>
         <Breadcrumb style={{ paddingTop: '10px' }}>
           <Breadcrumb.Item>
-            <Link to='/'>Request</Link>
+            <Link to='/'>Performance</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>View & Edit</Breadcrumb.Item>
         </Breadcrumb>
