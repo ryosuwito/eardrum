@@ -107,12 +107,12 @@ class RequestList extends Component {
 
   RowDetail = ({ row }) => {
     return (
-      <React.Fragment>
+      <div style={{ textAlign: 'end' }}>
         <Button color='primary' to={ `/performance/${row.id}/details`}
           component={ Link } variant='outlined'>View</Button>{' '}
         <Button color='primary' to={ `/performance/${row.id}/details`}
           component={ Link } variant='outlined' disabled={ row.status === 'Closed' }>Edit</Button>
-      </React.Fragment>)
+      </div>)
   }
 
   render() {
