@@ -108,33 +108,6 @@ export const signOut = () => {
 }
 /** END AUTHENTICATION ACTIONS */
 
-
-/** START REQUEST ACTIONS */
-export const requestFetchAll = () => {
-  return callAPI(
-    axios.get(urls.REQUEST_FETCH_ALL),
-    ActionTypes.REQUEST_FETCH_ALL,
-  )
-}
-
-export const requestFetchOne = (id) => {
-  return callAPI(
-    axios.get(urls.REQUEST_FETCH_ONE(id)),
-    ActionTypes.REQUEST_FETCH_ONE,
-  )
-}
-
-export const requestSendReview = (id, review) => {
-  return callAPI(
-    axios.patch(urls.REQUEST_SEND_REVIEW(id), { review }),
-    ActionTypes.REQUEST_FETCH_ONE,
-    API_MESSAGES.REQUEST_SEND_REVIEW,
-    API_MESSAGES.REQUEST_SEND_REVIEW_ERROR,
-  )
-}
-/** END REQUEST ACTIONS */
-
-
 /** START CONFIG ACTIONS */
 export const configFetchGradeOptions = () => {
   return callAPI(

@@ -22,10 +22,10 @@ import {
   IntegratedFiltering,
   IntegratedSorting,
 } from '@devexpress/dx-react-grid';
-import { 
+import {
   requestFetchAll,
   requestSendReview,
-} from '../actions';
+} from './actions';
 import WithLongPolling from '../core/WithLongPolling';
 
 
@@ -107,12 +107,12 @@ class RequestList extends Component {
 
   RowDetail = ({ row }) => {
     return (
-      <React.Fragment>
-        <Button color='primary' to={ `/requests/${row.id}/details`}
+      <div style={{ textAlign: 'end' }}>
+        <Button color='primary' to={ `/performance/${row.id}/details`}
           component={ Link } variant='outlined'>View</Button>{' '}
-        <Button color='primary' to={ `/requests/${row.id}/details`}
+        <Button color='primary' to={ `/performance/${row.id}/details`}
           component={ Link } variant='outlined' disabled={ row.status === 'Closed' }>Edit</Button>
-      </React.Fragment>)
+      </div>)
   }
 
   render() {

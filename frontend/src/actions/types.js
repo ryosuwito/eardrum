@@ -27,14 +27,6 @@ const ActionTypes = {
   BUCKET_FETCH_ONE: 'bucket_fetch_one',
   BUCKET_FETCH_ONE_ERROR: 'bucket_fetch_one_error',
 
-  // REQUEST
-  REQUEST_FETCH_ALL: 'request_fetch_all',
-  REQUEST_FETCH_ALL_ERROR: 'request_fetch_all_error',
-  REQUEST_FETCH_ONE: 'request_fetch_one',
-  REQUEST_FETCH_ONE_ERROR: 'request_fetch_one_error',
-  REQUEST_SEND_REVIEW: 'request_send_review',
-  REQUEST_SEND_REVIEW_ERROR: 'request_send_review_error',
-
   // CONFIG
   CONFIG_FETCH_GRADE_OPTIONS: 'config_fetch_grade_options',
   CONFIG_FETCH_GRADE_OPTIONS_ERROR: 'config_fetch_grade_options_error',

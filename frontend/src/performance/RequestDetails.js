@@ -23,7 +23,7 @@ import WithLongPolling from '../core/WithLongPolling';
 import {
   requestFetchOne,
   requestSendReview,
-} from '../actions';
+} from './actions';
 
 
 const styles = theme => ({
@@ -81,8 +81,9 @@ const styles = theme => ({
   reviewFormStyle: {
     width: '40%',
   },
-  button: {
-    marginRight: theme.spacing.unit,
+  buttonGroup: {
+    display: 'flex',
+    justifyContent: 'space-between',
   },
 });
 
@@ -153,7 +154,7 @@ class RequestDetails extends Component {
       <Paper className={ classes.root }>
         <Breadcrumb style={{ paddingTop: '10px' }}>
           <Breadcrumb.Item>
-            <Link to='/'>Request</Link>
+            <Link to='/'>Performance</Link>
           </Breadcrumb.Item>
           <Breadcrumb.Item>View & Edit</Breadcrumb.Item>
         </Breadcrumb>
@@ -233,8 +234,10 @@ class RequestDetails extends Component {
               <Divider variant="fullWidth" />
           </div>
         ))}
-        <Button onClick={ this.onReviewSubmit } color='primary' variant='contained' className={ classes.button }>Submit</Button>
-        <Button to='/' component={ Link } color='primary' variant='outlined' className={ classes.button }>Back</Button>
+        <div className={classes.buttonGroup}>
+          <Button to='/' component={ Link } color='primary' variant='outlined' >Back</Button>
+          <Button onClick={ this.onReviewSubmit } color='primary' variant='contained'>Submit</Button>
+        </div>
       </Paper>
     )
   }

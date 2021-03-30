@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux';
 
 import auth from '../reducers/auth';
-import requests from '../reducers/requests';
-import request from '../reducers/request';
+import requests from '../performance/reducers/requests';
+import request from '../performance/reducers/request';
 import gradeOptions from '../reducers/gradeOptions';
 import notifications from '../reducers/notifications';
 import okrs from '../okr/reducers/okrs';

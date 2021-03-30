@@ -54,13 +54,17 @@ class OKRList extends Component {
       return (
         <React.Fragment>
           <Typography component='div' dangerouslySetInnerHTML={{__html: row.html_content}}/>
-          <Button color='primary' to={ `/okrs/${row.id}`}
+          <div style={{ textAlign: 'end', marginBottom: '10px'}}>
+            <Button color='primary' to={ `/okrs/${row.id}`}
             component={ Link } variant='outlined'>View and Edit</Button>{' '}
+          </div>
         </React.Fragment>)
     }
     return (
       <div style={{marginTop: '20px'}}>
-      <Button to='/okrs/new' color="primary" variant="contained" component={ Link }>New</Button>
+      <div style={{ textAlign: 'end', marginBottom: '10px'}}>
+        <Button to='/okrs/new' color="primary" variant="contained" component={ Link }>New</Button>
+      </div>
       <Paper>
         <Grid
           rows={ this.props.okrs }
