@@ -331,9 +331,11 @@ class OKRDetail extends Component {
           </Grid>
         </div>
         <Divider variant="fullWidth" />
-        <Button onClick={ this.onSaveForm } color='primary' variant='contained' className={ classes.button }>Save</Button>
-        <Button to='/okrs' component={ Link } color='primary' variant='outlined' className={ classes.button }>Cancel & Back</Button>
-        {!this.props.new && (<Button onClick={ this.onDeleteOKR } variant='contained' color='secondary'>Delete</Button>)}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+          <Button onClick={ this.onSaveForm } color='primary' variant='contained' className={ classes.button }>Save</Button>
+          <Button to='/okrs' component={ Link } color='primary' variant='outlined' className={ classes.button }>Cancel & Back</Button>
+          {!this.props.new && (<Button onClick={ this.onDeleteOKR } variant='contained' color='secondary'>Delete</Button>)}
+        </div>
       </Paper>
     )
   }
