@@ -3,7 +3,7 @@ from rest_framework.permissions import (IsAuthenticated, IsAdminUser)
 
 from .serializers import (OKRSerializer, LightOKRSerializer)
 from .models import OKR
-
+from .permissions import IsApplicationAdminUser
 # Create your views here.
 
 
@@ -22,7 +22,7 @@ class OKRViewset(viewsets.GenericViewSet,
     def get_queryset(self):
         """
         """
-        if IsAdminUser.has_permission(None, self.request, self):
+        if IsApplicationAdminUser.has_permission(None, self.request, self):
             return self.queryset.all()
         else:
             return self.request.user.okr_set.all()
