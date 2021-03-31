@@ -1,7 +1,5 @@
 # Dockerfile for deployment
-FROM python:3.6-slim
-
-RUN apt-get update && apt-get install -y nodejs npm
+FROM node:10-buster
 
 RUN mkdir -p /usr/src/app
 

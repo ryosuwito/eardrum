@@ -15,7 +15,7 @@ python-coding-style-check:
 build-docker-image:
   stage: build
   tags:
-    - docker-build
+    - image-build
   script:
     - tag=$(git describe --tags) && echo $tag
     - imagetag=docker.dtl:5000/ado/docker-images/eardrum/r48:$tag && echo $imagetag
