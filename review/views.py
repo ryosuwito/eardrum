@@ -6,12 +6,12 @@ from rest_framework import (
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from account.permissions import (
-    IsAdminUser,
     IsAuthenticated,
 )
 
 from .serializers import RequestSerializer, LightRequestSerializer
 from .models import Request
+from .permissions import IsApplicationAdminUser
 
 
 class UpdateModelMixin(object):
@@ -53,7 +53,7 @@ class RequestViewSet(mixins.ListModelMixin,
 
     def get_queryset(self):
         # Admin
-        if IsAdminUser().has_permission(self.request, self):
+        if IsApplicationAdminUser.has_permission(None, self.request, self):
             return self.queryset.all()
 
         # Reviewer

@@ -14,13 +14,15 @@ from .serializers import (
     ComplianceAdminSerializer,
 )
 
+from .permissions import IsApplicationAdminUser
+
 
 class ComplianceViewset(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     queryset = Compliance.objects.all()
 
     def get_queryset(self):
-        if permissions.IsAdminUser.has_permission(None, self.request, self):
+        if IsApplicationAdminUser.has_permission(None, self.request, self):
             return self.queryset.all()
         else:
             return self.queryset.filter(submit_by=self.request.user.username)
