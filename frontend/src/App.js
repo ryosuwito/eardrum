@@ -19,12 +19,12 @@ import {
   Switch,
 } from "react-router-dom";
 
-import FAQ from './views/FAQ';
 import SignInView from './views/SignInView';
 
 import PerformanceApp from './performance';
 import OKRApp from './okr';
 import ComplianceApp from './compliance';
+import MainApp from './main'
 
 import { signOut, getCurrentUser, accountFetchAll, } from './actions/index';
 import { configFetchGradeOptions } from './actions';
@@ -208,7 +208,7 @@ class App extends Component {
           <main className={ classes.layout }>
             <Switch>
               <SignInRoute path="/signin" component={ SignInView } />
-              <PrivateRoute exact={ true } path="/other" component={ FAQ } />
+              <PrivateRoute path="/other" component={ MainApp } />
               <PrivateRoute path="/okrs" component={OKRApp} />
               <PrivateRoute path="/compliance" component={ ComplianceApp } />
               <PrivateRoute path="/" component={ PerformanceApp } />
