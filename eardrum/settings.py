@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'auditlog',
     'okr_app',
     'compliance',
+    'main',
 ]
 
 MIDDLEWARE = [
