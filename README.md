@@ -117,6 +117,12 @@ Main app contains apps which are too small to be created as a new app. Currently
 
 In User guideline app, markdown content is saved in the database instead of hard coding in the react component for better flexibility. Admin can go to admin page and update the content if it's necessary without having to update the react component.
 
+### Leave App
+
+Minimum backend configuration: executing `python manage.py leave_init <year>`
+- Config entries object `holidays_<year>` is a list of holiday in that year with format "YYYYMMDD"
+- Config entries object `leaves_type_<year>` contains information about different types of leaves
+
 ##  What's next?
 
 * Writing test for all the applications in the project

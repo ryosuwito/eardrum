@@ -31,6 +31,7 @@ from okr_app import views as okr_viewsets
 from account import views as account_viewsets
 from compliance import api as compliance_api
 from main import api as main_api
+from leave import api as leave_api
 
 swagger_schema_view = get_swagger_view(title='Eardrum API', url='/')
 router = routers.DefaultRouter()
@@ -40,6 +41,7 @@ router.register('okrs', okr_viewsets.OKRViewset)
 router.register('account', account_viewsets.UserViewset)
 router.register('compliance', compliance_api.ComplianceViewset)
 router.register('guideline', main_api.GuidelineViewSet)
+router.register('leave', leave_api.LeaveViewSet)
 
 
 urlpatterns = [

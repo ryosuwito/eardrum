@@ -25,6 +25,7 @@ import PerformanceApp from './performance';
 import OKRApp from './okr';
 import ComplianceApp from './compliance';
 import MainApp from './main'
+import LeaveApp from './leave';
 
 import { signOut, getCurrentUser, accountFetchAll, } from './actions/index';
 import { configFetchGradeOptions } from './actions';
@@ -122,6 +123,7 @@ class App extends Component {
       [RegExp('^/okrs'), 'okrs'],
       [RegExp('^/other'), 'other'],
       [RegExp('^/compliance'), 'compliance'],
+      [RegExp('^/leave'), 'leave'],
       // [RegExp(''), 'home'],
     ]
     for(let i = 0; i < urlMap.length; i++) {
@@ -197,6 +199,7 @@ class App extends Component {
                       <LinkTab label="OKR" to="/okrs" value='okrs'/>
                       <LinkTab label="Other" to='/other' value='other'/>
                       <LinkTab label="compliance" to='/compliance' value='compliance' />
+                      <LinkTab label="Leave" to='/leave' value='leave'/>
                     </Tabs>
                     <Button to='/' color="primary" variant="outlined" component={ Link } onClick={ this.onSignOut }>Sign Out</Button>
                   </React.Fragment>
@@ -210,7 +213,8 @@ class App extends Component {
               <SignInRoute path="/signin" component={ SignInView } />
               <PrivateRoute path="/other" component={ MainApp } />
               <PrivateRoute path="/okrs" component={OKRApp} />
-              <PrivateRoute path="/compliance" component={ ComplianceApp } />
+              <PrivateRoute path="/compliance" component= { ComplianceApp } />
+              <PrivateRoute path="/leave" component={ LeaveApp } />
               <PrivateRoute path="/" component={ PerformanceApp } />
             </Switch>
           </main>
