@@ -139,7 +139,7 @@ const LeaveHoliday = ({refresh}) => {
                     </Box>}
                     <Divider/>
                     {holidays.map(item => 
-                        (<Fragment>
+                        (<Fragment key={item.id}>
                             <ListItem>
                                 <ListItemText 
                                     primary={moment(item.date).format(DATE_FORMAT.LABEL)} 

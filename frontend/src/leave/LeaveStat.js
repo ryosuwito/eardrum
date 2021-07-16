@@ -37,6 +37,7 @@ const LeaveStat = ({year, refreshCount}) => {
         type: 'string', 
         sortable: false,
         flex: 1, 
+        disableColumnMenu: true,
     })))
     
     return <Box m={2}>
@@ -47,7 +48,6 @@ const LeaveStat = ({year, refreshCount}) => {
             columns={columns}
             pagination
             pageSize={10}
-            disableColumnMenu
             disableSelectionOnClick
             loading={getStat.loading}
         />
