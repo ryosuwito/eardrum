@@ -37,3 +37,4 @@ class LeaveMask(models.Model):
     name = models.CharField(max_length=260, unique=True)
     value = models.TextField()
     summary = models.TextField()
+    capacity = models.TextField(default='{}')

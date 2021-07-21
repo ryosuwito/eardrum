@@ -33,21 +33,34 @@ const useLeaveContext = () => fetchOnStart(routes.api.context(), response => res
 const useCurrentUser = () => fetchOnStart(routes.api.currentUser(), response => response.data);
 
 
-
-const actionOnCall = (axiosConfigGetter, dataExtractor = response => response, initialData = null ) => {
+// execute() return data and error since data and error of the outer object are asynchronously updated
+const actionOnCall = (axiosConfigGetter, dataExtractor = response => response, initialData = null, defaultOnError = {}) => {
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(initialData);
+  const [data, setData] = useState(initialData);
   const [error, setError] = useState(null);
 
   const execute = async (options) => {
     setLoading(true)
-    await axios(axiosConfigGetter(options))
-      .then((response) => setResponse(dataExtractor(response)))
-      .catch((error) => setError(error))
-      .finally(() => setLoading(false));
+    let returnData = initialData;
+    let returnError = null;
+    try {
+      returnData = dataExtractor(await axios(axiosConfigGetter(options)))
+    } catch (e) {
+      let status = e.response.status;
+      if (defaultOnError[status] !== undefined) {
+        returnData = defaultOnError[status]
+      } else {
+        returnError = e
+      }
+    } finally {
+      setLoading(false);
+      setData(returnData);
+      setError(returnError);
+      return {data: returnData, error: returnError}
+    }
   };
 
-  return { execute, loading, data: response, error };
+  return { execute, loading, data, error };
 }
  
 // options: { status: string, year: int, leaveContext: obj }
@@ -103,7 +116,7 @@ const useStat = () => actionOnCall(options => ({
     ...item,
     id: item.user,
   }))
-}, [])
+}, [], {404: []})
 
 // options: { date: string }
 const useLeaveUsers = () => actionOnCall(options => ({
@@ -137,45 +150,47 @@ const usePatchHolidays = () => actionOnCall(options => ({
   data: {holidays: options.holidays.map(date => date.id).join(" ")}
 }))
 
-function useHolidays() {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
-  const [error, setError]= useState(null);
+const useHolidays = () => actionOnCall(options => ({
+  method: 'get',
+  url: routes.api.holidays(options.year),
+}), response => {
+  let unsortedHolidays = response.data.map((item) => ({
+    "id" : item,
+    "date": moment(item, DATE_FORMAT.VALUE).toDate(),
+  }))
 
-  const execute = async (options) => {
-    setLoading(true);
-    try {
-      let response = await axios({
-        method: 'get', 
-        url: routes.api.holidays(options.year),
-      })
-        
-      let unsortedHolidays = response.data.map((item) => ({
-        "id" : item,
-        "date": moment(item, DATE_FORMAT.VALUE).toDate(),
-      }))
-
-      unsortedHolidays.sort(holidayComparator);
-      setData(unsortedHolidays)
-    } catch(error) {
-      // year could be either an integer or a string representing an integer
-      if ((Number.isInteger(options.year) || !isNaN(options.year)) && error.response && error.response.status === 404) {
-        setData([]);
-      } else {
-        setError(error)
-      }
-    }
-    setLoading(false);
-  }
-
-  return { execute, loading, data, error };
-}
+  unsortedHolidays.sort(holidayComparator);
+  return unsortedHolidays;
+}, [], {404: []})
 
 // options: { year: string }
 const useRecalculateMasks = () => actionOnCall(options => ({
   method: 'post',
   url: routes.api.recalculateMasks(),
   data: { year: options.year }
+}))
+
+// options: { year: string }
+const useGetCapacities = () => actionOnCall(options => ({
+  method: 'get',
+  url: routes.api.getCapacity(options.year),
+}), response => {
+  return [Object.entries(response.data.capacities).map(([key, value]) => ({
+    id: key,
+    user: key,
+    ...value,
+  })), response.data.capacities]
+}, [[], {}], {404: [[], {}]})
+
+// options: { year: int, user: string, typ: string, limit: number }
+const usePostCapacities = () => actionOnCall(options => ({
+  method: 'post',
+  url: routes.api.updateCapacity(options.year),
+  data: {
+    user: options.user,
+    typ: options.typ,
+    limit: options.limit,
+  },
 }))
 
 export {
@@ -191,4 +206,6 @@ export {
   useLeaveUsers,
   useRecalculateMasks,
   usePatchHolidays,
+  useGetCapacities,
+  usePostCapacities,
 }

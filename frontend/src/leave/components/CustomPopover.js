@@ -1,7 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Popover from '@material-ui/core/Popover';
-import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles((theme) => ({
@@ -47,7 +46,7 @@ export default function SimplePopover({label, text}) {
                     style: {width: 1000}
                 }}
             >
-                <Typography className={classes.typography}>{text.split('\n').map((line, index) => <p key={index}>{line}</p>)}</Typography>
+                <div className={classes.typography}>{text.split('\n').map((line, index) => <div key={index}>{line}</div>)}</div>
             </Popover>
         </div>
     );

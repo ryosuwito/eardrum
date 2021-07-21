@@ -1,7 +1,6 @@
 import json
 import datetime
 import copy
-import calendar
 
 from django.contrib.auth.models import User, Group
 from django.forms.models import model_to_dict
@@ -18,13 +17,15 @@ from rest_framework import (
 from .models import (
     Leave,
     ConfigEntry,
-    LeaveMask,
 )
 from .serializers import LeaveSerializer
 
 from .helpers import (
+    get_base_mask,
     get_mask,
     accumulate_mask,
+    mask_from_holiday,
+    get_leave_types,
 )
 
 Response = response.Response
@@ -68,10 +69,31 @@ class LeaveViewSet(mixins.CreateModelMixin,
 
             return value if value in leave_statuses else None
 
+        def validate_typ(value):
+            leave_types = get_leave_types()
+            typ_list = [leave_type.get('name') for leave_type in leave_types]
+            return value if value in typ_list else None
+
+        def validate_user(value):
+            try:
+                User.objects.get(username=value)
+                return value
+            except User.DoesNotExist:
+                return None
+
+        def validate_number(value):
+            if (type(value) is int) or (type(value) is float):
+                return value
+            else:
+                return None
+
         validation_funcs = {
             'year': validate_year,
             'status': validate_status,
             'date': validate_date,
+            'typ': validate_typ,
+            'user': validate_user,
+            'number': validate_number,
         }
 
         return (fieldname, (
@@ -139,8 +161,8 @@ class LeaveViewSet(mixins.CreateModelMixin,
             instance.save(update_fields=['active'])
 
             if instance.status == 'approved':
-                mask = get_mask(user=instance.user, year=instance.year)
-                base_mask = get_mask(user='_', year=instance.year)
+                mask = get_mask(instance.user, instance.year)
+                base_mask = get_base_mask(instance.year)
                 mask.value = base_mask.value
                 mask.summary = base_mask.summary
 
@@ -156,7 +178,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
         if (instance.status != "approved"):
             return
 
-        mask = get_mask(user=instance.user, year=instance.year)
+        mask = get_mask(instance.user, instance.year)
         accumulate_mask(mask, [instance])
 
     @decorators.action(methods=['GET'], detail=False)
@@ -248,11 +270,8 @@ class LeaveViewSet(mixins.CreateModelMixin,
 
             stats = []
             for user in users:
-                try:
-                    mask = get_mask(user=user, year=year)
-                    stat = json.loads(mask.summary)
-                except LeaveMask.DoesNotExist:
-                    stat = {leave_type['name']: 0 for leave_type in leave_types}
+                mask = get_mask(user, year)
+                stat = json.loads(mask.summary)
                 stats.append({**stat, 'user': user.username})
 
             ret = {
@@ -281,7 +300,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
         leave_status['all'] = {}
 
         for user in User.objects.all():
-            mask_value = get_mask(user=user.username, year=date[:4]).value
+            mask_value = get_mask(user.username, date[:4]).value
             day_in_year = datetime.datetime.strptime(date, '%Y%m%d').timetuple().tm_yday
 
             # '-' = work, otherwise = leave
@@ -309,43 +328,23 @@ class LeaveViewSet(mixins.CreateModelMixin,
             }
             return Response(ret, status=status.HTTP_400_BAD_REQUEST)
 
-        holidays = ConfigEntry.objects.get(name="holidays_{}".format(year)).extra.split()
-        holidays_in_year = [datetime.datetime.strptime(item, '%Y%m%d').timetuple().tm_yday - 1
-                            for item in holidays]
-        first_sat = 6 - (datetime.datetime(int(year), 1, 1).weekday() + 1) % 7
-        mask = ['-'] * ((366 if calendar.isleap(int(year)) else 365) * 2)
-        for holiday in holidays_in_year:
-            mask[2 * holiday] = '0'
-            mask[2 * holiday + 1] = '0'
-        for saturday in range(first_sat, len(mask) // 2, 7):
-            mask[2 * saturday] = '0'
-            mask[2 * saturday + 1] = '0'
-        for sunday in range(first_sat + 1, len(mask) // 2, 7):
-            mask[2 * sunday] = '0'
-            mask[2 * sunday + 1] = '0'
-
-        leave_type_config = ConfigEntry.objects.get(name='leave_context')
-        leave_types = json.loads(leave_type_config.extra)['leave_types']
-        summary = json.dumps({leave_type['name']: 0 for leave_type in leave_types}, indent=2)
-
-        mask_name = '__{}'.format(year)
-        (leave_mask, _) = LeaveMask.objects.get_or_create(name=mask_name)
-        leave_mask.value = ''.join(mask)
-        leave_mask.summary = summary
-        leave_mask.save()
+        leave_mask = get_base_mask(year)
+        leave_mask.value = mask_from_holiday(year,
+                                             ConfigEntry.objects.get(name="holidays_{}".format(year)).extra.split())
+        leave_mask.save(update_fields=['value'])
 
         success = []
         failed = []
+        # Recaculate instance masks
         for user in User.objects.all():
             try:
-                mask = get_mask(user=user.username, year=year)
+                mask = get_mask(user.username, year)
                 leaves = Leave.objects.filter(user=user.username,
                                               year=year,
                                               status='approved',
                                               active=True)
 
-                # assumption: base_mask exists for every year leave request exist
-                base_mask = get_mask(user='_', year=year)
+                base_mask = get_base_mask(year)
                 mask.value = base_mask.value
                 mask.summary = base_mask.summary
                 accumulate_mask(mask, leaves)
@@ -361,3 +360,49 @@ class LeaveViewSet(mixins.CreateModelMixin,
             'failed': failed,
         }
         return Response(ret)
+
+    @decorators.action(methods=['GET'], detail=False)
+    def get_capacity(self, request, *args, **kargs):
+        year = request.query_params.get('year')
+        _, year = self.get_validated_query_value('year', year)
+
+        if year is None:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+
+        else:
+            users = User.objects.all()
+            if not self.is_admin_user():
+                users = users.filter(username=self.request.user.username)
+
+            leave_types = get_leave_types()
+            default_capacity = {leave_type['name']: leave_type['limitation'] for leave_type in leave_types}
+
+            def capacity_of(user):
+                mask = get_mask(user.username, year)
+                return {**default_capacity, **json.loads(mask.capacity)}
+
+            data = {user.username: capacity_of(user) for user in users}
+            return Response({
+                "capacities": data,
+            })
+
+    @decorators.action(methods=['POST'], detail=False, permission_classes=[permissions.IsAdminUser])
+    def update_capacity(self, request, *args, **kargs):
+        year = request.query_params.get('year')
+        _, year = self.get_validated_query_value('year', year)
+
+        if year is None:
+            return Response(None, status=status.HTTP_404_NOT_FOUND)
+        else:
+            _, user = self.get_validated_query_value('user', request.data.get('user'))
+            _, typ = self.get_validated_query_value('typ', request.data.get('typ'))
+            _, limit = self.get_validated_query_value('number', request.data.get('limit'))
+
+            if None not in [user, typ, limit]:
+                user_mask = get_mask(user, year)
+                new_capacity = json.loads(user_mask.capacity)
+                new_capacity[typ] = limit
+                user_mask.capacity = json.dumps(new_capacity, indent=2)
+                user_mask.save(update_fields=['capacity'])
+
+            return Response(status=status.HTTP_204_NO_CONTENT)

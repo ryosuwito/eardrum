@@ -47,8 +47,8 @@ const LeaveHoliday = ({refresh}) => {
 
     useEffect(() => {
         const fetchApi = async () => {
-            await fetchHolidays.execute({year: year});
-            handleError(fetchHolidays, "Error fetching holidays.");
+            let result = await fetchHolidays.execute({year: year});
+            handleError(result, "Error fetching holidays.");
         }
         fetchApi();
     }, [year])
@@ -77,11 +77,11 @@ const LeaveHoliday = ({refresh}) => {
 
     const onDoneEdit = async () => {
         if (isEditHoliday) {
-            await patchHolidays.execute({year: year, holidays: holidays});
-            handleError(patchHolidays, "Error updating holidays");
-            if (!patchHolidays.error && isEditHoliday) {
-                await recalculateMasks.execute({year: year});
-                handleError(recalculateMasks, "Error updating statistics", "Statistics updated");
+            let result = await patchHolidays.execute({year: year, holidays: holidays});
+            handleError(result, "Error updating holidays");
+            if (!result.error && isEditHoliday) {
+                let result = await recalculateMasks.execute({year: year});
+                handleError(result, "Error updating statistics", "Statistics updated");
                 refresh();
             }
         }

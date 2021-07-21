@@ -43,8 +43,8 @@ const LeaveCalendar = ({refreshCount}) => {
     useEffect(() => {
         setYear(date.getFullYear());
         const fetchApi = async () => {
-            await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD")})
-            handleError(fetchLeaveUsers, "Error fetching leave users.");
+            let result = await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD")})
+            handleError(result, "Error fetching leave users.");
         }
         fetchApi();
     }, [date, refreshCount])
@@ -54,8 +54,8 @@ const LeaveCalendar = ({refreshCount}) => {
     // all holidays of every years, or remove holiday from this calendar
     useEffect(() => {
         const fetchApi = async () => {
-            await fetchHoliday.execute({year: year});
-            handleError(fetchHoliday, "Error fetching holidays.");
+            let result = await fetchHoliday.execute({year: year});
+            handleError(result, "Error fetching holidays.");
         }
         fetchApi();
     }, [year, refreshCount])

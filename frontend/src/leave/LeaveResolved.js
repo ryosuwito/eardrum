@@ -18,8 +18,8 @@ const LeaveResolved = ({year, refreshCount, refresh}) => {
 
   useEffect(() => {
     const fetchApi = async () => {
-      await getLeaveAll.execute({year: year});
-      handleError(getLeaveAll, "Error fetching leave requests.");
+      let result = await getLeaveAll.execute({year: year});
+      handleError(result, "Error fetching resolved leave requests.");
     }
     fetchApi();
   }, [refreshCount, year])
@@ -38,8 +38,8 @@ const LeaveResolved = ({year, refreshCount, refresh}) => {
   }
 
   const onDeleteConfirm = async (id) => {
-    await deleteLeave.execute({id: id});
-    handleError(deleteLeave, "Something went wrong", "Leave request deleted");
+    let result = await deleteLeave.execute({id: id});
+    handleError(result, "Something went wrong", "Leave request deleted");
     refresh();
   }
 
@@ -80,10 +80,10 @@ const LeaveResolved = ({year, refreshCount, refresh}) => {
   const columns = [
     { field: 'user', headerName: 'User', type: 'string', flex: 1, },
     { field: 'start_date', headerName: 'Start date', type: 'string', flex: 1, filterable: false, 
-      valueGetter: (params) => [params.getValue(params.id, "startdate"), params.getValue(params.id, "half")[0]],
+      valueGetter: (params) => [params.row.startdate, params.row.half[0]],
       renderCell: renderDate, },
     { field: 'end_date', headerName: 'End date', type: 'string', flex: 1, filterable: false, 
-      valueGetter: (params) => [params.getValue(params.id, "enddate"), params.getValue(params.id, "half")[1]],
+      valueGetter: (params) => [params.row.enddate, params.row.half[1]],
       renderCell: renderDate, },
     { field: 'type', headerName: 'Type', type: 'string', flex: 1, sortable: false, renderCell: renderTypeCell },
     { field: 'note', headerName: 'Note', type: 'string', flex: 1,

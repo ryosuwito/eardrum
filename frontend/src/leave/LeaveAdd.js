@@ -6,7 +6,6 @@ import { Link, useHistory } from 'react-router-dom';
 import { LeaveContext, useAddLeave } from './hooks';
 import moment from 'moment';
 import { DATE_FORMAT } from './constants';
-import { message } from 'antd';
 import { handleError } from './helpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -47,10 +46,9 @@ const LeaveAdd = () => {
     const classes = useStyles();
 
     const onSubmit = async () => {
-        await addLeave.execute({data: application})
-        handleError(addLeave, "Error submitting leave request.")
-        if (!addLeave.error) {
-            message.success("Leave request submitted");
+        let result = await addLeave.execute({data: application})
+        handleError(result, "Error submitting leave request.", "Leave request submitted")
+        if (!result.error) {
             history.replace("/leave");
         }
     }

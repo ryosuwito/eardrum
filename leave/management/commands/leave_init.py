@@ -1,5 +1,4 @@
 import datetime
-import calendar
 import json
 from collections import namedtuple
 
@@ -7,7 +6,7 @@ from django.core.management.base import (
     BaseCommand,
 )
 
-from leave.models import ConfigEntry, LeaveMask
+from leave.models import ConfigEntry
 
 
 class Command(BaseCommand):
@@ -68,29 +67,3 @@ class Command(BaseCommand):
             holidays_config.extra = '{}0101'.format(year)
             holidays_config.save()
             self.stdout.write(self.style.SUCCESS('ConfigEntry[name={}] is created'.format(holidays_name)))
-
-        # base leave mask for a specific year
-        mask_name = '__{}'.format(year)
-        if LeaveMask.objects.filter(name=mask_name).count() == 0:
-            holidays = ConfigEntry.objects.get(name="holidays_{}".format(year)).extra.split('\r\n')
-            holidays_in_year = [datetime.datetime.strptime(item, '%Y%m%d').timetuple().tm_yday - 1
-                                for item in holidays]
-            first_sat = 6 - (datetime.datetime(year, 1, 1).weekday() + 1) % 7
-            mask = ['-'] * ((366 if calendar.isleap(year) else 365) * 2)
-            for holiday in holidays_in_year:
-                mask[2 * holiday] = '0'
-                mask[2 * holiday + 1] = '0'
-            for saturday in range(first_sat, len(mask) // 2, 7):
-                mask[2 * saturday] = '0'
-                mask[2 * saturday + 1] = '0'
-            for sunday in range(first_sat + 1, len(mask) // 2, 7):
-                mask[2 * sunday] = '0'
-                mask[2 * sunday + 1] = '0'
-
-            leave_type_config = ConfigEntry.objects.get(name='leave_context')
-            leave_types = json.loads(leave_type_config.extra)['leave_types']
-            summary = json.dumps({leave_type['name']: 0 for leave_type in leave_types}, indent=2)
-
-            leave_mask = LeaveMask(name=mask_name, value=''.join(mask), summary=summary)
-            leave_mask.save()
-            self.stdout.write(self.style.SUCCESS('LeaveMask[name={}] is created'.format(mask_name)))

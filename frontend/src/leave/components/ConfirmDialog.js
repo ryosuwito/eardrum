@@ -47,6 +47,7 @@ export default ({ content, onConfirm, open, setOpen, title, isReject = false, se
                                             setReason(event.target.value); 
                                             setNewNote(content['note'] + '\n===Rejecting reason===\n' + event.target.value);
                                         } }
+                                        value={reason}
                                         placeholder=" "
                                         variant='outlined'
                                         margin="normal"

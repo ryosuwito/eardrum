@@ -24,8 +24,8 @@ const LeavePending = ({refresh, refreshCount}) => {
 
   useEffect(() => {
     const fetchApi = async () => {
-      await getLeaveAll.execute({status: STATUS_TYPES.PENDING});
-      handleError(getLeaveAll, "Error fetching leave requests.");
+      let result = await getLeaveAll.execute({status: STATUS_TYPES.PENDING});
+      handleError(result, "Error fetching pending leave requests.");
     }
     fetchApi();
   }, [refreshCount])
@@ -59,18 +59,19 @@ const LeavePending = ({refresh, refreshCount}) => {
   }
 
   const onActionConfirm = async (id, mode) => {
+    let result;
     switch (mode) {
       case APPROVE:
-        await updateLeave.execute({id: id, data: {status: STATUS_TYPES.APPROVED}});
-        handleError(updateLeave, "Something went wrong", "Leave request approved");
+        result = await updateLeave.execute({id: id, data: {status: STATUS_TYPES.APPROVED}});
+        handleError(result, "Something went wrong", "Leave request approved");
         break;
       case REJECT:
-        await updateLeave.execute({id: id, data: {status: STATUS_TYPES.REJECTED, note: newNote}});
-        handleError(updateLeave, "Something went wrong", "Leave request rejected");
+        result = await updateLeave.execute({id: id, data: {status: STATUS_TYPES.REJECTED, note: newNote}});
+        handleError(result, "Something went wrong", "Leave request rejected");
         break;
       case DELETE:
-        await deleteLeave.execute({id: id});
-        handleError(deleteLeave, "Something went wrong", "Leave request deleted");
+        result = await deleteLeave.execute({id: id});
+        handleError(result, "Something went wrong", "Leave request deleted");
         break;
       default:
         message.error("Something went wrong");
@@ -124,10 +125,10 @@ const LeavePending = ({refresh, refreshCount}) => {
   const columns = [
     { field: 'user', headerName: 'User', type: 'string', flex: 1, },
     { field: 'start_date', headerName: 'Start date', type: 'string', flex: 1, filterable: false, 
-      valueGetter: (params) => [params.getValue(params.id, "startdate"), params.getValue(params.id, "half")[0]],
+      valueGetter: (params) => [params.row.startdate, params.row.half[0]],
       renderCell: renderDate, },
     { field: 'end_date', headerName: 'End date', type: 'string', flex: 1, filterable: false, 
-      valueGetter: (params) => [params.getValue(params.id, "enddate"), params.getValue(params.id, "half")[1]],
+      valueGetter: (params) => [params.row.enddate, params.row.half[1]],
       renderCell: renderDate, },
     { field: 'type', headerName: 'Type', type: 'string', flex: 1, sortable: false, renderCell: renderTypeCell, },
     { field: 'note', headerName: 'Note', type: 'string', flex: 1,
