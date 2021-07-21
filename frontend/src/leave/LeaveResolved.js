@@ -65,23 +65,33 @@ const LeaveResolved = ({year, refreshCount, refresh}) => {
     <Chip label={params.value} variant="outlined"/>
   )
 
+  //https://github.com/mui-org/material-ui-x/issues/898
+  const renderHeader = (params) => (
+    <div style={{wrapText: true, overflow: "hidden", lineHeight: "20px", whiteSpace: "normal"}}>{params.colDef.headerName}</div>
+  )
+
+  const renderDate = (params) => (
+    <div>
+      {params.value[0]} 
+      {(params.value[1] === "1") && <Chip label="half"/>}
+    </div>
+  )
+
   const columns = [
     { field: 'user', headerName: 'User', type: 'string', flex: 1, },
-    { field: 'startdate', headerName: 'Start date', type: 'string', flex: 1, },
-    { field: 'enddate', headerName: 'End date', type: 'string', flex: 1, },
+    { field: 'start_date', headerName: 'Start date', type: 'string', flex: 1, filterable: false, 
+      valueGetter: (params) => [params.getValue(params.id, "startdate"), params.getValue(params.id, "half")[0]],
+      renderCell: renderDate, },
+    { field: 'end_date', headerName: 'End date', type: 'string', flex: 1, filterable: false, 
+      valueGetter: (params) => [params.getValue(params.id, "enddate"), params.getValue(params.id, "half")[1]],
+      renderCell: renderDate, },
     { field: 'type', headerName: 'Type', type: 'string', flex: 1, sortable: false, renderCell: renderTypeCell },
-    { field: 'beautified_half', headerName: 'Half-day leave', type: 'string', flex: 1, 
-      description: "Whether the leave request apply for half-day leave on the first and last day, respectively", sortable: false,
-      valueGetter: (params) => params.getValue(params.id, "half").replace(/[01]/g, (m) => ({
-        '0': '[ False ]',
-        '1': '[ True ]'
-      }[m])), },
     { field: 'note', headerName: 'Note', type: 'string', flex: 1,
-    renderCell: renderNoteCell, sortable: false },
+    renderCell: renderNoteCell, sortable: false, filterable: false, },
     { field: 'status', headerName: 'Status', type: 'string', flex: 1, sortable: false, renderCell: renderStatusCell },
     { field: 'action', headerName: 'Action', disableColumnMenu: true, sortable: false, 
       renderCell: renderActionButton , width: 100, hide: !leaveContext.currentUser.is_admin, },
-  ];
+  ].map(obj => ({...obj, renderHeader: renderHeader}));;
 
   return (
     <Box m={2}>

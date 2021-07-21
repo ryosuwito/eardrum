@@ -47,7 +47,7 @@ export default function SimplePopover({label, text}) {
                     style: {width: 1000}
                 }}
             >
-                <Typography className={classes.typography}>{text.split('\n').map(line => <p>{line}</p>)}</Typography>
+                <Typography className={classes.typography}>{text.split('\n').map((line, index) => <p key={index}>{line}</p>)}</Typography>
             </Popover>
         </div>
     );

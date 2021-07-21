@@ -1,26 +1,22 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogActions, Button, DialogTitle, Table, TableRow, TableCell } from '@material-ui/core';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogActions, Button, DialogTitle, Table, TableRow, TableCell, Chip, TextField } from '@material-ui/core';
+import { STATUS_TYPES } from '../constants';
 
-export default ({ content, onConfirm, open, setOpen, title }) => {
-    let item = {}
-    Object.entries(content).forEach(([key, value]) => {
-        switch(key) {
-            case 'id':
-                break;
-            case 'half':
-                item['Half day leave on the first day'] = value[0] === 0 ? "No" : "Yes"
-                item['Half day leave on the last day'] = value[1] === 0 ? "No" : "Yes"
-                break;
-            case 'startdate':
-                item['Start date'] = value
-                break;
-            case 'enddate':
-                item['End date'] = value;
-                break;
-            default:
-                let capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-                item[capitalizedKey.replace('_', ' ')] = value;
-        }
+export default ({ content, onConfirm, open, setOpen, title, isReject = false, setNewNote}) => {
+    const [reason, setReason] = useState("")
+
+    let item = JSON.stringify(content) === "{}" ? {} : ({
+        'User': content['user'],
+        'Half day leave on the first day': content['half'][0] === "0" ? "No" : "Yes",
+        'Half day leave on the last day': content['half'][1] === "0" ? "No" : "Yes",
+        'Start date': content['startdate'],
+        'End date': content['enddate'],
+        'Type': <Chip label={content['type']} variant="outlined"/>,
+        'Status': <Chip 
+                    label={content['status']} 
+                    color={content['status'] === STATUS_TYPES.PENDING ? "default" : "primary"}
+                    variant={content['status'] === STATUS_TYPES.REJECTED ? "outlined" : "default"}/>,
+        'Note': content['note'].split('\n').map((line, index) => <div key={index}>{line}</div>),
     })
     return (
         <Dialog
@@ -31,17 +27,37 @@ export default ({ content, onConfirm, open, setOpen, title }) => {
             <DialogTitle>{title}</DialogTitle>
                 <DialogContent>
                     <Table>
-                    {/*TODO: use table*/}
-                        {Object.entries(item).map(([key, value]) => 
-                            <TableRow>
+                        <tbody> 
+                        {/*https://stackoverflow.com/questions/39915629/validatedomnesting-tr-cannot-appear-as-a-child-of-div*/}
+                            {Object.entries(item).map(([key, value]) => 
+                                <TableRow key={key}>
+                                    <TableCell>
+                                        {key}
+                                    </TableCell>
+                                    <TableCell>
+                                        {value}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {isReject && <TableRow>
+                                <TableCell>Rejection reason</TableCell>
                                 <TableCell>
-                                    {key}
+                                    <TextField
+                                        onChange={ (event) => {
+                                            setReason(event.target.value); 
+                                            setNewNote(content['note'] + '\n===Rejecting reason===\n' + event.target.value);
+                                        } }
+                                        placeholder=" "
+                                        variant='outlined'
+                                        margin="normal"
+                                        multiline
+                                        rows={5}
+                                        rowsMax={5}
+                                        fullWidth
+                                    />
                                 </TableCell>
-                                <TableCell>
-                                    {value.split('\n').map(line => <div>{line}</div>)}
-                                </TableCell>
-                            </TableRow>
-                        )}
+                            </TableRow>}
+                        </tbody>
                     </Table>
                 </DialogContent>
                 <DialogActions>

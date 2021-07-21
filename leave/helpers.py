@@ -7,6 +7,7 @@ from .models import (
     ConfigEntry,
 )
 
+
 def get_mask(**kwargs):
     user = kwargs.get("user")
     year = kwargs.get("year")
@@ -22,13 +23,13 @@ def get_mask(**kwargs):
         mask.save()
         return mask
 
+
 def accumulate_mask(mask, leave_requests):
     leave_type_config = ConfigEntry.objects.get(name='leave_context')
     leave_types = json.loads(leave_type_config.extra)['leave_types']
 
     arr = list(mask.value)
 
-    priority_to_type = {leave_type['priority']: leave_type['name'] for leave_type in leave_types}
     type_to_priority = {leave_type['name']: leave_type['priority'] for leave_type in leave_types}
 
     for leave_request in leave_requests:
@@ -39,7 +40,7 @@ def accumulate_mask(mask, leave_requests):
         end = 2 * (end - 1) + (leave_request.half[1] == "0")
 
         priority = type_to_priority[leave_request.typ]
-        
+
         # '-': work day
         # '0': holiday/weekend
         # otherwise: on leave, the representing character is the same as the leave type's priority,
@@ -49,7 +50,7 @@ def accumulate_mask(mask, leave_requests):
                 arr[i] = str(priority)
 
     count = Counter(arr)
-    summary = {leave_type['name']: count.get(str(type_to_priority[leave_type['name']]), 0) / 2 
+    summary = {leave_type['name']: count.get(str(type_to_priority[leave_type['name']]), 0) / 2
                for leave_type in leave_types}
 
     mask.value = ''.join(arr)

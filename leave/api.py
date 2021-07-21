@@ -43,12 +43,12 @@ class LeaveViewSet(mixins.CreateModelMixin,
 
     def get_validated_query_value(self, fieldname, value):
         def validate_date(value):
-            try: 
-                date = datetime.datetime.strptime(value, '%Y%m%d')
+            try:
+                datetime.datetime.strptime(value, '%Y%m%d')
                 return value
             except (ValueError, TypeError):
                 return None
-                
+
         def validate_year(value):
             try:
                 year = int(value)
@@ -74,7 +74,9 @@ class LeaveViewSet(mixins.CreateModelMixin,
             'date': validate_date,
         }
 
-        return (fieldname, validation_funcs[fieldname](value)) if validation_funcs.get(fieldname) is not None else (fieldname, None)
+        return (fieldname, (
+                    validation_funcs[fieldname](value)) if validation_funcs.get(fieldname) is not None
+                else (fieldname, None))
 
     def get_permissions(self):
         """
@@ -143,9 +145,9 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 mask.summary = base_mask.summary
 
                 accumulate_mask(mask, Leave.objects.filter(user=instance.user,
-                                                                year=instance.year,
-                                                                status='approved',
-                                                                active=True))
+                                                           year=instance.year,
+                                                           status='approved',
+                                                           active=True))
 
             return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -173,7 +175,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
         return Response(res)
 
     @decorators.action(methods=['GET', 'PATCH'], detail=False)
-    def holidays(self, request, *args, **kargs):    
+    def holidays(self, request, *args, **kargs):
         if request.method == "GET":
             year = request.query_params.get('year')
             _, year = self.get_validated_query_value('year', year)
@@ -216,7 +218,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     holidays_entry.extra = unique_holidays
                     holidays_entry.save(update_fields=["extra"])
                     return Response(status=status.HTTP_204_NO_CONTENT)
-                    
+
                 except ConfigEntry.DoesNotExist:
                     return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -226,7 +228,6 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 }
 
                 return Response(ret, status=status.HTTP_400_BAD_REQUEST)
-
 
     @decorators.action(methods=['GET'], detail=False)
     def statistics(self, request, *args, **kargs):
@@ -278,11 +279,11 @@ class LeaveViewSet(mixins.CreateModelMixin,
 
         leave_status = {group.name[len(prefix):]: {} for group in Group.objects.filter(name__startswith=prefix)}
         leave_status['all'] = {}
-        
+
         for user in User.objects.all():
             mask_value = get_mask(user=user.username, year=date[:4]).value
             day_in_year = datetime.datetime.strptime(date, '%Y%m%d').timetuple().tm_yday
-            
+
             # '-' = work, otherwise = leave
             leave = mask_value[(2 * day_in_year - 2):(2 * day_in_year)]
 
@@ -307,7 +308,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 'message': 'no year provided'
             }
             return Response(ret, status=status.HTTP_400_BAD_REQUEST)
-    
+
         holidays = ConfigEntry.objects.get(name="holidays_{}".format(year)).extra.split()
         holidays_in_year = [datetime.datetime.strptime(item, '%Y%m%d').timetuple().tm_yday - 1
                             for item in holidays]
@@ -339,17 +340,17 @@ class LeaveViewSet(mixins.CreateModelMixin,
             try:
                 mask = get_mask(user=user.username, year=year)
                 leaves = Leave.objects.filter(user=user.username,
-                                            year=year,
-                                            status='approved',
-                                            active=True)
+                                              year=year,
+                                              status='approved',
+                                              active=True)
 
                 # assumption: base_mask exists for every year leave request exist
                 base_mask = get_mask(user='_', year=year)
                 mask.value = base_mask.value
                 mask.summary = base_mask.summary
                 accumulate_mask(mask, leaves)
-                
-                success.append({'user': user.username}) 
+
+                success.append({'user': user.username})
 
             except Exception as e:
                 failed.append({'user': user.username, 'error': str(e)})

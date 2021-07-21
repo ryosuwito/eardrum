@@ -197,9 +197,9 @@ class App extends Component {
                     <Tabs value={ this.state.tabValue } onChange={ this.onChangeTab }>
                       <LinkTab label="Performance" to="/" value='performance' />
                       <LinkTab label="OKR" to="/okrs" value='okrs'/>
-                      <LinkTab label="Other" to='/other' value='other'/>
                       <LinkTab label="compliance" to='/compliance' value='compliance' />
                       <LinkTab label="Leave" to='/leave' value='leave'/>
+                      <LinkTab label="User Guides" to='/other' value='other'/>
                     </Tabs>
                     <Button to='/' color="primary" variant="outlined" component={ Link } onClick={ this.onSignOut }>Sign Out</Button>
                   </React.Fragment>

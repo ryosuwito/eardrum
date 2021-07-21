@@ -68,7 +68,7 @@ const LeaveAdd = () => {
     }, [application.startdate, application.enddate, application.half])
 
     return <Paper className={classes.root}>
-        <FormControl error={errorBox}>
+        <FormControl error={errorBox} fullWidth>
             <Grid container direction="column" spacing={3}>
                 <Grid item xs={12}>
                     <TextField

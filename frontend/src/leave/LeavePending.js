@@ -20,6 +20,7 @@ const LeavePending = ({refresh, refreshCount}) => {
   const [openRejectDialog, setOpenRejectDialog] = useState(false);
   const [dialogTitle, setDialogTitle] = useState({})
   const [dialogContent, setDialogContent] = useState({})
+  const [newNote, setNewNote] = useState("")
 
   useEffect(() => {
     const fetchApi = async () => {
@@ -64,7 +65,7 @@ const LeavePending = ({refresh, refreshCount}) => {
         handleError(updateLeave, "Something went wrong", "Leave request approved");
         break;
       case REJECT:
-        await updateLeave.execute({id: id, data: {status: STATUS_TYPES.REJECTED}});
+        await updateLeave.execute({id: id, data: {status: STATUS_TYPES.REJECTED, note: newNote}});
         handleError(updateLeave, "Something went wrong", "Leave request rejected");
         break;
       case DELETE:
@@ -87,14 +88,14 @@ const LeavePending = ({refresh, refreshCount}) => {
   const renderActionButtons = (params) => (
     <Fragment>
       {leaveContext.currentUser.is_admin 
-        && <Button color='primary' style={{margin: 5}} onClick={() => onAction(params.row, APPROVE)}>
+        && <Button color='primary' style={{margin: 5}} size="small" onClick={() => onAction(params.row, APPROVE)}>
           Approve
       </Button>}
       {leaveContext.currentUser.is_admin 
-        && <Button color='primary' style={{margin: 5}} onClick={() => onAction(params.row, REJECT)}>
+        && <Button color='primary' style={{margin: 5}} size="small" onClick={() => onAction(params.row, REJECT)}>
           Reject
       </Button>}
-      <Button color='primary' style={{margin: 5}} onClick={() => onAction(params.row, DELETE)}>
+      <Button color='primary' style={{margin: 5}} size="small" onClick={() => onAction(params.row, DELETE)}>
           Delete
       </Button>
     </Fragment>
@@ -108,30 +109,40 @@ const LeavePending = ({refresh, refreshCount}) => {
     <Chip label={params.value} variant="outlined"/>
   )
 
+  //https://github.com/mui-org/material-ui-x/issues/898
+  const renderHeader = (params) => (
+    <div style={{wrapText: true, overflow: "hidden", lineHeight: "20px", whiteSpace: "normal"}}>{params.colDef.headerName}</div>
+  )
+
+  const renderDate = (params) => (
+    <div>
+      {params.value[0]} 
+      {(params.value[1] === "1") && <Chip label="half"/>}
+    </div>
+  )
+
   const columns = [
     { field: 'user', headerName: 'User', type: 'string', flex: 1, },
-    { field: 'startdate', headerName: 'Start date', type: 'string', flex: 1, },
-    { field: 'enddate', headerName: 'End date', type: 'string', flex: 1, },
+    { field: 'start_date', headerName: 'Start date', type: 'string', flex: 1, filterable: false, 
+      valueGetter: (params) => [params.getValue(params.id, "startdate"), params.getValue(params.id, "half")[0]],
+      renderCell: renderDate, },
+    { field: 'end_date', headerName: 'End date', type: 'string', flex: 1, filterable: false, 
+      valueGetter: (params) => [params.getValue(params.id, "enddate"), params.getValue(params.id, "half")[1]],
+      renderCell: renderDate, },
     { field: 'type', headerName: 'Type', type: 'string', flex: 1, sortable: false, renderCell: renderTypeCell, },
-    { field: 'beautified_half', headerName: 'Half-day leave', type: 'string', flex: 1, 
-      description: "Whether the leave request apply for half-day leave on the first and last day, respectively", sortable: false,
-      valueGetter: (params) => params.getValue(params.id, "half").replace(/[01]/g, (m) => ({
-        '0': '[ False ]',
-        '1': '[ True ]'
-      }[m]))} ,
     { field: 'note', headerName: 'Note', type: 'string', flex: 1,
-      renderCell: renderNoteCell, sortable: false, },
+      renderCell: renderNoteCell, sortable: false, filterable: false, },
     { field: 'status', headerName: 'Status', type: 'string', flex: 1, sortable: false, 
       renderCell: renderStatusCell, },
-    { field: 'action', headerName: 'Action', disableColumnMenu: true, sortable: false, 
-      renderCell: renderActionButtons , width: (leaveContext.currentUser.is_admin) * 200 + 100},
-  ];
+    { field: 'action', headerName: 'Action', disableColumnMenu: true, 
+      renderCell: renderActionButtons , width: (leaveContext.currentUser.is_admin) * 160 + 80, }, 
+  ].map(obj => ({...obj, renderHeader: renderHeader}));
 
   return (
     <Box m={2}>
         <Typography variant="h5" gutterBottom>Pending requests</Typography>
         <DataGrid
-            autoHeight 
+            autoHeight
             rows={getLeaveAll.data} 
             columns={columns}
             pagination
@@ -152,6 +163,8 @@ const LeavePending = ({refresh, refreshCount}) => {
           setOpen={setOpenRejectDialog}
           content={dialogContent}
           title={dialogTitle}
+          isReject
+          setNewNote = {setNewNote}
         /> 
         <ConfirmDialog 
           onConfirm={() => onActionConfirm(leaveId, DELETE)} 
