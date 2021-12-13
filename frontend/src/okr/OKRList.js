@@ -54,6 +54,10 @@ class OKRList extends Component {
       return (
         <React.Fragment>
           <Typography component='div' dangerouslySetInnerHTML={{__html: row.html_content}}/>
+          { row.files && 
+            <div>{row.files.map(function(object, i){
+              return <a href={object.file} target="_blank" ><div>{object.name}</div></a>;})
+            }</div>}
           <div style={{ textAlign: 'end', marginBottom: '10px'}}>
             <Button color='primary' to={ `/okrs/${row.id}`}
             component={ Link } variant='outlined'>View and Edit</Button>{' '}

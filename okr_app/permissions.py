@@ -14,3 +14,8 @@ class IsApplicationAdminUser(BasePermission):
             return True
 
         return False
+
+
+class IsOKROwner(BasePermission):
+    def has_object_permission(self, request, view, okr):
+        return okr.issuer.id == request.user.id

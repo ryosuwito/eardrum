@@ -176,7 +176,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = '/usr/src/static'
-MEDIA_ROOT = '/usr/src/uploads'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = get_config_of('MEDIA_ROOT', '/usr/src/uploads')
 
 STATICFILES_DIRS_DEFAULT = (
     # We do this so that django's collectstatic copies or our bundles to the

@@ -1,9 +1,12 @@
+from django.shortcuts import get_object_or_404
+
 from rest_framework import (viewsets, mixins)
 from rest_framework.permissions import (IsAuthenticated, IsAdminUser)
+from rest_framework.exceptions import PermissionDenied
 
-from .serializers import (OKRSerializer, LightOKRSerializer)
-from .models import OKR
-from .permissions import IsApplicationAdminUser
+from .serializers import (OKRSerializer, OKRFileSerializer, LightOKRSerializer)
+from .models import OKR, OKRFile
+from .permissions import IsApplicationAdminUser, IsOKROwner
 # Create your views here.
 
 
@@ -42,3 +45,38 @@ class OKRViewset(viewsets.GenericViewSet,
             if request.data.get('issuer', None):
                 del request.data['issuer']
         return super().update(request, *args, **kwargs)
+
+
+class OKRFileViewset(viewsets.GenericViewSet,
+                     mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.ListModelMixin):
+    """
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = OKRFileSerializer
+    queryset = OKRFile.objects.all()
+
+    def check_okr_permission(self, okr):
+        return (IsApplicationAdminUser().has_permission(self.request, self) or
+                IsOKROwner().has_object_permission(self.request, None, okr))
+
+    def get_queryset(self):
+        okr = None
+        if self.request.GET.get("okr", None):
+            okr = get_object_or_404(OKR, pk=self.request.GET.get("okr", None))
+        elif self.kwargs.get("pk", None):
+            okr = get_object_or_404(OKR, files=self.kwargs['pk'])
+
+        if okr and self.check_okr_permission(okr):
+            return self.queryset.filter(okr_id=okr.id)
+
+        return self.queryset.none()
+
+    def create(self, request, *args, **kwargs):
+        okr = get_object_or_404(OKR, pk=request.data['okr'])
+        if okr and self.check_okr_permission(okr):
+            return super().create(request, *args, **kwargs)
+        else:
+            raise PermissionDenied({"error": "Not OKR owner."})

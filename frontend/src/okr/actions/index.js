@@ -34,3 +34,16 @@ export const onCreateOKR = async (okr) => {
 export const onDeleteOKR = async (id) => {
   return callAPI(await axios.delete(url.OKR_DETAIL_URL(id)), null, API_MESSAGES.ON_DELETE_OKR);
 };
+
+export const onCreateOKRFile = async (okrFile, okr_id) => {
+  const formData = new FormData();
+  formData.append('file',okrFile)
+  formData.append('okr',okr_id)
+
+  return callAPI(
+    await axios.post(url.OKR_FILE_DETAIL_URL(), formData),
+    ActionTypes.OKR_FILE_FETCH_ONE,
+    API_MESSAGES.ON_CREATE_FILE,
+    API_MESSAGES.ON_CREATE_FILE_ERROR
+  );
+};

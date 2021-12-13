@@ -20,6 +20,8 @@ from django.urls import (
 )
 from django.conf.urls import url
 from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
 
 from rest_framework_jwt import views as jwt_views
 from rest_framework_swagger.views import get_swagger_view
@@ -33,18 +35,20 @@ from compliance import api as compliance_api
 from main import api as main_api
 from leave import api as leave_api
 
+
 swagger_schema_view = get_swagger_view(title='Eardrum API', url='/')
 router = routers.DefaultRouter()
 router.register('requests', review_viewsets.RequestViewSet)
 router.register('configs', config_viewsets.ConfigViewset)
 router.register('okrs', okr_viewsets.OKRViewset)
+router.register('okrfiles', okr_viewsets.OKRFileViewset)
 router.register('account', account_viewsets.UserViewset)
 router.register('compliance', compliance_api.ComplianceViewset)
 router.register('guideline', main_api.GuidelineViewSet)
 router.register('leave', leave_api.LeaveViewSet)
 
 
-urlpatterns = [
+urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     url(r'^markdownx/', include('markdownx.urls')),

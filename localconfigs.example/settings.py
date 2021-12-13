@@ -28,7 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #
 # STATIC_ROOT = os.path.join(BASE_DIR, 'assets/static/')
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'assets/media/')
-#
+# MEDIA_URL = "/media/"
 #
 # STATICFILES_DIRS = (
 #     # We do this so that django's collectstatic copies or our bundles to the

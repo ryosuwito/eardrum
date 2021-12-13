@@ -1,6 +1,5 @@
-const UserURL = (action = '') => (id = '') => (
-  id? (action? `/api/account/${id}/${action}/`:`/api/account/${id}/`):'/api/account/'
-)
+const UserURL = (action = '') => (id = '') =>
+  id? (action? `/api/account/${id}/${action}/`:`/api/account/${id}/`): (action? `/api/account/${action}/`:`/api/account/`)
 
 const ConfigURL = (action) => `/api/configs/${action}/`;
 
