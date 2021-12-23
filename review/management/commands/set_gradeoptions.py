@@ -56,7 +56,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.WARNING('Start setting default grade options'))
 
         try:
-            gradeOptions = get_grade_options(Entry.objects.get(name='grade_options'))
+            gradeOptions = get_grade_options(Entry.objects.get(name='grade_options').value)
         except Entry.DoesNotExist:
             self.stdout.write(self.style.ERROR('grade_options does not exist'))
             return
