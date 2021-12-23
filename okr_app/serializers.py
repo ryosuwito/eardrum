@@ -30,7 +30,10 @@ class LightOKRSerializer(serializers.ModelSerializer):
     html_content = serializers.SerializerMethodField()
 
     def get_html_content(self, obj):
-        return utils.markdownify(obj.content)
+        if obj.content:
+            return utils.markdownify(obj.content)
+        else:
+            return None
 
 
 class OKRSerializer(serializers.ModelSerializer):

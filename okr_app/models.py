@@ -13,7 +13,7 @@ class OKR(models.Model):
     quarter = models.CharField(max_length=10)
     year = models.CharField(max_length=10)
 
-    content = models.TextField(blank='')
+    content = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

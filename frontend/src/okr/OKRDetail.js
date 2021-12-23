@@ -180,17 +180,11 @@ OKRFileDeleteDialog.propTypes = {
 class OKRDetail extends Component {
   constructor(props) {
     super(props);
-    const defaultOKR = {};
-    if (this.props.new) {
-      const now = new Date();
-      defaultOKR.quarter = Math.floor(now.getMonth() / 3) + 1;
-      defaultOKR.year = now.getFullYear();
-    }
     this.state = {
       readOnly: false, // TODO Boolean(props['readOnly']),
       okrContentState: 'write',
       loadingPreview: false,
-      okr: defaultOKR,
+      okr: props.okr,
       dialogOpen: false,
       dialogOKRFileOpen: false,
       loaded: false,
@@ -244,15 +238,7 @@ class OKRDetail extends Component {
   }
   onSaveForm = async (event) => {
     try {
-      if (this.state.okr !== null && this.state.okr !== undefined && Object.keys(this.state.okr).length > 0) {
-        if (!this.props.new || this.props.okr.id) {
-          const isSucceeded = await (await onSaveOKR(this.props.match.params.okrId, this.state.okr))(this.props.dispatch);
-        } else {
-          const isSucceeded = await (await onCreateOKR(this.state.okr))(this.props.dispatch);
-        }
-      } else {
-        throw Error('Empty Form! Fill in the form, please!')
-      }
+      const isSucceeded = await (await onSaveOKR(this.props.match.params.okrId, this.state.okr))(this.props.dispatch);
     } catch (err) {
       this.props.dispatch(enqueueSnackbar({
         message: err.message,
@@ -373,8 +359,22 @@ class OKRDetail extends Component {
         this.getFilelist()
         onSuccess(null, file);
       }
-      else { onError() }
+      else { 
+        this.props.dispatch(enqueueSnackbar({
+          message: file.name + " Failed to upload",
+          options: {
+            variant: 'error',
+          }
+        }))
+        onError() 
+      }
     } catch (err) {
+      this.props.dispatch(enqueueSnackbar({
+        message: file.name + " Failed to upload",
+        options: {
+          variant: 'error',
+        }
+      }))
       onError()
     }
   };
@@ -468,16 +468,7 @@ class OKRDetail extends Component {
             </React.Fragment>
           </Grid>
         </div>
-        <div>
-          <Divider variant="fullWidth" />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
-            <Button onClick={this.onSaveForm} color='primary' variant='contained' className={classes.button}>Save</Button>
-            <Button to='/okrs' component={Link} color='primary' variant='outlined' className={classes.button}>Cancel & Back</Button>
-            {this.props.okr.id && <Button onClick={this.onDeleteOKR} variant='contained' color='secondary'>Delete</Button>}
-          </div>
-        </div>
         {this.props.okr.id && <div>
-          <Divider style={{ margin: '20px 0' }} variant="fullWidth" />
           {this.state.fileToBeDeleted && (<OKRFileDeleteDialog open={this.state.dialogOKRFileOpen} onClose={this.onFileRemove} okrFile={this.state.fileToBeDeleted} />)}
           <Upload fileList={this.state.okrFiles} customRequest={this.customRequest} multiple={true} onChange={this.onFileListChange} onRemove={this.onDeleteOKRFile}>
             <InputLabel style={{ margin: '20px 0' }} >
@@ -486,6 +477,14 @@ class OKRDetail extends Component {
             <UploadButton icon={<UploadOutlined />}>Upload</UploadButton>
           </Upload>
         </div>}
+        <div>
+          <Divider variant="fullWidth"  style={{ margin: '20px 0' }}/>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
+            <Button onClick={this.onSaveForm} color='primary' variant='contained' className={classes.button}>Save</Button>
+            <Button to='/okrs' component={Link} color='primary' variant='outlined' className={classes.button}>Cancel & Back</Button>
+            {this.props.okr.id && <Button onClick={this.onDeleteOKR} variant='contained' color='secondary'>Delete</Button>}
+          </div>
+        </div>
       </Paper>
     )
   }
