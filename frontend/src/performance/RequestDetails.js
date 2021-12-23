@@ -259,7 +259,7 @@ RequestDetails.propTypes = {
 
 const mapStateToProps = (state) => {
   let gradeOptions;
-  if (state.request && state.request.review && state.request.review.grade) {
+  if (state.request && state.request.review && state.request.review.gradeoptions) {
     gradeOptions = [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.request.review.gradeoptions)]
   } else {
     gradeOptions = [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.gradeOptions)]
