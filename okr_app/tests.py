@@ -138,6 +138,6 @@ class TaskDetailAPITestCase(TestCase):
         """
         fileSample = SimpleUploadedFile("file.pdf", b"file_content", content_type="application/pdf")
         self.client.login(username='guest', password='12345')
-        self.url = '/api/okrfiles/'.format(id=self.okr_file.id)
+        self.url = '/api/okrfiles/'
         response = self.client.post(self.url, {"file": fileSample, "okr": self.okr.id}, format='multipart')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)

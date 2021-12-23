@@ -129,7 +129,7 @@ class RequestDetails extends Component {
   }
 
   onReviewSubmit = () => {
-    const reviews = {};
+    const reviews = {..._.cloneDeep(this.props.request.review), gradeoptions: this.props.gradeOptions};
     Object.keys(this.state.reviews).forEach(
       key => {
         if (this.state.reviews[key].grade !== 'NONE') {
@@ -137,6 +137,10 @@ class RequestDetails extends Component {
         }
       }
     );
+
+    console.log("log reviews");
+    console.log(reviews);
+
     this.props.dispatch(requestSendReview(this.props.request.id, reviews))
   }
 
@@ -254,9 +258,15 @@ RequestDetails.propTypes = {
 
 
 const mapStateToProps = (state) => {
+  let gradeOptions;
+  if (state.request && state.request.review && state.request.review.grade) {
+    gradeOptions = [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.request.review.gradeoptions)]
+  } else {
+    gradeOptions = [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.gradeOptions)]
+  }
   return ({
     request: {..._.cloneDeep(state.request), bucket_title: !state.request.bucket? null: state.request.bucket.title},
-    gradeOptions: [{'value': 0, 'name': 'NONE'}, ..._.cloneDeep(state.gradeOptions)],
+    gradeOptions,
   })
 }
 

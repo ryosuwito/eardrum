@@ -13,8 +13,6 @@ from .models import (
     Request,
 )
 
-from config.models import Entry
-from config import utils as config_utils
 
 Logger = logging.getLogger(__name__)
 
@@ -152,11 +150,14 @@ class RequestSerializer(serializers.ModelSerializer):
             questions = obj.bucket.questions.all()
             reviews = json.loads(obj.review)
 
-            grade_options = config_utils.get_grade_options(Entry.objects.get(name='grade_options').value)
-            grade_map = {grade['name']: grade['value'] for grade in grade_options}
+            if reviews.get('gradeoptions'):
+                grade_options = reviews.gradeoptions
+                grade_map = {grade['name']: grade['value'] for grade in grade_options}
+            else:
+                return 'no_gradeoptions'
         except Exception as err:
             Logger.warn(err)
-            return "-1/100"
+            return str(err)
 
         points = 0
         for question_id, ans in reviews.items():
@@ -228,11 +229,14 @@ class LightRequestSerializer(serializers.ModelSerializer):
             questions = obj.bucket.questions.all()
             reviews = json.loads(obj.review)
 
-            grade_options = config_utils.get_grade_options(Entry.objects.get(name='grade_options').value)
-            grade_map = {grade['name']: grade['value'] for grade in grade_options}
+            if reviews.get('gradeoptions'):
+                grade_options = reviews['gradeoptions']
+                grade_map = {grade['name']: grade['value'] for grade in grade_options}
+            else:
+                return '0.0'
         except Exception as err:
             Logger.warn(err)
-            return "-1/100"
+            return str(err)
 
         points = 0
         for question_id, ans in reviews.items():
