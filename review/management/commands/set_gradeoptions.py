@@ -64,7 +64,7 @@ class Command(BaseCommand):
         for request in Request.objects.all():
             try:
                 reviews = json.loads(request.review)
-                if reviews.get('gradeoptions') is None:
+                if reviews.get('gradeoptions') is None or len(reviews.keys()) == 1:
                     reviews['gradeoptions'] = gradeOptions
                     Request.objects.filter(pk=request.pk).update(review=json.dumps(reviews))
                     self.stdout.write(
