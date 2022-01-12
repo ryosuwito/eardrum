@@ -196,3 +196,9 @@ WEBPACK_LOADER_DEFAULT = {
 
 WEBPACK_LOADER = get_config_of('WEBPACK_LOADER', WEBPACK_LOADER_DEFAULT)
 LDAP_SERVER = getattr(localconfigs, 'LDAP_SERVER')
+EMAIL_BACKEND = get_config_of('EMAIL_BACKEND', '')
+EMAIL_HOST = get_config_of('EMAIL_HOST', '')
+EMAIL_HOST_USER = get_config_of('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = get_config_of('EMAIL_HOST_PASSWORD', '')
+EMAIL_PORT = get_config_of('EMAIL_PORT', '')
+TIME_ZONE = 'Asia/Singapore'

@@ -1,0 +1,102 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Create Batch Requests{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+<link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
+
+
+<script type="text/javascript" src="/admin/jsi18n/"></script>
+<script type="text/javascript" src="/static/admin/js/core.js"></script>
+<script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+<script type="text/javascript" src="/static/admin/js/actions.js"></script>
+<script type="text/javascript" src="/static/admin/js/urlify.js"></script>
+<script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>
+<script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>
+<script type="text/javascript" src="/static/admin/js/calendar.js"></script>
+<script type="text/javascript" src="/static/admin/js/admin/DateTimeShortcuts.js"></script>
+<script type="text/javascript" src="/static/admin/js/inlines.js"></script>
+
+<p>
+   Create requests for these selected items
+</p>  
+<form action="" method="post" class="form">
+  {% csrf_token %}
+  <fieldset class="module aligned">
+    <div class="result">
+        <table  style="width: 100%;">
+            <thead>
+                <tr>
+                    <th class="action-checkbox-column" style="width: 20px;">
+                        <input type="checkbox" onClick="toggleAllTemplates(this)" />
+                    </th>
+                    <th>
+                        Employment Status
+                    </th>
+                    <th>
+                        Reviewee
+                    </th>
+                    <th>
+                        Reviewer
+                    </th>
+                    <th>
+                        Bucket
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for template in templates %}
+                    {% for mentorship in template.mentorship.all %}
+                    <tr>
+                        <td class="action-checkbox-column">
+                            <input type="checkbox" name="selected_templates" value="{{template.pk}}/{{mentorship.pk}}"/>
+                        </td>
+                        <td>{{ mentorship.get_employment_status_display }}</td>
+                        <td>{{ mentorship.user.username }}</td>
+                        <td>{{ mentorship.get_mentors_name }}</td>
+                        <td>{{ template.bucket.title }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <input type="hidden" name="_selected_action" value="{{ pks  }}" />
+    <input type="hidden" name="action" value="create_batch" />
+    <div class="form-row">
+        <div class="fieldWrapper">
+            {{ form.close_at.errors }}
+            {{ form.close_at.label_tag }}
+            {{ form.close_at }}
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="fieldWrapper">
+            {{ form.quarter_and_year.errors }}
+            {{ form.quarter_and_year.label_tag }}
+            {{ form.quarter_and_year }}
+        </div>
+    </div>
+  </fieldset>
+  <div class="submit-row">
+    <input type="submit" name="apply" value="Submit"/>
+  </div>
+</form>
+<script language="JavaScript">
+    var isSelectedAll = false;
+    function toggleAllTemplates() {
+        let checkboxes = document.getElementsByName('selected_templates');
+        console.log(checkboxes)
+        var i;
+        for (i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].type == "checkbox") {
+                checkboxes[i].checked = !isSelectedAll;
+            }
+        }
+        isSelectedAll = !isSelectedAll;
+    }    
+</script>
+{% endblock %}

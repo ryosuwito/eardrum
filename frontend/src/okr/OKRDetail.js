@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 import { withStyles } from '@material-ui/core/styles';
+import Backdrop from '@mui/material/Backdrop';
+import CircularProgress from '@mui/material/CircularProgress';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -192,6 +194,7 @@ class OKRDetail extends Component {
       fileList: [],
       fileToBeDeleted: null,
       showInfo: true,
+      openBackdrop: false
     }
   }
   allowedFileType = ["application/pdf", "image/jpeg", "image/png"]
@@ -314,11 +317,36 @@ class OKRDetail extends Component {
     }
   };
   componentDidUpdate() {
-    console.log("this.props", this.props)
     if (this.props.okr.id && (!this.state.loaded)) {
       this.setState({ loaded: true });
       this.getFilelist()
     }
+  }
+  informMentor = async () => {
+    this.setState({openBackdrop: true})    
+    try {
+      await axios({
+        method: 'get',
+        url: url.OKR_ACTION('notify')(this.props.okr.id),
+      });
+      this.props.dispatch(enqueueSnackbar({
+        message: API_MESSAGES.ON_NOTIFY_MENTOR,
+        options: {
+          variant: 'success',
+        }
+      }))
+      this.setState({openBackdrop: false}) 
+    } catch (error) {
+      console.log(error)
+      this.props.dispatch(enqueueSnackbar({
+        message: API_MESSAGES.ON_NOTIFY_MENTOR_ERROR,
+        options: {
+          variant: 'error',
+        }
+      }))
+      this.setState({openBackdrop: false}) 
+    }
+    this.setState({openBackdrop: false}) 
   }
   getFilelist = async () => {
     console.log("this.async.props", this.props)
@@ -378,6 +406,9 @@ class OKRDetail extends Component {
       onError()
     }
   };
+  handleCloseBackdrop = () => {
+    this.setState({openBackdrop: false}) 
+  };
 
   render() {
     if (!this.props.new && this.props.okr.id != this.props.match.params.okrId) {
@@ -388,6 +419,13 @@ class OKRDetail extends Component {
 
     return (
       <Paper className={classes.root}>
+        <Backdrop
+              sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+              open={this.state.openBackdrop}
+              onClick={this.handleCloseBackdrop}
+            >
+              <CircularProgress color="inherit" />
+        </Backdrop>
         <Breadcrumb style={{ marginBottom: '24px', paddingTop: '10px' }}>
           <Breadcrumb.Item>
             <Link to='/okrs'>OKR</Link>
@@ -481,6 +519,7 @@ class OKRDetail extends Component {
           <Divider variant="fullWidth"  style={{ margin: '20px 0' }}/>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px' }}>
             <Button onClick={this.onSaveForm} color='primary' variant='contained' className={classes.button}>Save</Button>
+            <Button onClick={this.informMentor} color='primary' variant='outlined' className={classes.button}>Inform Mentor</Button>
             <Button to='/okrs' component={Link} color='primary' variant='outlined' className={classes.button}>Cancel & Back</Button>
             {this.props.okr.id && <Button onClick={this.onDeleteOKR} variant='contained' color='secondary'>Delete</Button>}
           </div>

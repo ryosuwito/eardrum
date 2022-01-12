@@ -35,7 +35,6 @@ from compliance import api as compliance_api
 from main import api as main_api
 from leave import api as leave_api
 
-
 swagger_schema_view = get_swagger_view(title='Eardrum API', url='/')
 router = routers.DefaultRouter()
 router.register('requests', review_viewsets.RequestViewSet)

@@ -8,6 +8,7 @@ const OKRFILEDELETEURL = (id = '') =>
   `/api/okrfiles/${id}/`;
 
 export default {
+  OKR_ACTION: OKRURL,
   OKR_FETCH_ALL: OKRURL()(),
   OKR_FETCH_ONE: OKRURL(),
   OKR_DETAIL_URL: OKRURL(),

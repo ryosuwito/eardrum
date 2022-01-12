@@ -6,9 +6,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from .settings import app_settings as review_settings
-
+from account.models import Mentorship
 # Create your models here.
-
+from auditlog.registry import auditlog
 
 Logger = logging.getLogger(__name__)
 
@@ -99,3 +99,22 @@ class Request(models.Model):
 
     def __str__(self):
         return "(%s) %s - %s" % (self.id, self.reviewer.username, self.reviewee.username)
+
+
+class TemplateRequest(models.Model):
+    title = models.CharField(max_length=255, blank=False, null=False, default="")
+    mentorship = models.ManyToManyField(Mentorship, related_name="template_requests")
+
+    bucket = models.ForeignKey(Bucket, models.CASCADE)
+
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return 'Mentorship : {} - Bucket: {}'.format(
+            ','.join([m.user.username for m in self.mentorship.all()]),
+            self.bucket.title
+            )
+
+
+auditlog.register(TemplateRequest, exclude_fields=['created_at', 'updated_at'])

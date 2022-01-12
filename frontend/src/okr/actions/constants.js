@@ -9,5 +9,8 @@ export const API_MESSAGES = {
   ON_CREATE_FILE: "You've created file successfully!",
   ON_CREATE_FILE_ERROR: "Error",
   ON_DELETE_FILE: "You've deleted file successfully!",
-  ON_DELETE_FILE_ERROR: "Error deleting file",
+  ON_DELETE_FILE_ERROR: "Error deleting file",  
+  
+  ON_NOTIFY_MENTOR: "You've notified mentor successfully!",
+  ON_NOTIFY_MENTOR_ERROR: "Error notifying mentor",
 }
