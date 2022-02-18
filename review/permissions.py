@@ -14,3 +14,8 @@ class IsApplicationAdminUser(BasePermission):
             return True
 
         return False
+
+
+class IsReviewer(BasePermission):
+    def has_object_permission(self, request, view, req):
+        return req.reviewer.id == request.user.id

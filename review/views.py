@@ -1,17 +1,20 @@
+from django.http import Http404
 from rest_framework import (
     viewsets,
     mixins,
     # status,
 )
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from account.permissions import (
     IsAuthenticated,
 )
 
-from .serializers import RequestSerializer, LightRequestSerializer
 from .models import Request
-from .permissions import IsApplicationAdminUser
+from .permissions import IsApplicationAdminUser, IsReviewer
+from .serializers import RequestSerializer, LightRequestSerializer
+from .utils import generate_context, get_pdf_response
 
 
 class UpdateModelMixin(object):
@@ -64,3 +67,10 @@ class RequestViewSet(mixins.ListModelMixin,
             return LightRequestSerializer
         else:
             return self.serializer_class
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated, IsReviewer])
+    def get_pdf(self, request, *args, **kwargs):
+        context = generate_context(self.get_object())
+        if context:
+            return get_pdf_response(request, 'pdf/review_detail.html', context["request"]["title"], context)
+        raise Http404

@@ -26,8 +26,12 @@ import {
   requestFetchAll,
   requestSendReview,
 } from './actions';
+import url from './actions/urls';
 import WithLongPolling from '../core/WithLongPolling';
 
+
+import axios from 'axios';
+import { enqueueSnackbar } from '../actions';
 
 const DatetimeFormatter = ({ value }) => {
   const time = new Date(value);
@@ -96,6 +100,37 @@ const sortingStateColumnExtensions = [
 
 
 class RequestList extends Component {
+  getPdf = async (request_id) => {  
+    try {
+      await axios({
+        responseType: 'blob',
+        method: 'get',
+        url: url.REQUEST_ACTION('get_pdf')(request_id),
+      }).then((response) => {
+          let filename = response.headers["content-disposition"].split("; filename=")[1]
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', filename);
+          document.body.appendChild(link);
+          link.click();      
+          this.props.dispatch(enqueueSnackbar({
+            message: "Successfully Downloading PDF",
+            options: {
+              variant: 'success',
+            }
+          }))
+      });
+    } catch (error) {
+      console.log(error)
+      this.props.dispatch(enqueueSnackbar({
+        message: "Error Downloading PDF",
+        options: {
+          variant: 'error',
+        }
+      }))
+    }
+  }
   onRate = reqId => (qId, value) => {
     this.props.requests.forEach(req => {
       if (req.id === reqId) {
@@ -108,6 +143,8 @@ class RequestList extends Component {
   RowDetail = ({ row }) => {
     return (
       <div style={{ textAlign: 'end' }}>
+        <Button color='primary' onClick={()=>{this.getPdf(row.id)}}
+          component={ Link } variant='outlined'>Download</Button>
         <Button color='primary' to={ `/performance/${row.id}/details`}
           component={ Link } variant='outlined'>View</Button>{' '}
         <Button color='primary' to={ `/performance/${row.id}/details`}
