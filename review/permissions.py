@@ -1,3 +1,4 @@
+from ast import Or
 from rest_framework.permissions import BasePermission
 
 
@@ -18,4 +19,5 @@ class IsApplicationAdminUser(BasePermission):
 
 class IsReviewer(BasePermission):
     def has_object_permission(self, request, view, req):
-        return req.reviewer.id == request.user.id
+        admin_group_name = IsApplicationAdminUser.ADMIN_GROUP_NAME
+        return req.reviewer.id == request.user.id or request.user.groups.filter(name=admin_group_name).exists()
