@@ -51,19 +51,25 @@
         <!-- {{request.reviews}} -->
         {% for review in request.ordered_review %}
             <div class='details'>
-                <p>Title : {{review.question.title}}<br/>
-                Point : {{review.point}} <br/>
-                Grade : {{review.review.grade}} <br/>
-                Content :</p>
+                {% if review.question.typ != 'title' %}
+                    <p><strong>{{review.question.title}}</strong><br/>
+                    Point : {{review.point}} <br/>
+                    Grade : {{review.review.grade}} <br/>
+                    Content :</p>
+                {% else %}
+                    <p><strong>{{review.question.title}}</strong><p/>
+                {% endif %}
                 {% autoescape off %}
                     {{review.question.html_content | markdownify }}
                 {% endautoescape %}
+                {% if review.question.typ != 'title' %}
                 <br/>
-                <p>Comment:</p>
-                {% autoescape off %}
-                    {{review.review.comment | markdownify }}
-                {% endautoescape %}
-                <hr class='hrItem' />
+                    <p>Comment:</p>
+                    {% autoescape off %}
+                        {{review.review.comment | markdownify }}
+                    {% endautoescape %}
+                    <hr class='hrItem' />
+                {% endif %}
             </div>
         {% endfor %}
     </div>
