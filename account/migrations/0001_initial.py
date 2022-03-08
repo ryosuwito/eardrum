@@ -18,9 +18,12 @@ class Migration(migrations.Migration):
             name='Mentorship',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('employment_status', models.CharField(choices=[('INTERN', 'Intern'), ('EMPLOYEE', 'Employee')], default='EMPLOYEE', max_length=8)),
-                ('mentor', models.ManyToManyField(blank=True, related_name='mentees', related_query_name='mentees', to=settings.AUTH_USER_MODEL)),
-                ('user', models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='mentorship', to=settings.AUTH_USER_MODEL)),
+                ('employment_status', models.CharField(choices=[('INTERN', 'Intern'), ('EMPLOYEE', 'Employee')],
+                                                       default='EMPLOYEE', max_length=8)),
+                ('mentor', models.ManyToManyField(blank=True, related_name='mentees',
+                                                  related_query_name='mentees', to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE,
+                                              related_name='mentorship', to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

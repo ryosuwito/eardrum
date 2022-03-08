@@ -1,4 +1,3 @@
-from ast import Or
 from rest_framework.permissions import BasePermission
 
 
