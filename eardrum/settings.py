@@ -200,6 +200,6 @@ WEBPACK_LOADER = get_config_of('WEBPACK_LOADER', WEBPACK_LOADER_DEFAULT)
 LDAP_SERVER = getattr(localconfigs, 'LDAP_SERVER')
 
 # EMAIL
-DEFAULT_FROM_EMAIL = get_config_of('DEFAULT_FROM_EMAIL', 'Data Manager <noreply_data-manager@dytechlab.com>')
+DEFAULT_FROM_EMAIL = get_config_of('DEFAULT_FROM_EMAIL', 'Eardrum <noreply_eardrum@dytechlab.com>')
 EMAIL_BACKEND = 'mailer.backend.DbBackend'
 TIME_ZONE = 'Asia/Singapore'
