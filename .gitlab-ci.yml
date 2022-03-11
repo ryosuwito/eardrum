@@ -19,7 +19,6 @@ build-docker-image:
   script:
     - tag=$(git describe --tags) && echo $tag
     - imagetag=docker.dtl:5000/ado/docker-images/eardrum/r48:$tag && echo $imagetag
-    - docker build -t eardrum-frontend -f frontend.Dockerfile .
-    - docker build -t $imagetag -f eardrum.Dockerfile .
+    - docker build -t $imagetag .
     - docker push $imagetag
   when: manual

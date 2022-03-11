@@ -1,3 +1,4 @@
+/etc/init.d/postfix start
 # Runserver
 python manage.py migrate 
 # mkdir -p run

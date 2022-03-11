@@ -67,8 +67,8 @@ class OKRViewset(viewsets.GenericViewSet,
             message = subject + ' for "' + okr.quarter + "_" + okr.year + '". Please check it via ' + action_url
             context = Context({"username": username, "okr": okr, "action_url": action_url})
             html_message = Template('email_draft/notify_okr.html')
-            email_from = settings.EMAIL_HOST_USER
-            send_mail(subject, message=message, from_email=email_from,
+            from_email = settings.DEFAULT_FROM_EMAIL
+            send_mail(subject, message=message, from_email=from_email,
                       recipient_list=recipient_list, html_message=html_message.render(context=context))
             return Response({"success": True})
         else:
