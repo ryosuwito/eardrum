@@ -202,4 +202,5 @@ LDAP_SERVER = getattr(localconfigs, 'LDAP_SERVER')
 # EMAIL
 DEFAULT_FROM_EMAIL = get_config_of('DEFAULT_FROM_EMAIL', 'Eardrum <noreply_eardrum@dytechlab.com>')
 EMAIL_BACKEND = 'mailer.backend.DbBackend'
+DEFAULT_EMAIL_DOMAIN = 'dytechlab.com'
 TIME_ZONE = 'Asia/Singapore'
