@@ -61,7 +61,7 @@ class OKRViewset(viewsets.GenericViewSet,
         okr = self.get_object()
         if okr and hasattr(self.request.user, 'mentorship'):
             recipient_list = ["{}@{}".format(x, settings.DEFAULT_EMAIL_DOMAIN) for x in
-                              self.request.user.mentorship.mentor.values_list('email', flat=True)]
+                              self.request.user.mentorship.mentor.values_list('username', flat=True)]
             username = self.request.user.username
             subject = "{}_Q{}_{}_okr".format(username, okr.quarter, okr.year)
             context = {"username": username, "okr": okr}
