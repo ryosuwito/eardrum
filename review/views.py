@@ -68,7 +68,7 @@ class RequestViewSet(mixins.ListModelMixin,
         else:
             return self.serializer_class
 
-    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated, IsReviewer|IsApplicationAdminUser,])
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated, IsReviewer | IsApplicationAdminUser, ])
     def get_pdf(self, request, *args, **kwargs):
         context = generate_context(self.get_object())
         if context:
