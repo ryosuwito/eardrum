@@ -26,6 +26,9 @@ def notify_mentor(request, okr, settings):
                 recipient_list,
                 cc=["{}@{}".format(okr.issuer.username, settings.DEFAULT_EMAIL_DOMAIN)],
             )
+            if okr.files.all():
+                for f in okr.files.all():
+                    message.attach_file(f.file.path)
             message.attach_alternative(rendered, "text/html")
             message.send()
         except Exception:
