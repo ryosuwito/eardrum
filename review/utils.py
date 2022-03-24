@@ -37,9 +37,10 @@ def generate_context(request_object):
     ordered_review = []
     quarter = request_object.quarter_and_year.split(",")
     for question in ordered_questions:
+        print(question)
         ordered_review.append(
             {
-                "point": bucket_extra[str(question["id"])],
+                "point": bucket_extra[str(question["id"])] if question["typ"] != "title" else 0,
                 "review": reviews[str(question["id"])] if str(question["id"]) in reviews else [],
                 "question": question
             }
@@ -48,8 +49,8 @@ def generate_context(request_object):
         return {
             "request": {
                 "title": "{}_{}Q{}".format(request_object.reviewee.username, quarter[1], quarter[0]),
-                "reviewee": request_object.reviewee.get_short_name(),
-                "reviewer": request_object.reviewer.get_short_name(),
+                "reviewee": request_object.reviewee.username,
+                "reviewer": request_object.reviewer.username,
                 "quarter_and_year": request_object.quarter_and_year,
                 "ordered_review": ordered_review,
             }
