@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
 from django.shortcuts import get_object_or_404
-from django.template.loader import render_to_string
 
 from rest_framework import (viewsets, mixins)
 from rest_framework.decorators import action
@@ -12,6 +10,7 @@ from rest_framework.response import Response
 from .serializers import (OKRSerializer, OKRFileSerializer, LightOKRSerializer)
 from .models import OKR, OKRFile
 from .permissions import IsApplicationAdminUser, IsOKROwner, IsMentor
+from .utils.emails import notify_mentor
 # Create your views here.
 
 
@@ -58,31 +57,11 @@ class OKRViewset(viewsets.GenericViewSet,
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated, IsOKROwner])
     def notify(self, request, *args, **kwargs):
-        okr = self.get_object()
-        if okr and hasattr(self.request.user, 'mentorship'):
-            recipient_list = ["{}@{}".format(x, settings.DEFAULT_EMAIL_DOMAIN) for x in
-                              self.request.user.mentorship.mentor.values_list('username', flat=True)]
-            username = self.request.user.username
-            subject = "{}_Q{}_{}_okr".format(username, okr.quarter, okr.year)
-            context = {"username": username, "okr": okr}
-            rendered = render_to_string('email_draft/notify_okr.html', context=context)
-            from_email = settings.DEFAULT_FROM_EMAIL
-            body = "Hi, {} has uploaded an OKR for Q{}_{}.".format(username, okr.quarter, okr.year)
-            message = EmailMultiAlternatives(
-                subject,
-                body,
-                from_email,
-                recipient_list,
-                cc=["{}@{}".format(self.request.user.username, settings.DEFAULT_EMAIL_DOMAIN)],
-            )
-            if okr.files.all():
-                for f in okr.files.all():
-                    message.attach_file(f.file.path)
-            message.attach_alternative(rendered, "text/html")
-            message.send()
+        is_notify_success = notify_mentor(request, self.get_object(), settings)
+        if is_notify_success:
             return Response({"success": True})
         else:
-            raise PermissionDenied({"error": "Not OKR owner."})
+            raise PermissionDenied({"error": "Failed to notify Mentor"})
 
 
 class OKRFileViewset(viewsets.GenericViewSet,

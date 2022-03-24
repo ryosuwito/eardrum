@@ -4,6 +4,16 @@
     <p>
         Hi, {{username}} has uploaded an OKR for Q{{okr.quarter}}_{{okr.year}}.
     </p>
+    {% if files %}
+        <p>
+        Attachments:
+        </p>
+        <ul>
+            {% for file in files %}
+            <li><a href={{file.url}}>{{file.name}}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </body>
 
 </html>
