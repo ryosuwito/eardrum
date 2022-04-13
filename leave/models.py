@@ -38,3 +38,14 @@ class LeaveMask(models.Model):
     value = models.TextField()
     summary = models.TextField()
     capacity = models.TextField(default='{}')
+
+class LowerCaseField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        super(LowerCaseField, self).__init__(*args, **kwargs)
+
+    def get_prep_value(self, value):
+        return str(value).lower()
+
+class Country(models.Model):
+    name = models.CharField(max_length=260)
+    country_code = LowerCaseField(max_length=10, unique=True)

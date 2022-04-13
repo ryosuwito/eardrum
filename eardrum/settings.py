@@ -128,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'account.ldap_backend.LDAPBackend',
+    # 'account.ldap_backend.LDAPBackend',
 ]
 
 
@@ -196,7 +196,7 @@ WEBPACK_LOADER_DEFAULT = {
 }
 
 WEBPACK_LOADER = get_config_of('WEBPACK_LOADER', WEBPACK_LOADER_DEFAULT)
-LDAP_SERVER = getattr(localconfigs, 'LDAP_SERVER')
+# LDAP_SERVER = getattr(localconfigs, 'LDAP_SERVER')
 EMAIL_BACKEND = get_config_of('EMAIL_BACKEND', '')
 EMAIL_HOST = get_config_of('EMAIL_HOST', '')
 EMAIL_HOST_USER = get_config_of('EMAIL_HOST_USER', '')

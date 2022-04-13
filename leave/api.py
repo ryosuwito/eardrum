@@ -17,6 +17,7 @@ from rest_framework import (
 from .models import (
     Leave,
     ConfigEntry,
+    Country,
 )
 from .serializers import LeaveSerializer
 
@@ -27,6 +28,7 @@ from .helpers import (
     mask_from_holiday,
     get_leave_types,
 )
+import http.client
 
 Response = response.Response
 
@@ -199,13 +201,41 @@ class LeaveViewSet(mixins.CreateModelMixin,
     @decorators.action(methods=['GET', 'PATCH'], detail=False)
     def holidays(self, request, *args, **kargs):
         if request.method == "GET":
+            country_code = request.query_params.get('country_code')
             year = request.query_params.get('year')
             _, year = self.get_validated_query_value('year', year)
             if year is not None:
+                config_name = 'holidays_{}'.format(year)
+                if country_code and country_code != "singapore":
+                    config_name = 'holidays_{}_{}'.format(year, country_code)
                 try:
-                    config_entry = ConfigEntry.objects.get(name='holidays_{}'.format(year))
+                    config_entry = ConfigEntry.objects.get(name=config_name)
                 except ConfigEntry.DoesNotExist:
-                    return Response(None, status=status.HTTP_404_NOT_FOUND)
+                    connection = http.client.HTTPSConnection('www.googleapis.com')
+                    # TODO handle error
+                    headers = {'Content-type': 'application/json'}
+                    if not country_code:
+                        country_code = "singapore"
+                    connection.request('GET', 
+                        "/calendar/v3/calendars/en.{}%23holiday%40group.v.calendar.google.com/events?key=AIzaSyAO2O6QbetikhZsg8Mm7b1JpKpgx7KQ_gk".format(country_code), 
+                        None, headers)
+
+                    response = connection.getresponse()
+                    decoded = json.loads(response.read().decode())
+                    holidays = []
+                    for holiday in decoded["items"]:
+                        holidays.append(holiday["start"]["date"].replace("-", ""))
+                        if holiday["start"]["date"] != holiday["end"]["date"]:
+                            holidays.append(holiday["end"]["date"].replace("-", ""))
+                        
+                    unique_holidays = '\n'.join(set(holidays))
+                    holidays_entry = ConfigEntry.objects.create(
+                        name=config_name,
+                        extra=unique_holidays)
+
+                    holidays = holidays_entry.extra.split()
+                    return Response(holidays)
+                    # return Response(None, status=status.HTTP_404_NOT_FOUND)
                 else:
                     holidays = config_entry.extra.split()
                     return Response(holidays)
@@ -385,6 +415,13 @@ class LeaveViewSet(mixins.CreateModelMixin,
             return Response({
                 "capacities": data,
             })
+
+    @decorators.action(methods=['GET'], detail=False)
+    def get_countries(self, request, *args, **kargs):
+        countries = Country.objects.all()
+        return Response({
+            "countries": list(map(lambda x: model_to_dict(x, fields=['name', 'country_code']), countries)),
+        })
 
     @decorators.action(methods=['POST'], detail=False, permission_classes=[permissions.IsAdminUser])
     def update_capacity(self, request, *args, **kargs):

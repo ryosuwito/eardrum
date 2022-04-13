@@ -143,6 +143,14 @@ const useLeaveUsers = () => actionOnCall(options => ({
   return data;
 }, [])
 
+// options: { date: string }
+const useGetCountries = () => actionOnCall(options => ({
+  method: 'get',
+  url: routes.api.getCountries(),
+}), response => {
+  return response.data;
+}, [])
+
 // options: { year: string, holidays: array of dates}
 const usePatchHolidays = () => actionOnCall(options => ({
   method: 'patch',
@@ -152,7 +160,7 @@ const usePatchHolidays = () => actionOnCall(options => ({
 
 const useHolidays = () => actionOnCall(options => ({
   method: 'get',
-  url: routes.api.holidays(options.year),
+  url: routes.api.holidays(options.year, options.country_code),
 }), response => {
   let unsortedHolidays = response.data.map((item) => ({
     "id" : item,
@@ -208,4 +216,5 @@ export {
   usePatchHolidays,
   useGetCapacities,
   usePostCapacities,
+  useGetCountries
 }

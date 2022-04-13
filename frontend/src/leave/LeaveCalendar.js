@@ -15,7 +15,7 @@ import {
     Tooltip,
     Typography,
 } from "@material-ui/core";
-import { useHolidays, useLeaveUsers } from "./hooks";
+import { useHolidays, useLeaveUsers, useGetCountries } from "./hooks";
 import moment from "moment";
 import { handleError } from "./helpers";
 
@@ -34,19 +34,45 @@ const useStyles = makeStyles(theme => ({
 
 const LeaveCalendar = ({refreshCount}) => {
     const [date, setDate] = useState(new Date());
+    const [countries, setCountries] = useState([]);
     const [year, setYear] = useState(new Date().getFullYear());
     const fetchHoliday = useHolidays();
     const fetchLeaveUsers = useLeaveUsers();
+    const fetchCountries = useGetCountries();
+    const [fetchLeaveUsersData, setFetchLeaveUsersData] = useState([]);
 
     const classes = useStyles();
 
     useEffect(() => {
-        setYear(date.getFullYear());
         const fetchApi = async () => {
-            let result = await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD")})
-            handleError(result, "Error fetching leave users.");
+            let result = await fetchCountries.execute()
+            console.log("GET  COUNTRIES", result)
+            setCountries(result.data.countries)
         }
         fetchApi();
+    }, [])
+
+    useEffect(() => {
+        const isHoliday = (date) => {
+            return fetchHoliday.data.find(item => {
+                return moment(item.date).format("YYYYMMDD") === moment(date).format("YYYYMMDD")
+            });
+        }
+        var dayOfWeek = date.getDay();
+        setYear(date.getFullYear());
+        if (isHoliday(date)) {
+            setFetchLeaveUsersData([{
+                group : 'all users',
+                users : []
+            }])
+        } else {
+            const fetchApi = async () => {
+                let result = await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD")})
+                setFetchLeaveUsersData(result.data)
+                handleError(result, "Error fetching leave users.");
+            }
+            fetchApi();
+        }
     }, [date, refreshCount])
 
     // currently only update holiday of a particular year when user pick any date within the same 
@@ -61,9 +87,12 @@ const LeaveCalendar = ({refreshCount}) => {
     }, [year, refreshCount])
 
     // render holidays differently
-    const renderDay = (day, selectedDate, dayInCurrentMonth, dayComponent) => { 
+    const renderDay = (day, selectedDate, dayInCurrentMonth, dayComponent) => {
+        console.log("fetchHoliday.data", fetchHoliday.data)
         const isHoliday = (day) => {
-            return fetchHoliday.data.find(item => {return item.date.getTime() === day.getTime()});
+            return fetchHoliday.data.find(item => {
+                return moment(item.date).format("YYYYMMDD") === moment(day).format("YYYYMMDD")
+            });
         }
         if (day.getTime() === selectedDate.getTime()) {
             return React.cloneElement(dayComponent, {style: {textDecorationLine: 'underline'}});
@@ -73,10 +102,27 @@ const LeaveCalendar = ({refreshCount}) => {
         }
         return dayComponent;
     };
+    const changeCountry = (country) => {
+        console.log("COUNTRY CLICKED", country)        
+        const fetchApi = async () => {
+            let result = await fetchHoliday.execute({year: year, country_code:country.country_code});
+            handleError(result, "Error fetching holidays.");
+            console.log("HOLIDAY CHANGED", result.data)
+        }
+        fetchApi();
+        setDate(new Date());
+    }
 
     return (
         <Paper className={classes.root}>
             <Paper>
+                <List>
+                    <Fragment>
+                        {countries.map(country => 
+                            <Chip onClick={() => changeCountry(country)} label={country.name} className={classes.chips}/>
+                        )}
+                    </Fragment>
+                </List>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <DatePicker
                         autoOk
@@ -96,7 +142,7 @@ const LeaveCalendar = ({refreshCount}) => {
             {fetchLeaveUsers.loading && <LinearProgress/>}
             <Paper style={{overflow: 'auto'}}>
                 <List>
-                    {fetchLeaveUsers.data.map(item => (
+                    {fetchLeaveUsersData.map(item => (
                         <Fragment key={item.group}>
                             <Card style={{display: 'flex', flexWrap: 'wrap'}}>
                                 <CardContent style={{padding: 5}}>

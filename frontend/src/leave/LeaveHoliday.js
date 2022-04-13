@@ -33,7 +33,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-const LeaveHoliday = ({refresh}) => {
+const LeaveHoliday = ({refresh, country}) => {
     const [year, setYear] = useState(new Date().getFullYear());
     const fetchHolidays = useHolidays();
     const [isEditHoliday, setIsEditHoliday] = useState(false);
@@ -46,8 +46,9 @@ const LeaveHoliday = ({refresh}) => {
     const classes = useStyles();
 
     useEffect(() => {
+        console.log("UPDATED COUNTRY HOLIDAY",country)
         const fetchApi = async () => {
-            let result = await fetchHolidays.execute({year: year});
+            let result = await fetchHolidays.execute({year: year, country_code:country});
             handleError(result, "Error fetching holidays.");
         }
         fetchApi();
