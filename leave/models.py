@@ -48,4 +48,4 @@ class LowerCaseField(models.CharField):
 
 class Country(models.Model):
     name = models.CharField(max_length=260)
-    country_code = LowerCaseField(max_length=10, unique=True)
+    country_code = LowerCaseField(max_length=20, unique=True)
