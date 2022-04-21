@@ -114,6 +114,7 @@ const LeaveCalendar = ({refreshCount}) => {
         setDate(new Date());
     }
     const renderGroup = (item) => {
+        if (item.group == 'all users') return true
         for (const user of item.users) {
             if (user.status !== '') return true
         }
