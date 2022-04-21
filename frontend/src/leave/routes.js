@@ -10,11 +10,12 @@ export default {
         },
         leaveDetail: (id) => `/api/leave/${id}/`,
         statistics: (year) => `/api/leave/statistics/?year=${year}`,
-        holidays: (year, country_code) => `/api/leave/holidays/?year=${year}&country_code=${country_code?country_code:'singapore'}`,
+        holidays: (year, country_code) => `/api/leave/holidays/?year=${year}&country_code=${country_code?country_code:'sg'}`,
         leaveUsers: (date) => `/api/leave/leave_users?date=${date}`,
         getCountries: () => `/api/leave/get_countries`,
         recalculateMasks: () => `/api/leave/recalculate_masks/`,
         getCapacity: (year) => `/api/leave/get_capacity/?year=${year}`,
+        addManualLeave: () => `/api/leave/manual_leave/`,
         updateCapacity: (year) => `/api/leave/update_capacity/?year=${year}`,
     }
 }

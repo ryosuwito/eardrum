@@ -201,6 +201,17 @@ const usePostCapacities = () => actionOnCall(options => ({
   },
 }))
 
+// options: { user: string, typ: string, days: number }
+const useAddManualLeave = () => actionOnCall(options => ({
+  method: 'post',
+  url: routes.api.addManualLeave(),
+  data: {
+    user: options.user,
+    typ: options.typ,
+    days: options.days,
+  },
+}))
+
 export {
   LeaveContext,
   useLeaveContext, 
@@ -216,5 +227,6 @@ export {
   usePatchHolidays,
   useGetCapacities,
   usePostCapacities,
-  useGetCountries
+  useGetCountries,
+  useAddManualLeave
 }

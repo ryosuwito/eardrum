@@ -44,8 +44,16 @@ class LowerCaseField(models.CharField):
         super(LowerCaseField, self).__init__(*args, **kwargs)
 
     def get_prep_value(self, value):
-        return str(value).lower()
+        return str(value).upper()
 
 class Country(models.Model):
     name = models.CharField(max_length=260)
-    country_code = LowerCaseField(max_length=20, unique=True)
+    country_code = LowerCaseField(max_length=2, unique=True)
+
+
+class AdditionalLeave(models.Model):
+    user = models.CharField(max_length=255)
+    year = models.CharField(max_length=20, default=None)
+    typ = models.CharField(max_length=255)
+    days = models.IntegerField(max_length=30)
+    created_at = models.DateTimeField(auto_now_add=True)

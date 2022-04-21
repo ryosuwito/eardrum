@@ -65,6 +65,7 @@ const LeaveCalendar = ({refreshCount}) => {
                 group : 'all users',
                 users : []
             }])
+            console.log("fetchLeaveUsersData", fetchLeaveUsersData)
         } else {
             const fetchApi = async () => {
                 let result = await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD")})
@@ -112,7 +113,12 @@ const LeaveCalendar = ({refreshCount}) => {
         fetchApi();
         setDate(new Date());
     }
-
+    const renderGroup = (item) => {
+        for (const user of item.users) {
+            if (user.status !== '') return true
+        }
+        return false
+    }
     return (
         <Paper className={classes.root}>
             <Paper>
@@ -147,7 +153,7 @@ const LeaveCalendar = ({refreshCount}) => {
                             <Card style={{display: 'flex', flexWrap: 'wrap'}}>
                                 <CardContent style={{padding: 5}}>
                                     <Fragment>
-                                        <Typography variant="h6" className={classes.chips}>{item.group}</Typography>
+                                        {renderGroup(item) && <Typography variant="h6" className={classes.chips}>{item.group}</Typography>}
                                         {item.users.map(user => 
                                             ((user.status !== '') && <Tooltip title={user.status} key={user.name}>
                                                 <Chip label={user.name} className={classes.chips}/>
