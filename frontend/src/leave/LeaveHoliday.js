@@ -14,11 +14,16 @@ import {
     makeStyles, 
     Paper, 
     TextField, 
+    Select,
+    FormControl,
+    InputLabel,
+    MenuItem,
 } from "@material-ui/core";
 import { LeaveContext, useHolidays, usePatchHolidays, useRecalculateMasks } from "./hooks";
 import moment from "moment";
 import { DATE_FORMAT } from "./constants";
 import { handleError, holidayComparator } from "./helpers";
+import { borderBottom } from "@material-ui/system";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -33,11 +38,12 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-const LeaveHoliday = ({refresh, country}) => {
+const LeaveHoliday = ({refresh, country, countries_list}) => {
     const [year, setYear] = useState(new Date().getFullYear());
     const fetchHolidays = useHolidays();
     const [isEditHoliday, setIsEditHoliday] = useState(false);
     const [holiday, setHoliday] = useState(null);
+    const [selectedCountry, setSelectedCountry] = useState(null);
     const recalculateMasks = useRecalculateMasks();
     const [holidays, setHolidays] = useState([]);
     const patchHolidays = usePatchHolidays();
@@ -52,7 +58,7 @@ const LeaveHoliday = ({refresh, country}) => {
             handleError(result, "Error fetching holidays.");
         }
         fetchApi();
-    }, [year])
+    }, [year, country])
 
     useEffect(() => {
         if (fetchHolidays.data) {
@@ -78,21 +84,27 @@ const LeaveHoliday = ({refresh, country}) => {
 
     const onDoneEdit = async () => {
         if (isEditHoliday) {
-            let result = await patchHolidays.execute({year: year, holidays: holidays});
+            let result = await patchHolidays.execute({year: year, holidays: holidays, country:selectedCountry});
             handleError(result, "Error updating holidays");
             if (!result.error && isEditHoliday) {
                 let result = await recalculateMasks.execute({year: year});
                 handleError(result, "Error updating statistics", "Statistics updated");
                 refresh();
             }
+            setSelectedCountry(null)
         }
         setIsEditHoliday(edit => !edit)
+    }
+
+    const handleChangeSelectedCountry = async (e) => {
+        console.log(e.target.value)
+        setSelectedCountry(e.target.value)
     }
 
     return (
         <Paper className={classes.root}>
             <ListSubheader className={classes.list}>
-                Holidays
+                {country?country:'SG'} Holidays
                 {leaveContext.currentUser.is_admin && <ListItemSecondaryAction>
                     <Button variant="contained" onClick={onDoneEdit}>
                         {isEditHoliday ? "Done" : "Edit"}
@@ -115,18 +127,36 @@ const LeaveHoliday = ({refresh, country}) => {
                     {leaveContext.currentUser.is_admin && isEditHoliday && <Box ml={1}>
                         <Grid container direction="row" alignItems="center">
                             <Grid item xs={8}>
-                            <DatePicker
-                                disableToolbar
-                                autoOk
-                                label="Add holiday"
-                                variant="inline"
-                                inputVariant="outlined"
-                                format={DATE_FORMAT.LABEL_DATEFNS}
-                                value={holiday}
-                                onChange={(date) => setHoliday(date)}
-                                minDate={new Date(Number(year), 0, 1)}
-                                maxDate={new Date(Number(year), 11, 31)}
-                            />
+                                <div style={{marginBottom:"15px"}}>
+                                    <FormControl fullWidth>
+                                        <InputLabel id="selectedCountry-label">Country</InputLabel>
+                                            <Select
+                                                labelId="selectedCountry-label"
+                                                id="selectedCountry"
+                                                value={selectedCountry}
+                                                label="Country"
+                                                onChange={handleChangeSelectedCountry}
+                                            >
+                                            {countries_list.map(country => (
+                                                <MenuItem value={country.country_code}>{country.name}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </div>
+                                <div style={{marginBottom:"15px"}}>
+                                    <DatePicker
+                                        disableToolbar
+                                        autoOk
+                                        label="Add holiday"
+                                        variant="inline"
+                                        inputVariant="outlined"
+                                        format={DATE_FORMAT.LABEL_DATEFNS}
+                                        value={holiday}
+                                        onChange={(date) => setHoliday(date)}
+                                        minDate={new Date(Number(year), 0, 1)}
+                                        maxDate={new Date(Number(year), 11, 31)}
+                                    />
+                                </div>
                             </Grid>
                             <Grid item container direction="column" xs={4}>
                                 <Button onClick={() => { 

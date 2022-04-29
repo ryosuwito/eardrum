@@ -16,6 +16,7 @@ from rest_framework import (
 )
 
 from .models import (
+    AccountProfile,
     AdditionalLeave,
     Leave,
     ConfigEntry,
@@ -209,12 +210,13 @@ class LeaveViewSet(mixins.CreateModelMixin,
             _, year = self.get_validated_query_value('year', year)
             if year is not None:
                 additional_name = 'holidays_{}'.format(year)
-                config_name = additional_name
-                if country_code :
+                if country_code == "SG":
+                    config_name = 'holidays_{}_SG'.format(year)
+                    additional = ConfigEntry.objects.get(name=additional_name)
+                else :
                     config_name = 'holidays_{}_{}'.format(year, country_code)
                 try:
                     config_entry = ConfigEntry.objects.get(name=config_name)
-                    additional = ConfigEntry.objects.get(name=additional_name)
                 except ConfigEntry.DoesNotExist:
                     connection = http.client.HTTPSConnection('calendarific.com')
                     # TODO handle error
@@ -238,15 +240,17 @@ class LeaveViewSet(mixins.CreateModelMixin,
                         extra=unique_holidays)
 
                     holidays = holidays_entry.extra.split()
-                    if additional:
-                        holidays.append(additional.extra.split())
-                    return Response(holidays)
+                    if additional and country_code == "SG":
+                        holidays.extend(additional.extra.split())
+                    return Response(set(holidays))
                     # return Response(None, status=status.HTTP_404_NOT_FOUND)
                 else:
                     holidays = config_entry.extra.split()
+                    print(holidays)
                     if additional:
-                        holidays.append(additional.extra.split())
-                    return Response(holidays)
+                        holidays.extend(additional.extra.split())
+                        print(holidays)
+                    return Response(set(holidays))
             else:
                 return Response(None, status=status.HTTP_404_NOT_FOUND)
 
@@ -255,8 +259,17 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 return Response(status=status.HTTP_403_FORBIDDEN)
 
             year = request.query_params.get('year')
-
+            country_code = request.query_params.get('country')
             _, year = self.get_validated_query_value('year', year)
+            holidays_entry = None
+            try:
+                if country_code :
+                    config_name = 'holidays_{}_{}'.format(year, country_code)
+                    holidays_entry = ConfigEntry.objects.get(name=config_name)
+                else :
+                    holidays_entry = ConfigEntry.objects.get(name='holidays_{}_SG'.format(year))
+            except:
+                pass
             if year is not None:
                 holidays = request.data.get('holidays').split()
                 for holiday in holidays:
@@ -273,7 +286,6 @@ class LeaveViewSet(mixins.CreateModelMixin,
                         return Response(ret, status=status.HTTP_400_BAD_REQUEST)
 
                 try:
-                    holidays_entry = ConfigEntry.objects.get(name='holidays_{}'.format(year))
                     unique_holidays = '\n'.join(set(holidays))
                     holidays_entry.extra = unique_holidays
                     holidays_entry.save(update_fields=["extra"])
@@ -351,7 +363,15 @@ class LeaveViewSet(mixins.CreateModelMixin,
         leave_status = {group.name[len(prefix):]: {} for group in Group.objects.filter(name__startswith=prefix)}
         leave_status['all'] = {}
 
-        for user in User.objects.all():
+        users = User.objects.all()
+        country_code = request.query_params.get('country_code')
+        try:
+            if country_code:
+                users = [profile.user for profile in AccountProfile.objects.filter(country__country_code = country_code).all()]
+        except:
+            pass
+
+        for user in users:
             mask_value = get_mask(user.username, date[:4]).value
             day_in_year = datetime.datetime.strptime(date, '%Y%m%d').timetuple().tm_yday
 
@@ -441,8 +461,10 @@ class LeaveViewSet(mixins.CreateModelMixin,
     @decorators.action(methods=['GET'], detail=False)
     def get_countries(self, request, *args, **kargs):
         countries = Country.objects.all()
+        calendars = ConfigEntry.objects.filter(name__contains='holidays')
         return Response({
             "countries": list(map(lambda x: model_to_dict(x, fields=['name', 'country_code']), countries)),
+            "calendars":[x.name for x in calendars],
         })
 
     @decorators.action(methods=['POST'], detail=False)

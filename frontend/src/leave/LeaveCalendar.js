@@ -32,9 +32,10 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-const LeaveCalendar = ({refreshCount}) => {
+const LeaveCalendar = ({setCurrentCountry, setCountriesList, refreshCount}) => {
     const [date, setDate] = useState(new Date());
     const [countries, setCountries] = useState([]);
+    const [activeCountry, setActiveCountry] = useState(null);
     const [year, setYear] = useState(new Date().getFullYear());
     const fetchHoliday = useHolidays();
     const fetchLeaveUsers = useLeaveUsers();
@@ -48,6 +49,7 @@ const LeaveCalendar = ({refreshCount}) => {
             let result = await fetchCountries.execute()
             console.log("GET  COUNTRIES", result)
             setCountries(result.data.countries)
+            setCountriesList(result.data.countries)
         }
         fetchApi();
     }, [])
@@ -58,7 +60,6 @@ const LeaveCalendar = ({refreshCount}) => {
                 return moment(item.date).format("YYYYMMDD") === moment(date).format("YYYYMMDD")
             });
         }
-        var dayOfWeek = date.getDay();
         setYear(date.getFullYear());
         if (isHoliday(date)) {
             setFetchLeaveUsersData([{
@@ -68,8 +69,10 @@ const LeaveCalendar = ({refreshCount}) => {
             console.log("fetchLeaveUsersData", fetchLeaveUsersData)
         } else {
             const fetchApi = async () => {
-                let result = await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD")})
+                console.log("activeCountry", activeCountry)
+                let result = await fetchLeaveUsers.execute({date: moment(date).format("YYYYMMDD"), country_code:activeCountry?activeCountry.country_code:null})
                 setFetchLeaveUsersData(result.data)
+                console.log("result", result)
                 handleError(result, "Error fetching leave users.");
             }
             fetchApi();
@@ -81,7 +84,7 @@ const LeaveCalendar = ({refreshCount}) => {
     // all holidays of every years, or remove holiday from this calendar
     useEffect(() => {
         const fetchApi = async () => {
-            let result = await fetchHoliday.execute({year: year});
+            let result = await fetchHoliday.execute({year: year, country_code:activeCountry?activeCountry.country_code:null})
             handleError(result, "Error fetching holidays.");
         }
         fetchApi();
@@ -89,7 +92,6 @@ const LeaveCalendar = ({refreshCount}) => {
 
     // render holidays differently
     const renderDay = (day, selectedDate, dayInCurrentMonth, dayComponent) => {
-        console.log("fetchHoliday.data", fetchHoliday.data)
         const isHoliday = (day) => {
             return fetchHoliday.data.find(item => {
                 return moment(item.date).format("YYYYMMDD") === moment(day).format("YYYYMMDD")
@@ -111,6 +113,8 @@ const LeaveCalendar = ({refreshCount}) => {
             console.log("HOLIDAY CHANGED", result.data)
         }
         fetchApi();
+        setActiveCountry(country)
+        setCurrentCountry(country)
         setDate(new Date());
     }
     const renderGroup = (item) => {
@@ -123,6 +127,9 @@ const LeaveCalendar = ({refreshCount}) => {
     return (
         <Paper className={classes.root}>
             <Paper>
+                <ListSubheader className={classes.list}>
+                        Current Calendar : {activeCountry?activeCountry.name:'Singapore'}
+                </ListSubheader>
                 <List>
                     <Fragment>
                         {countries.map(country => 
@@ -144,7 +151,7 @@ const LeaveCalendar = ({refreshCount}) => {
             </Paper>
             <Divider/>
             <ListSubheader className={classes.list}>
-                Users on leave ({moment(date).format("DD/MM/YYYY")})
+            {activeCountry?activeCountry.country_code:'SG'} Users on leave ({moment(date).format("DD/MM/YYYY")})
             </ListSubheader>
             {fetchLeaveUsers.loading && <LinearProgress/>}
             <Paper style={{overflow: 'auto'}}>

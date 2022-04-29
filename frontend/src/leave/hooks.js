@@ -121,7 +121,7 @@ const useStat = () => actionOnCall(options => ({
 // options: { date: string }
 const useLeaveUsers = () => actionOnCall(options => ({
   method: 'get',
-  url: routes.api.leaveUsers(options.date),
+  url: routes.api.leaveUsers(options.date, options.country_code),
 }), response => {
   let data = [];
   const toStatus = (str) => {
@@ -154,7 +154,7 @@ const useGetCountries = () => actionOnCall(options => ({
 // options: { year: string, holidays: array of dates}
 const usePatchHolidays = () => actionOnCall(options => ({
   method: 'patch',
-  url: routes.api.holidays(options.year),
+  url: routes.api.holidays(options.year, options.country),
   data: {holidays: options.holidays.map(date => date.id).join(" ")}
 }))
 

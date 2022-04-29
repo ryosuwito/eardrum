@@ -36,7 +36,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const LeaveMainPage = () => {
+  const [countries, setCountries] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
+  const [country, setCountry] = useState(null);
   const [date, setDate] = useState(new Date());
   const [refreshCount, setRefreshCount] = useState(0);
   const classes = useStyles();
@@ -44,7 +46,12 @@ const LeaveMainPage = () => {
   const refresh = () => {
     setRefreshCount(refreshCount => refreshCount + 1)
   };
-
+  const setCountriesList = (countries_list) =>{
+    setCountries(countries_list)
+  }
+  const setCurrentCountry = (currentCountry) =>{
+    setCountry(currentCountry.country_code)
+  }
   return (
     <div className={classes.root}>
         {<Grid container spacing={5}>
@@ -52,8 +59,8 @@ const LeaveMainPage = () => {
                 <Button to='/leave/new' color="primary" variant="contained" component={ Link }>New</Button>
             </Grid>
             <Grid item style={{maxWidth: "350px"}}>
-                <LeaveCalendar refreshCount={refreshCount}/>
-                <LeaveHoliday refresh={refresh}/>
+                <LeaveCalendar setCurrentCountry={setCurrentCountry} setCountriesList={setCountriesList} refreshCount={refreshCount}/>
+                <LeaveHoliday countries_list={countries} country={country} refresh={refresh}/>
             </Grid>
             <Grid item style={{flexGrow: 1}}>
                 <LeavePending refresh={refresh} refreshCount={refreshCount}/>
