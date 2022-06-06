@@ -35,6 +35,14 @@
                 color: #333; /* old IE */
                 background-color: #fff; /* Modern Browsers */
             }
+            ol, ul, li{
+                margin-bottom:0;
+                margin-top:0;
+                padding: 0;
+            }
+            p{
+                margin:2px !important
+            }
         </style>
     </head>
     <body>
@@ -51,22 +59,23 @@
         <!-- {{request.reviews}} -->
         {% for review in request.ordered_review %}
             <div class='details'>
-                {% if review.question.typ != 'title' %}
+                {% if review.question.typ != 'title' and review.question.typ != 'comment'%}
                     <p><strong>{{review.question.title}}</strong><br/>
                     Point : {{review.point}} <br/>
+                    {% if review.review %}
                     Grade : {{review.review.grade}} <br/>
+                    {% endif %}
                     Content :</p>
                 {% else %}
-                    <p><strong>{{review.question.title}}</strong><p/>
+                    <p><strong>{{review.question.title}}</strong></p>
                 {% endif %}
                 {% autoescape off %}
                     {{review.question.html_content | markdownify }}
                 {% endautoescape %}
                 {% if review.question.typ != 'title' %}
-                <br/>
                     <p>Comment:</p>
                     {% autoescape off %}
-                        {{review.review.comment | markdownify }}
+                    <pre>{{review.review.comment}}</pre>
                     {% endautoescape %}
                     <hr class='hrItem' />
                 {% endif %}

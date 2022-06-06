@@ -25,6 +25,10 @@ import {
   requestSendReview,
 } from './actions';
 
+import { convertToHTML, convertFromHTML } from 'draft-convert';
+import { EditorState } from 'draft-js';
+import { Editor } from 'react-draft-wysiwyg';
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 
 const styles = theme => ({
   root: {
@@ -117,13 +121,17 @@ class RequestDetails extends Component {
     const request = getValueOfObject(this.props, ['request'], null);
     if (request !== null && this.state.requestId !== request.id) {
       this.setState({ reviews: this.props.request.review, requestId: this.props.request.id })
+      console.log("REVIEWS", this.props.request.review)
     }
   }
 
   handleChange = (questionId, name) => event => {
     const newReviews = _.cloneDeep(this.state.reviews);
     const newReview = {};
-    newReview[name] = event.target.value;
+    if(event.constructor.name !="EditorState" ) newReview[name] = event.target.value;
+    else {
+      newReview[name] = event
+    }
     newReviews[questionId] = Object.assign({}, newReviews[questionId], newReview);
     this.setState({ reviews: newReviews })
   }
@@ -134,6 +142,10 @@ class RequestDetails extends Component {
       key => {
         if (this.state.reviews[key].grade !== 'NONE') {
           reviews[key] = this.state.reviews[key];
+        }
+        if( "comment" in this.state.reviews[key] && this.state.reviews[key]["comment"].constructor.name =="EditorState" ) {
+          const html = convertToHTML(this.state.reviews[key]["comment"].getCurrentContent());
+          this.state.reviews[key]["comment"] = html
         }
       }
     );
@@ -201,38 +213,19 @@ class RequestDetails extends Component {
                       <GradeOptions/>
                     </Select>
                   </FormControl>
-
-                  <FormControl className={classes.formControl}>
-                    <TextField
-                      id="review-comment-id"
-                      label="Comment"
-                      multiline
-                      rows="5"
-                      rowsMax="5"
-                      value={ getValueOfObject(this.state.reviews, [question.id, 'comment'], '') }
-                      onChange={ this.handleChange(question.id, 'comment') }
-                      className={classes.textField}
-                      variant='outlined'
-                      margin="normal"
-                    />
-                  </FormControl>
                 </React.Fragment>)}
               </div>
-              {question.typ === 'comment' && (
-                <FormControl className={classes.formControl}>
-                  <TextField
-                    id="review-comment-id"
-                    label="Comment"
-                    multiline
-                    rows="5"
-                    rowsMax="5"
-                    value={ getValueOfObject(this.state.reviews, [question.id, 'comment'], '') }
-                    onChange={ this.handleChange(question.id, 'comment') }
-                    className={classes.textField}
-                    variant='outlined'
-                    margin="normal"
+              {(question.typ === 'comment' || question.typ === '') && (
+                <div style={{border: "1px solid #bbb", borderRadius: "3px"}}>
+                  <Editor
+                    editorState={ getValueOfObject(this.state.reviews, [question.id, 'comment'], '').constructor.name =="EditorState" ?
+                      getValueOfObject(this.state.reviews, [question.id, 'comment'], '') :
+                      EditorState.createWithContent(convertFromHTML(getValueOfObject(this.state.reviews, [question.id, 'comment'], '')))}
+                    wrapperClassName="demo-wrapper"
+                    editorClassName="demo-editor"
+                    onEditorStateChange={this.handleChange(question.id, 'comment')}
                   />
-                </FormControl>
+                </div>
               )}
             </Grid>
               <Divider variant="fullWidth" />
