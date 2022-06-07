@@ -125,7 +125,7 @@ class RequestDetails extends Component {
     }
   }
 
-  handleChange = (questionId, name) => event => {
+  handleChange = (questionId, name, event) => {
     const newReviews = _.cloneDeep(this.state.reviews);
     const newReview = {};
     if(event.constructor.name !="EditorState" ) newReview[name] = event.target.value;
@@ -163,8 +163,17 @@ class RequestDetails extends Component {
     const { classes, request, gradeOptions } = this.props;
     const { extra } = request.bucket;
     const questions = this.props.request.bucket.ordered_questions;
-    const GradeOptions = () => (gradeOptions.map(obj =>
-      (<option key={ `option-${obj.name}` } value={ obj.name }>{ obj.name }</option>)))
+    const GradeOptions = () => {
+      let names = []
+      return gradeOptions.map(obj =>
+      {
+        if(!names.includes(obj.name)) {
+          names.push(obj.name)
+          return <option key={ `option-${obj.name}` } value={ obj.name }>{ obj.name }</option>
+        }
+        return null;
+      })
+    }
 
     return (
       <Paper className={ classes.root }>
@@ -206,7 +215,7 @@ class RequestDetails extends Component {
                     <Select
                       native
                       value={ getValueOfObject(this.state.reviews, [question.id, 'grade'], 0) }
-                      onChange={this.handleChange(question.id, 'grade')}
+                      onChange={this.handleChange.bind(this, question.id, 'grade')}
                       className={ classes.nativeSelect }
                       input={<OutlinedInput labelWidth={ 45 } name="age" id="grade-label-placeholder-id" />}
                     >
@@ -223,7 +232,7 @@ class RequestDetails extends Component {
                       EditorState.createWithContent(convertFromHTML(getValueOfObject(this.state.reviews, [question.id, 'comment'], '')))}
                     wrapperClassName="demo-wrapper"
                     editorClassName="demo-editor"
-                    onEditorStateChange={this.handleChange(question.id, 'comment')}
+                    onEditorStateChange={this.handleChange.bind(this, question.id, 'comment')}
                   />
                 </div>
               )}
