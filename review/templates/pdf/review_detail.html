@@ -61,7 +61,9 @@
             <div class='details'>
                 {% if review.question.typ != 'title' and review.question.typ != 'comment'%}
                     <p><strong>{{review.question.title}}</strong><br/>
+                    {% if review.point %}
                     Point : {{review.point}} <br/>
+                    {% endif %}
                     {% if review.review %}
                     Grade : {{review.review.grade}} <br/>
                     {% endif %}
