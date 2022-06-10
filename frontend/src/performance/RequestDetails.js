@@ -121,19 +121,24 @@ class RequestDetails extends Component {
     const request = getValueOfObject(this.props, ['request'], null);
     if (request !== null && this.state.requestId !== request.id) {
       this.setState({ reviews: this.props.request.review, requestId: this.props.request.id })
-      console.log("REVIEWS", this.props.request.review)
     }
   }
 
-  handleChange = (questionId, name, event) => {
-    const newReviews = _.cloneDeep(this.state.reviews);
-    const newReview = {};
-    if(event.constructor.name !="EditorState" ) newReview[name] = event.target.value;
-    else {
-      newReview[name] = event
+  handleChange = (event, questionId, name) => {
+    if(event.constructor.name =="EditorState" || event.target){
+      const newReviews = _.cloneDeep(this.state.reviews)
+      const newReview = {};
+      if(event.constructor.name =="EditorState"){
+        newReview[name] = event
+      }
+      else if(event.target.value){
+        newReview[name] = event.target.value;
+      }
+      if(newReview){
+        newReviews[questionId] = Object.assign({}, newReviews[questionId], newReview);
+        this.setState({ reviews: newReviews })
+      }
     }
-    newReviews[questionId] = Object.assign({}, newReviews[questionId], newReview);
-    this.setState({ reviews: newReviews })
   }
 
   onReviewSubmit = () => {
@@ -215,7 +220,7 @@ class RequestDetails extends Component {
                     <Select
                       native
                       value={ getValueOfObject(this.state.reviews, [question.id, 'grade'], 0) }
-                      onChange={this.handleChange.bind(this, question.id, 'grade')}
+                      onChange={event => this.handleChange(event, question.id, 'grade')}
                       className={ classes.nativeSelect }
                       input={<OutlinedInput labelWidth={ 45 } name="age" id="grade-label-placeholder-id" />}
                     >
@@ -232,7 +237,7 @@ class RequestDetails extends Component {
                       EditorState.createWithContent(convertFromHTML(getValueOfObject(this.state.reviews, [question.id, 'comment'], '')))}
                     wrapperClassName="demo-wrapper"
                     editorClassName="demo-editor"
-                    onEditorStateChange={this.handleChange.bind(this, question.id, 'comment')}
+                    onEditorStateChange={event => this.handleChange(event, question.id, 'comment')}
                   />
                 </div>
               )}
