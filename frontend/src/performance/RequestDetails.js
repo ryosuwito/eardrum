@@ -124,7 +124,7 @@ class RequestDetails extends Component {
     }
   }
 
-  handleChange = (event, questionId, name) => {
+  handleChange = (questionId, name) => event => {
     if(event.constructor.name =="EditorState" || event.target){
       const newReviews = _.cloneDeep(this.state.reviews)
       const newReview = {};
@@ -220,7 +220,7 @@ class RequestDetails extends Component {
                     <Select
                       native
                       value={ getValueOfObject(this.state.reviews, [question.id, 'grade'], 0) }
-                      onChange={event => this.handleChange(event, question.id, 'grade')}
+                      onChange={this.handleChange(question.id, 'grade')}
                       className={ classes.nativeSelect }
                       input={<OutlinedInput labelWidth={ 45 } name="age" id="grade-label-placeholder-id" />}
                     >
@@ -237,7 +237,7 @@ class RequestDetails extends Component {
                       EditorState.createWithContent(convertFromHTML(getValueOfObject(this.state.reviews, [question.id, 'comment'], '')))}
                     wrapperClassName="demo-wrapper"
                     editorClassName="demo-editor"
-                    onEditorStateChange={event => this.handleChange(event, question.id, 'comment')}
+                    onEditorStateChange={this.handleChange(question.id, 'comment')}
                   />
                 </div>
               )}
