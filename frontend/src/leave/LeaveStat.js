@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Box, Typography, Tooltip, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import { DataGrid } from '@material-ui/data-grid';
-import { LeaveContext, useGetCapacities, usePostCapacities, useStat } from './hooks';
+import { LeaveContext, useGetCapacities, usePostCapacities, useStat, useAddManualLeave } from './hooks';
 import HelpOutlineOutlinedIcon from '@material-ui/icons/HelpOutlineOutlined';
 import { handleError } from './helpers';
 import { Fragment } from 'react';
@@ -11,13 +11,19 @@ const LeaveStat = ({year, refreshCount}) => {
     const leaveContext = useContext(LeaveContext);
     const getStat = useStat();
     const [openCapDialog, setOpenCapDialog] = useState(false);
+    const [openManualLeaveDialog, setOpenManualLeaveDialog] = useState(false);
     const getCapacities = useGetCapacities();
     const postCapacities = usePostCapacities();
+    const addManualLeave = useAddManualLeave();
     const [localRefreshCount, setLocalRefreshCount] = useState(0)
+    const [statRefreshCount, setStatRefreshCount] = useState(refreshCount)
     const [statWithCap, setStatWithCap] = useState([])
     const [editCapUser, setEditCapUser] = useState(leaveContext.currentUser.username)
     const [editCapType, setEditCapType] = useState(leaveContext.leaveTypes[0].name)
     const [editCapLimit, setEditCapLimit] = useState("0")
+    const [addManualLeaveUser, setAddManualLeaveUser] = useState(leaveContext.currentUser.username)
+    const [addManualLeaveType, setAddManualLeaveType] = useState(leaveContext.leaveTypes[0].name)
+    const [addManualLeaveDays, setAddManualLeaveDays] = useState("0")
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -26,7 +32,7 @@ const LeaveStat = ({year, refreshCount}) => {
         }
 
         fetchApi();
-    }, [year, refreshCount])
+    }, [year, statRefreshCount])
 
     useEffect(() => {
         const fetchApi = async () => {
@@ -78,8 +84,16 @@ const LeaveStat = ({year, refreshCount}) => {
         setLocalRefreshCount(count => count + 1)
     }
 
+    const onSubmitManualLeave = async () => {
+        let result = await addManualLeave.execute({user: addManualLeaveUser, typ: addManualLeaveType, days: Number(addManualLeaveDays)})
+        handleError(result, "Error Adding Manual Leave", "Leave Added successfully")
+        setOpenManualLeaveDialog(false)
+        setStatRefreshCount(count => count + 1)
+    }
+
     const onCancel = () => {
         setOpenCapDialog(false)
+        setOpenManualLeaveDialog(false)
     }
     
     return <Box m={2}>
@@ -88,6 +102,7 @@ const LeaveStat = ({year, refreshCount}) => {
                 <Typography variant="h5" gutterBottom>Statistic (year {year})</Typography>
             </Grid>
             {leaveContext.currentUser.is_admin && <Grid item>
+                <Button variant="outlined" onClick={() => setOpenManualLeaveDialog(true)}>Add Leave</Button>
                 <Button variant="outlined" onClick={() => setOpenCapDialog(true)}>Edit leave capacity</Button>
             </Grid>}
         </Grid>
@@ -100,6 +115,64 @@ const LeaveStat = ({year, refreshCount}) => {
             disableSelectionOnClick
             loading={getStat.loading}
         />
+        {leaveContext.currentUser.is_admin && <Dialog open={openManualLeaveDialog} onClose={() => setOpenManualLeaveDialog(false)}>
+             <DialogTitle>Add Manual Leave</DialogTitle>
+             <DialogContent>
+                 <TextField
+                     fullWidth
+                     label="Name"
+                     variant='outlined'
+                     margin="normal"
+                     value={addManualLeaveUser}
+                     onChange={(event) => {setAddManualLeaveUser(event.target.value)}}
+                     select
+                 >
+                     {leaveContext.allUsers.map((item) => (
+                         <MenuItem key={item.username} value={item.username}>
+                             {item.username}
+                         </MenuItem>
+                     ))}
+                 </TextField>
+                 <TextField
+                     fullWidth
+                     label="Type"
+                     variant='outlined'
+                     margin="normal"
+                     value={ addManualLeaveType }
+                     onChange={(event) => {setAddManualLeaveType(event.target.value)}}
+                     select
+                 >
+                     {leaveContext.leaveTypes.map((type) => (
+                         <MenuItem key={type.name} value={type.name}>
+                             {type.label}
+                         </MenuItem>
+                     ))}
+                 </TextField>
+                 <TextField
+                     fullWidth
+                     label="Days"
+                     variant='outlined'
+                     margin="normal"
+                     type='number'
+                     value={ addManualLeaveDays }
+                     onChange={(event) => {setAddManualLeaveDays(event.target.value)}}
+                 />
+             </DialogContent>
+             <DialogActions>
+                 {leaveContext.currentUser.is_admin 
+                     ?   <Fragment>
+                             <Button onClick={onSubmitManualLeave} color="primary">
+                                 Submit
+                             </Button>
+                             <Button onClick={onCancel} color="primary" autoFocus>
+                                 Cancel
+                             </Button>
+                         </Fragment>
+                     :   <Button onClick={() => setOpenManualLeaveDialog(false)} color="primary">
+                             Back
+                         </Button>}
+             </DialogActions>
+         </Dialog>}
        {leaveContext.currentUser.is_admin && <Dialog open={openCapDialog} onClose={() => setOpenCapDialog(false)}>
             <DialogTitle>Edit leave capacity</DialogTitle>
             <DialogContent>
