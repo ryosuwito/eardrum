@@ -281,7 +281,7 @@ class OKRDetail extends Component {
   }
   onFileListChange = (info) => {
     console.log("fileinfo", info.file)
-    if (!this.allowedFileType.includes(info.file.type)) {
+    if (!this.allowedFileType.includes(info.file.type) && !info.file.type.includes("application/")) {
       return
     }
     this.setState({ okrFiles: this.state.fileList })
@@ -371,7 +371,7 @@ class OKRDetail extends Component {
   }
 
   customRequest = async ({ onSuccess, onError, file }) => {
-    if (!this.allowedFileType.includes(file.type)) {
+    if (!this.allowedFileType.includes(file.type) && !file.type.includes("application/")) {
       this.props.dispatch(enqueueSnackbar({
         message: "File type not allowed",
         options: {

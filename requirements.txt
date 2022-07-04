@@ -19,3 +19,4 @@ gevent==21.1.2
 django-markdownify==0.9.0
 xhtml2pdf==0.2.5
 reportlab==3.6.5
+django-mailer==2.1

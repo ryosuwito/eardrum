@@ -1,7 +1,5 @@
 from django.conf import settings
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django.template import Template, Context
 
 from rest_framework import (viewsets, mixins)
 from rest_framework.decorators import action
@@ -12,6 +10,7 @@ from rest_framework.response import Response
 from .serializers import (OKRSerializer, OKRFileSerializer, LightOKRSerializer)
 from .models import OKR, OKRFile
 from .permissions import IsApplicationAdminUser, IsOKROwner, IsMentor
+from .utils.emails import notify_mentor
 # Create your views here.
 
 
@@ -58,21 +57,11 @@ class OKRViewset(viewsets.GenericViewSet,
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated, IsOKROwner])
     def notify(self, request, *args, **kwargs):
-        okr = self.get_object()
-        if okr and hasattr(self.request.user, 'mentorship'):
-            recipient_list = self.request.user.mentorship.mentor.values_list('email', flat=True)
-            username = self.request.user.get_short_name()
-            subject = '"Mentee ' + username + '" has uploaded an OKR'
-            action_url = 'http://research48-pc.dtl:8005/okrs'
-            message = subject + ' for "' + okr.quarter + "_" + okr.year + '". Please check it via ' + action_url
-            context = Context({"username": username, "okr": okr, "action_url": action_url})
-            html_message = Template('email_draft/notify_okr.html')
-            email_from = settings.EMAIL_HOST_USER
-            send_mail(subject, message=message, from_email=email_from,
-                      recipient_list=recipient_list, html_message=html_message.render(context=context))
+        is_notify_success = notify_mentor(request, self.get_object(), settings)
+        if is_notify_success:
             return Response({"success": True})
         else:
-            raise PermissionDenied({"error": "Not OKR owner."})
+            raise PermissionDenied({"error": "Failed to notify Mentor"})
 
 
 class OKRFileViewset(viewsets.GenericViewSet,

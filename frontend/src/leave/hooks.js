@@ -121,7 +121,7 @@ const useStat = () => actionOnCall(options => ({
 // options: { date: string }
 const useLeaveUsers = () => actionOnCall(options => ({
   method: 'get',
-  url: routes.api.leaveUsers(options.date),
+  url: routes.api.leaveUsers(options.date, options.country_code),
 }), response => {
   let data = [];
   const toStatus = (str) => {
@@ -143,16 +143,24 @@ const useLeaveUsers = () => actionOnCall(options => ({
   return data;
 }, [])
 
+// options: { date: string }
+const useGetCountries = () => actionOnCall(options => ({
+  method: 'get',
+  url: routes.api.getCountries(),
+}), response => {
+  return response.data;
+}, [])
+
 // options: { year: string, holidays: array of dates}
 const usePatchHolidays = () => actionOnCall(options => ({
   method: 'patch',
-  url: routes.api.holidays(options.year),
+  url: routes.api.holidays(options.year, options.country),
   data: {holidays: options.holidays.map(date => date.id).join(" ")}
 }))
 
 const useHolidays = () => actionOnCall(options => ({
   method: 'get',
-  url: routes.api.holidays(options.year),
+  url: routes.api.holidays(options.year, options.country_code),
 }), response => {
   let unsortedHolidays = response.data.map((item) => ({
     "id" : item,
@@ -193,6 +201,17 @@ const usePostCapacities = () => actionOnCall(options => ({
   },
 }))
 
+// options: { user: string, typ: string, days: number }
+const useAddManualLeave = () => actionOnCall(options => ({
+  method: 'post',
+  url: routes.api.addManualLeave(),
+  data: {
+    user: options.user,
+    typ: options.typ,
+    days: options.days,
+  },
+}))
+
 export {
   LeaveContext,
   useLeaveContext, 
@@ -208,4 +227,6 @@ export {
   usePatchHolidays,
   useGetCapacities,
   usePostCapacities,
+  useGetCountries,
+  useAddManualLeave
 }
