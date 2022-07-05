@@ -8,7 +8,7 @@ from auditlog.registry import auditlog
 from . import signals
 from datetime import datetime, timedelta
 
-from leave.models import ConfigEntry, ProratedLeave
+from leave.models import ConfigEntry, ProratedLeave, HolidayLeave
 import json
 # Create your models here.
 
@@ -110,15 +110,12 @@ def presave_join_date(sender, instance=None, created=False, **kwargs):
             day=instance.join_date.day,
         )
         delta = this_end_year - join_with_time
-        print(delta.days)
         ce = ConfigEntry.objects.get(name="leave_type_{}".format(datetime.now().year))
-        print(ce.extra)
         pro_rated_leaves = []
         for leave in json.loads(ce.extra):
             leave["limitation"] = int((delta.days/this_year_days) * leave["limitation"])
             pro_rated_leaves.append(leave)
         
-        print("pro rated leaves=", pro_rated_leaves)
         pr = ProratedLeave.objects.filter(name="{}_leave_{}".format(instance.user.username, datetime.now().year))
         if not pr :
             ProratedLeave.objects.create(
@@ -129,3 +126,10 @@ def presave_join_date(sender, instance=None, created=False, **kwargs):
         else :
             pr[0].extra = json.dumps(pro_rated_leaves, indent=2)
             pr[0].save()
+
+        if instance.country.country_code == "SG":
+            hl = HolidayLeave.objects.get_or_create(user=instance.user, year=datetime.now().year)[0]
+            sample = HolidayLeave.objects.filter(year = datetime.now().year).first()
+            if sample:
+                hl.days = sample.days
+                hl.save()

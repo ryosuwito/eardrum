@@ -59,7 +59,7 @@ class ProratedLeave(models.Model):
 
 class HolidayLeave(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    year = models.CharField(max_length=255, unique=True)
+    year = models.CharField(max_length=255)
     days = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
