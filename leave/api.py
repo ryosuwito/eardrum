@@ -15,12 +15,16 @@ from rest_framework import (
     status,
 )
 
+from account.models import (
+    Mentorship as AccountProfile,
+    Country,
+)
 from .models import (
-    AccountProfile,
+    HolidayLeave,
     AdditionalLeave,
     Leave,
     ConfigEntry,
-    Country,
+    ProratedLeave,
 )
 from .serializers import LeaveSerializer
 
@@ -230,10 +234,32 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     decoded = json.loads(response.read())
                     holidays = []
                     if 'response' in decoded and 'holidays' in decoded["response"]:
+                        holiday_leave = 0
                         for holiday in decoded["response"]["holidays"]:
                             if  "National holiday" in holiday["type"]:
-                                holidays.append(holiday["date"]["iso"].replace("-", ""))
-                        
+                                holiday_date = datetime.datetime.strptime(holiday["date"]["iso"], "%Y-%m-%d")
+                                if country_code == "SG":
+                                    weekno = holiday_date.weekday()
+                                    while weekno > 4:
+                                        holiday_leave += 1
+                                        holiday_date = holiday_date + datetime.timedelta(days=1)
+                                        weekno = holiday_date.weekday()
+
+
+                                holiday_string = holiday_date.strftime("%Y%m%d")
+                                holidays.append(holiday_string)
+
+                        if country_code == "SG":
+                            sg_profiles = AccountProfile.objects.filter(country__country_code="SG").all()
+                            for profile in sg_profiles:
+                                hl = HolidayLeave.objects.get_or_create(
+                                    user = profile.user,
+                                    year = year
+                                )[0]
+                                hl.days = holiday_leave
+                                hl.save()
+                            print(holiday_leave)
+
                     unique_holidays = '\n'.join(set(holidays))
                     holidays_entry = ConfigEntry.objects.create(
                         name=config_name,
@@ -337,7 +363,6 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     else:
                         stat[key] = value
                 stats.append({**stat, 'user': user.username})
-
             ret = {
                 'year': year,
                 'leave_types': leave_types,
@@ -453,7 +478,27 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 mask = get_mask(user.username, year)
                 return {**default_capacity, **json.loads(mask.capacity)}
 
-            data = {user.username: capacity_of(user) for user in users}
+            def prorated_capacity(extra):
+                data = {}
+                for type in extra:
+                    data[type["name"]] = type["limitation"]
+                return data
+
+            data = {}
+            for user in users:
+                data[user.username] = capacity_of(user)
+                try:
+                    prorated = ProratedLeave.objects.get(name = "{}_leave_{}".format(user.username, year))
+                    data[user.username] = prorated_capacity(json.loads(prorated.extra))
+                    if user.mentorship.country.country_code == "SG":
+                        try :
+                            hl = HolidayLeave.objects.get(user=user)
+                            data[user.username]["personal"] += hl.days
+                        except:
+                            pass
+                except:
+                    pass
+
             return Response({
                 "capacities": data,
             })
