@@ -479,25 +479,21 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 return {**default_capacity, **json.loads(mask.capacity)}
 
             def prorated_capacity(extra):
-                data = {}
-                for type in extra:
-                    data[type["name"]] = type["limitation"]
-                return data
+                mask = get_mask(user.username, year)
+                default_capacity = {leave_type['name']: leave_type['limitation'] for leave_type in extra}
+                return {**default_capacity, **json.loads(mask.capacity)}
 
             data = {}
             for user in users:
                 data[user.username] = capacity_of(user)
-                try:
-                    prorated = ProratedLeave.objects.get(name = "{}_leave_{}".format(user.username, year))
+                prorated = ProratedLeave.objects.filter(name = "{}_leave_{}".format(user.username, year)).first()
+                if prorated:
                     data[user.username] = prorated_capacity(json.loads(prorated.extra))
-                    if user.mentorship.country.country_code == "SG":
-                        try :
-                            hl = HolidayLeave.objects.get(user=user)
-                            data[user.username]["personal"] += hl.days
-                        except:
-                            pass
-                except:
-                    pass
+                if user.mentorship and user.mentorship.country and user.mentorship.country.country_code == "SG":
+                    hl = HolidayLeave.objects.filter(user=user).first()
+                    if hl:
+                        data[user.username]["personal"] += hl.days
+                data[user.username]["work_from_home"] = int(data[user.username]["work_from_home"] / 12)
 
             return Response({
                 "capacities": data,

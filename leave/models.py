@@ -2,8 +2,6 @@ from django.contrib.auth.models import User
 from django.db import models
 # Create your models here.
 
-
-
 class Leave(models.Model):
     user = models.CharField(max_length=255)
     startdate = models.CharField(max_length=20)
@@ -41,7 +39,7 @@ class LeaveMask(models.Model):
 
 class AdditionalLeave(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    year = models.CharField(max_length=20, default=None)
+    year = models.CharField(max_length=4, default=None)
     typ = models.CharField(max_length=255)
     days = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -56,10 +54,13 @@ class ProratedLeave(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        verbose_name = "Account Leave Limit"
+        verbose_name_plural = "Account Leave Limits"
 
 class HolidayLeave(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    year = models.CharField(max_length=255)
+    year = models.CharField(max_length=4)
     days = models.IntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
