@@ -104,7 +104,9 @@ class LeaveRule(models.Model):
     leave_type = models.CharField(max_length=2,
                     choices=LEAVE_TYPE_CHOICES,
                     default="PR")
-    year = models.CharField(max_length=4, help_text="Year when this rule will be applied")
+    year = models.CharField(max_length=4, null=True, blank=False, 
+                    help_text="""Year when this rule will be applied,\n
+                               When empty it'll be applied forever.""")
     days = models.IntegerField(default=0, help_text="Leave limit in days/year per child")
     children_max_age = models.IntegerField(default=0, help_text="Maximum age of eligible child <br> \
                                            Only applied to Childcare Leave")
@@ -146,6 +148,12 @@ def update_personal_childcare_leave(mentorship):
                                     leave_type = "CC",
                                     year = datetime.now().year
                                     ).first()
+    if not rule:
+        rule = LeaveRule.objects.filter(
+                                country=mentorship.country,
+                                work_pass = mentorship.work_pass,
+                                leave_type = "CC"
+                                ).order_by("-updated_at").first()
     days = 0 
     if rule and mentorship.children_birth_year:
         eligible_children = 0
@@ -155,6 +163,8 @@ def update_personal_childcare_leave(mentorship):
         if eligible_children:
             days = eligible_children * rule.days
             days = days if days <= rule.max_days else rule.max_days
+    else:
+        return
 
     extra = get_extra(mentorship)
 

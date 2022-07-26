@@ -240,10 +240,35 @@ class LeaveViewSet(mixins.CreateModelMixin,
                                 holiday_date = datetime.datetime.strptime(holiday["date"]["iso"], "%Y-%m-%d")
                                 if country_code == "SG":
                                     weekno = holiday_date.weekday()
-                                    while weekno > 4:
+                                    if weekno == 6:
                                         holiday_leave += 1
                                         holiday_date = holiday_date + datetime.timedelta(days=1)
                                         weekno = holiday_date.weekday()
+                                        
+                                    elif weekno == 5:
+                                        profiles = AccountProfile.objects.filter(country__country_code = country_code).all()
+                                        extra = None
+                                        ce = ConfigEntry.objects.filter(name="leave_type_{}".format(datetime.now().year)).first()
+                                        if ce :
+                                            extra = json.loads(ce.extra)
+                                        for profile in profiles:
+                                            pro_rated_leaves = []
+                                            pr = ProratedLeave.objects.filter(name="{}_leave_{}".format(profile.user.username, datetime.now().year)).first()
+                                            if pr :
+                                                extra = json.loads(pr.extra)
+                                            for leave in extra:
+                                                if leave["name"] == "personal":
+                                                    leave["limitation"] = leave["limitation"] + 1
+                                                pro_rated_leaves.append(leave)
+                                            if not pr:
+                                                ProratedLeave.objects.create(
+                                                    user=profile.user,
+                                                    name="{}_leave_{}".format(profile.user.username, datetime.now().year),
+                                                    extra=json.dumps(pro_rated_leaves)
+                                                )
+                                            else :
+                                                pr.extra = json.dumps(pro_rated_leaves, indent=2)
+                                                pr.save()
 
 
                                 holiday_string = holiday_date.strftime("%Y%m%d")
