@@ -104,7 +104,7 @@ class LeaveRule(models.Model):
     leave_type = models.CharField(max_length=2,
                     choices=LEAVE_TYPE_CHOICES,
                     default="PR")
-    year = models.CharField(max_length=4, null=True, blank=False, 
+    year = models.CharField(max_length=4, null=True, blank=True, 
                     help_text="""Year when this rule will be applied,\n
                                When empty it'll be applied forever.""")
     days = models.IntegerField(default=0, help_text="Leave limit in days/year per child")
