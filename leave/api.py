@@ -248,12 +248,12 @@ class LeaveViewSet(mixins.CreateModelMixin,
                                     elif weekno == 5:
                                         profiles = AccountProfile.objects.filter(country__country_code = country_code).all()
                                         extra = None
-                                        ce = ConfigEntry.objects.filter(name="leave_type_{}".format(datetime.now().year)).first()
+                                        ce = ConfigEntry.objects.filter(name="leave_type_{}".format(datetime.datetime.now().year)).first()
                                         if ce :
                                             extra = json.loads(ce.extra)
                                         for profile in profiles:
                                             pro_rated_leaves = []
-                                            pr = ProratedLeave.objects.filter(name="{}_leave_{}".format(profile.user.username, datetime.now().year)).first()
+                                            pr = ProratedLeave.objects.filter(name="{}_leave_{}".format(profile.user.username, datetime.datetime.now().year)).first()
                                             if pr :
                                                 extra = json.loads(pr.extra)
                                             for leave in extra:
@@ -263,7 +263,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                                             if not pr:
                                                 ProratedLeave.objects.create(
                                                     user=profile.user,
-                                                    name="{}_leave_{}".format(profile.user.username, datetime.now().year),
+                                                    name="{}_leave_{}".format(profile.user.username, datetime.datetime.now().year),
                                                     extra=json.dumps(pro_rated_leaves)
                                                 )
                                             else :
