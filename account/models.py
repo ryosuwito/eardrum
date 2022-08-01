@@ -204,6 +204,7 @@ def update_singapore_holiday(instance=None):
         sample = HolidayLeave.objects.filter(year = datetime.now().year).first()
         if sample:
             hl.days = sample.days
+            hl.extra = sample.extra
             hl.save()
             additional = sample.days
     return additional
