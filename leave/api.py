@@ -225,11 +225,13 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     if not country_code:
                         country_code = "SG"
                     if country_code == "SG":
-                        connection = http.client.HTTPSConnection(
-                            'https://notes.rjchow.com/singapore_public_holidays/api/{}/data.json'.format(year))
+                        connection = http.client.HTTPSConnection('notes.rjchow.com')
+                        headers = {'Content-type': 'application/json'}
+                        connection.request('GET', 
+                            '/singapore_public_holidays/api/{}/data.json'.format(year), 
+                            None, headers)
                     else:   
                         connection = http.client.HTTPSConnection('calendarific.com')
-                        # TODO handle error
                         headers = {'Content-type': 'application/json'}
                         connection.request('GET', 
                             "/api/v2/holidays?api_key=0aab312dcda043f78f8109abe8c066fa0dd2a1ba&country={}&year={}".format(country_code, year), 
