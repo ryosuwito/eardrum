@@ -233,6 +233,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     response = connection.getresponse()
                     decoded = json.loads(response.read())
                     holidays = []
+                    saturday_holidays = []
                     if 'response' in decoded and 'holidays' in decoded["response"]:
                         holiday_leave = 0
                         for holiday in decoded["response"]["holidays"]:
@@ -242,12 +243,11 @@ class LeaveViewSet(mixins.CreateModelMixin,
                                     weekno = holiday_date.weekday()
                                     if weekno == 6:
                                         holiday_date = holiday_date + datetime.timedelta(days=1)
-                                        weekno = holiday_date.weekday()
-                                        
                                     elif weekno == 5:
+                                        saturday_holidays.append(holiday_date.strftime("%Y%m%d"))
                                         holiday_leave += 1
-                                holiday_string = holiday_date.strftime("%Y%m%d")
-                                holidays.append(holiday_string)
+                                        continue
+                                holidays.append(holiday_date.strftime("%Y%m%d"))
 
                         if country_code == "SG":
                             sg_profiles = AccountProfile.objects.filter(country__country_code="SG").all()
@@ -257,6 +257,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                                     year = year
                                 )[0]
                                 hl.days = holiday_leave
+                                hl.extra = '\n'.join(set(saturday_holidays))
                                 hl.save()
                             print(holiday_leave)
 

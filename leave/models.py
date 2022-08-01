@@ -62,6 +62,7 @@ class HolidayLeave(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     year = models.CharField(max_length=4)
     days = models.IntegerField(default=0)
+    extra = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
