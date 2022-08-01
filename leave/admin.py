@@ -21,7 +21,10 @@ class ProratedLeaveAdmin(admin.ModelAdmin):
     list_display = ('name',)
 class LeaveRuleAdmin(admin.ModelAdmin):
     list_display = ('country','work_pass','leave_type','days','year',)
+class HolidayLeaveAdmin(admin.ModelAdmin):
+    list_display = ('country','work_pass','leave_type','days','year',)
 
+admin.site.register(HolidayLeave, HolidayLeaveAdmin)
 admin.site.register(LeaveRule, LeaveRuleAdmin)
 admin.site.register(ProratedLeave, ProratedLeaveAdmin)
 admin.site.register(ConfigEntry, ConfigEntryAdmin)
