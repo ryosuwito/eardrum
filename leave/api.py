@@ -494,9 +494,6 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     hl = HolidayLeave.objects.filter(user=user).first()
                     if hl:
                         data[user.username]["personal"] += hl.days
-                prorated = ProratedLeave.objects.filter(name = "{}_leave_{}".format(user.username, year)).first()
-                if prorated:
-                    data[user.username] = prorated_capacity(json.loads(prorated.extra))
                 data[user.username]["work_from_home"] = int(data[user.username]["work_from_home"] / 12)
 
             return Response({
