@@ -222,45 +222,51 @@ class LeaveViewSet(mixins.CreateModelMixin,
                 try:
                     config_entry = ConfigEntry.objects.get(name=config_name)
                 except ConfigEntry.DoesNotExist:
-                    connection = http.client.HTTPSConnection('calendarific.com')
-                    # TODO handle error
-                    headers = {'Content-type': 'application/json'}
                     if not country_code:
                         country_code = "SG"
-                    connection.request('GET', 
-                        "/api/v2/holidays?api_key=0aab312dcda043f78f8109abe8c066fa0dd2a1ba&country={}&year={}".format(country_code, year), 
-                        None, headers)
+                    if country_code == "SG":
+                        connection = http.client.HTTPSConnection(
+                            'https://notes.rjchow.com/singapore_public_holidays/api/{}/data.json'.format(year))
+                    else:   
+                        connection = http.client.HTTPSConnection('calendarific.com')
+                        # TODO handle error
+                        headers = {'Content-type': 'application/json'}
+                        connection.request('GET', 
+                            "/api/v2/holidays?api_key=0aab312dcda043f78f8109abe8c066fa0dd2a1ba&country={}&year={}".format(country_code, year), 
+                            None, headers)
                     response = connection.getresponse()
                     decoded = json.loads(response.read())
                     holidays = []
                     saturday_holidays = []
-                    if 'response' in decoded and 'holidays' in decoded["response"]:
+                    if country_code == "SG":
                         holiday_leave = 0
+                        for holiday in decoded:
+                            holiday_date = datetime.datetime.strptime(holiday["Date"], "%Y-%m-%d")
+                            weekno = holiday_date.weekday()
+                            if weekno == 6:
+                                holiday_date = holiday_date + datetime.timedelta(days=1)
+                            elif weekno == 5:
+                                saturday_holidays.append(holiday_date.strftime("%Y%m%d"))
+                                holiday_leave += 1
+                                continue
+                            holidays.append(holiday_date.strftime("%Y%m%d"))
+
+                        sg_profiles = AccountProfile.objects.filter(country__country_code="SG").all()
+                        for profile in sg_profiles:
+                            hl = HolidayLeave.objects.get_or_create(
+                                user = profile.user,
+                                year = year
+                            )[0]
+                            hl.days = holiday_leave
+                            hl.extra = '\n'.join(set(saturday_holidays))
+                            hl.save()
+                    elif 'response' in decoded and 'holidays' in decoded["response"]:
                         for holiday in decoded["response"]["holidays"]:
                             if  "National holiday" in holiday["type"]:
                                 holiday_date = datetime.datetime.strptime(holiday["date"]["iso"], "%Y-%m-%d")
-                                if country_code == "SG":
-                                    weekno = holiday_date.weekday()
-                                    if weekno == 6:
-                                        holiday_date = holiday_date + datetime.timedelta(days=1)
-                                    elif weekno == 5:
-                                        saturday_holidays.append(holiday_date.strftime("%Y%m%d"))
-                                        holiday_leave += 1
-                                        continue
                                 holidays.append(holiday_date.strftime("%Y%m%d"))
-
-                        if country_code == "SG":
-                            sg_profiles = AccountProfile.objects.filter(country__country_code="SG").all()
-                            for profile in sg_profiles:
-                                hl = HolidayLeave.objects.get_or_create(
-                                    user = profile.user,
-                                    year = year
-                                )[0]
-                                hl.days = holiday_leave
-                                hl.extra = '\n'.join(set(saturday_holidays))
-                                hl.save()
-                            print(holiday_leave)
-
+                    else:
+                        return Response(None, status=status.HTTP_404_NOT_FOUND)
                     unique_holidays = '\n'.join(set(holidays))
                     holidays_entry = ConfigEntry.objects.create(
                         name=config_name,
