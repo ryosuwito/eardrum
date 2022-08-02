@@ -349,7 +349,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
             else:
                 leave_types = json.loads(leave_type_config.extra)
 
-            users = User.objects.filter(mentorship__employment_status != "PEMPLOYEE")
+            users = User.objects.exclude(mentorship__employment_status = "PEMPLOYEE")
             if not self.is_admin_user():
                 users = users.filter(username=self.request.user.username)
 
