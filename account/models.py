@@ -141,39 +141,37 @@ def save_personal_extra(extra, instance):
         pr.extra = json.dumps(extra, indent=2)
         pr.save()
 
-def update_personal_childcare_leave(mentorship):
+def update_personal_childcare_leave(profile):
     rule = LeaveRule.objects.filter(
-                                    country=mentorship.country,
-                                    work_pass = mentorship.work_pass,
+                                    country=profile.country,
+                                    work_pass = profile.work_pass,
                                     leave_type = "CC",
                                     year = datetime.now().year
                                     ).first()
     if not rule:
         rule = LeaveRule.objects.filter(
-                                country=mentorship.country,
-                                work_pass = mentorship.work_pass,
+                                country=profile.country,
+                                work_pass = profile.work_pass,
                                 leave_type = "CC"
                                 ).order_by("-updated_at").first()
     days = 0 
-    if rule and mentorship.children_birth_year:
+    if rule and profile.children_birth_year:
         eligible_children = 0
-        for birth_year in mentorship.children_birth_year.split(";"):
+        for birth_year in profile.children_birth_year.split(";"):
             if int(birth_year) + rule.children_max_age >= datetime.now().year:
                 eligible_children += 1
         if eligible_children:
             days = eligible_children * rule.days
             days = days if days <= rule.max_days else rule.max_days
-    else:
-        return
 
-    extra = get_extra(mentorship)
+    extra = get_extra(profile)
 
     pro_rated_leaves = []
     for leave in extra:
         if leave["name"] == "childcare":
             leave["limitation"] = days
         pro_rated_leaves.append(leave)
-    save_personal_extra(pro_rated_leaves, mentorship)
+    save_personal_extra(pro_rated_leaves, profile)
 
 @receiver(post_save, sender=LeaveRule)
 def update_country_leave_rules(sender, instance, **kwargs):
