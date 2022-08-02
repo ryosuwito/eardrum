@@ -502,7 +502,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     hl = HolidayLeave.objects.filter(user=user).first()
                     if hl:
                         data[user.username]["personal"] += hl.days
-                if not user.mentoship.children:
+                if not user.mentorship.children:
                     data[user.username]["childcare"] = 0
                 data[user.username]["work_from_home"] = int(data[user.username]["work_from_home"] / 12)
 
