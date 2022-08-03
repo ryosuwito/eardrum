@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from account.models import Mentorship as AccountProfile
 # Create your models here.
 
 class Leave(models.Model):
@@ -26,8 +27,10 @@ class Leave(models.Model):
 
 @receiver(post_save, sender=Leave)
 def post_save_mentorship(sender, instance=None, created=False, **kwargs):
-    print(created)
-    print(instance)
+    if not created and instance.user.mentorship:
+        profile = instance.user.mentorship
+        print(instance.status)
+        print(profile.department)
 
 class ConfigEntry(models.Model):
     name = models.CharField(max_length=255, unique=True)
