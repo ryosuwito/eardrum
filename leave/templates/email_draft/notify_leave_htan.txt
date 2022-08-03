@@ -1,0 +1,6 @@
+Hi htan, please note that please note the following colleagues are on leave today:
+{% if data %}
+{% for user in data %}
+{{ forloop.counter }}. {{user.username}} - {{user.department}} - {{user.leave_type}}
+{% endfor %}
+{% endif %}
