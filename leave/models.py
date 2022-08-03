@@ -82,29 +82,35 @@ class HolidayLeave(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class AutoSendEmailRule(models.Model):
-    name = models.CharField(max_length=260, verbose_name="Template name")
-    receiver = models.ManyToManyField(User,  related_name="receivers", related_query_name="receivers", blank=True)
+    name = models.CharField(max_length=260, help_text="Template name")
+    receiver = models.ManyToManyField(User,  
+                help_text="Leave blank to send to all users.",
+                related_name="receivers", 
+                related_query_name="receivers", 
+                blank=True)
     TRIGGER_CHOICES = (
         ("ON_APPROVED", "On Leave Approved"),
         ("ON_CREATED", "On Leave Created"),
         ("ON_REJECTED", "On Leave Rejected"),
         ("ON_LEAVE_DATE", "On Leave Date"),
     )
-    trigger = models.CharField(max_length=100, blank=True, verbose_name="Select trigger rules") 
+    trigger = models.CharField(max_length=100, blank=False, help_text="Select trigger rules") 
     CC_LIST_CHOICES = (
         ("HR_TEAM", "HR Team"),
         ("TEAM_LEAD", "User's Team Lead"),
         ("TEAM_MATES", "User's Teammates"),
         ("MENTOR", "User's Mentor"),
     )
-    cc = models.CharField(max_length=100, blank=True, verbose_name="Select cc list")
-    all_users_on_leave = models.BooleanField(default=False, verbose_name="Get all users list for template")
-    all_users_on_leave = models.TextField(
-        verbose_name="""Email Template\n
+    cc = models.CharField(max_length=100, blank=True, verbose_name="CC List", help_text="Select CC List")
+    all_users_on_leave = models.BooleanField(default=False, help_text="Get all users list for template")
+    email_template = models.TextField(
+        verbose_name="Email Template",
+        default="",
+        help_text="""
         keyword :\n
-        [type] = type of leave \n
-        [name] = username, [team] = department\n
-        [start] = start_date, [end] = end_date
+        [type] = type of leave; \n
+        [name] = username; [team] = department;\n
+        [start] = start_date; [end] = end_date
         """)
     INTERVAL_CHOICES = (
         ("EVERY_MORNING", "Every 8 am SGT"),
