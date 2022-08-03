@@ -82,7 +82,6 @@ class Mentorship(models.Model):
         verbose_name_plural = "Account Profiles"
 
 auditlog.register(Mentorship, exclude_fields=['created_at', 'updated_at'])
-post_save.connect(signals.create_user_mentorship, sender = User, dispatch_uid="my_unique_identifier")
 
 class LeaveRule(models.Model):
     LEAVE_TYPE_CHOICES = (

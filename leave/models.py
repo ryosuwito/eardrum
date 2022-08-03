@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 # Create your models here.
 
 class Leave(models.Model):
@@ -21,6 +23,11 @@ class Leave(models.Model):
             models.Index(fields=['year']),
             models.Index(fields=['status']),
         ]
+
+@receiver(post_save, sender=Leave)
+def post_save_mentorship(sender, instance=None, created=False, **kwargs):
+    print(created)
+    print(instance)
 
 class ConfigEntry(models.Model):
     name = models.CharField(max_length=255, unique=True)
