@@ -24,6 +24,8 @@ def handle(leaves=None):
             }
             recipient_list = ["{}@{}".format(x.username,settings.DEFAULT_EMAIL_DOMAIN) for x in
                 user.mentorship.teammate.all()
+            ] +  ["{}@{}".format(x.username,settings.DEFAULT_EMAIL_DOMAIN) for x in
+                user.mentorship.mentor.all()
             ]
         except:
             continue
