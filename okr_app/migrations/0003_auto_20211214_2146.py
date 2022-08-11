@@ -14,7 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='okrfile',
             name='okr',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                    related_name='files', to='okr_app.OKR'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='files', to='okr_app.OKR'),
         ),
     ]
