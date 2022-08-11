@@ -201,6 +201,10 @@ LDAP_SERVER = getattr(localconfigs, 'LDAP_SERVER')
 
 # EMAIL
 DEFAULT_FROM_EMAIL = get_config_of('DEFAULT_FROM_EMAIL', 'Eardrum <noreply_eardrum@dytechlab.com>')
-EMAIL_BACKEND = 'mailer.backend.DbBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = './app-messages'
 DEFAULT_EMAIL_DOMAIN = 'dytechlab.com'
 TIME_ZONE = 'Asia/Singapore'
+SINGAPORE_HOLIDAY_SOURCE = 'notes.rjchow.com'
+GLOBAL_HOLIDAY_SOURCE = 'calendarific.com'
+CALENDARIFIC_KEY = '0aab312dcda043f78f8109abe8c066fa0dd2a1ba'
