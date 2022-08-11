@@ -52,3 +52,4 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #         'STATS_FILE': os.path.join(BASE_DIR, 'frontend', 'webpack-stats.json'),
 #     }
 # }
+# CALENDARIFIC_KEY = '0aab312dcda043f78f8109abe8c066fa0dd2a1ba'

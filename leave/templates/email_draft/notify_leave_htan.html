@@ -1,0 +1,16 @@
+<html>
+
+<body>
+    <p>
+        Hi htan, please note that the following colleagues are on leave today:
+    </p>
+    {% if data %}
+        <ol>
+            {% for user in data %}
+            <li>{{user.username}} - {{user.department}} - {{user.leave_type}}</li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+</body>
+
+</html>
