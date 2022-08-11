@@ -11,6 +11,7 @@ def handle(leaves=None):
     for leave in leaves:
         try:
             user = User.objects.get(username=leave.user)
+            hr_list = User.objects.filter(mentorship__department="HR")
             start_date = datetime.strptime(leave.startdate, "%Y%m%d")
             end_date = datetime.strptime(leave.enddate, "%Y%m%d")
             data = {
@@ -22,6 +23,11 @@ def handle(leaves=None):
             recipient_list = ["{}@{}".format(x.username,settings.DEFAULT_EMAIL_DOMAIN) for x in
                 user.mentorship.mentor.all()
             ]
+            hr_recipient_list = ["{}@{}".format(x.username,settings.DEFAULT_EMAIL_DOMAIN) for x in
+                hr_list
+            ]
+            recipient_list.extend(hr_recipient_list)
+            recipient_list.append("htan@{}".format(settings.DEFAULT_EMAIL_DOMAIN))
         except:
             continue
         context = {"data": data}
