@@ -204,3 +204,6 @@ DEFAULT_FROM_EMAIL = get_config_of('DEFAULT_FROM_EMAIL', 'Eardrum <noreply_eardr
 EMAIL_BACKEND = 'mailer.backend.DbBackend'
 DEFAULT_EMAIL_DOMAIN = 'dytechlab.com'
 TIME_ZONE = 'Asia/Singapore'
+SINGAPORE_HOLIDAY_SOURCE = 'notes.rjchow.com'
+GLOBAL_HOLIDAY_SOURCE = 'calendarific.com'
+CALENDARIFIC_KEY = get_config_of('CALENDARIFIC_KEY', '0aab312dcda043f78f8109abe8c066fa0dd2a1ba')
