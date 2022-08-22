@@ -1,6 +1,8 @@
 stages:
   - coding-style
   - build
+  - staging
+  - archive-build-artifacts
 
 python-coding-style-check:
   image: python:3.6-slim
@@ -12,13 +14,46 @@ python-coding-style-check:
     - pip install flake8
     - flake8 .
 
+.docker-job:
+  before_script:
+    - tag=$(git describe --tags) && echo $tag
+    - imagetag=docker.dtl:5000/ado/docker-images/eardrum/r48:$tag && echo $imagetag
+
 build-docker-image:
+  extends: .docker-job
   stage: build
   tags:
     - image-build
   script:
-    - tag=$(git describe --tags) && echo $tag
-    - imagetag=docker.dtl:5000/ado/docker-images/eardrum/r48:$tag && echo $imagetag
     - docker build -t $imagetag .
+
+release-staging:
+  extends: .docker-job
+  stage: staging
+  variables:
+    APP_CONFIG_DIR: "/app/eardrum-config"
+  tags:
+    - image-build  # TODO change this into docker
+  script:
+    - staging_img=docker.dtl:5000/ado/docker-images/eardrum/r48:staging
+    - docker tag $imagetag $staging_img
+    - docker push $staging_img
+    - "[[ -d $APP_CONFIG_DIR ]] && rm -rf $APP_CONFIG_DIR"
+    - git clone http://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.dtl/office-management/eardrum-group/eardrum-staging-configuration.git $APP_CONFIG_DIR
+    - cd ${APP_CONFIG_DIR}
+    - ls -la .
+    - echo $APP_CONFIG_DIR
+    - APP_CONFIG_DIR=${APP_CONFIG_DIR} /bin/bash start.sh
+  only:
+    - staging
+  except:
+    - master
+
+push-docker-image:
+  extends: .docker-job
+  stage: archive-build-artifacts
+  tags:
+    - image-build
+  script:
     - docker push $imagetag
   when: manual
