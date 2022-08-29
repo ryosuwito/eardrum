@@ -229,8 +229,8 @@ def update_join_date(instance=None):
     if ce :
         extra = json.loads(ce.extra)
     if instance.join_date and extra:
-        this_start_year = datetime.fromisoformat("{}-01-01 00:00:00".format(datetime.now().year))
-        this_end_year = datetime.fromisoformat("{}-12-31 00:00:00".format(datetime.now().year))
+        this_start_year = datetime.strptime("{}-01-01 00:00:00".format(datetime.now().year), "%Y-%m-%d %H:%M:%S")
+        this_end_year = datetime.strptime("{}-12-31 00:00:00".format(datetime.now().year), "%Y-%m-%d %H:%M:%S")
         this_year_days = (this_end_year - this_start_year).days
         join_with_time = datetime(
             year=instance.join_date.year, 

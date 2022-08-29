@@ -229,7 +229,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
 
         sg_profiles = AccountProfile.objects.filter(country__country_code="SG").all()
         for profile in sg_profiles:
-            hl = HolidayLeave.objects.get_or_create(user=profile.user, year=year)[0]
+            hl, _ = HolidayLeave.objects.get_or_create(user=profile.user, year=year)
             hl.days = holiday_leave
             hl.extra = '\n'.join(set(saturday_holidays))
             hl.save()
@@ -288,9 +288,10 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     else:
                         return Response(None, status=status.HTTP_404_NOT_FOUND)
                     unique_holidays = '\n'.join(set(holidays))
-                    holidays_entry = ConfigEntry.objects.create(
-                        name=config_name,
-                        extra=unique_holidays)
+                    holidays_entry = ConfigEntry.objects.get_or_create(
+                        name=config_name)
+                    holidays_entry.extra = unique_holidays
+                    holidays_entry.save()
 
                     holidays = holidays_entry.extra.split()
                     if additional and country_code == "SG":
