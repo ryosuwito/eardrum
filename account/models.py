@@ -173,6 +173,30 @@ def update_personal_childcare_leave(profile):
             pro_rated_leaves.append(leave)
         save_personal_extra(pro_rated_leaves, profile)
 
+def update_personal_leave_rules(instance):
+    rules = LeaveRule.objects.filter(
+                        country=instance.country,
+                        work_pass = instance.work_pass
+                        ).order_by("-updated_at").all()
+    leave_type = {
+        "PR": "personal",
+        "CO": "compassionate",
+        "CC": "childcare",
+        "MD": "medical",
+        "WH": "work_from_home",
+    }
+    for rule in rules:
+        if rule.leave_type == "CC":
+            update_personal_childcare_leave(instance)
+        else :
+            pro_rated_leaves = []
+            extra = get_extra(instance)
+            for leave in extra:
+                if leave["name"] == leave_type[instance.leave_type]:
+                    leave["limitation"] = instance.days
+                pro_rated_leaves.append(leave)
+            save_personal_extra(pro_rated_leaves, instance)
+
 @receiver(post_save, sender=LeaveRule)
 def update_country_leave_rules(sender, instance, **kwargs):
     leave_type = {
@@ -255,3 +279,7 @@ def presave_mentorship(sender, instance=None, created=False, **kwargs):
     update_singapore_holiday(instance)
     update_join_date(instance)
     update_personal_childcare_leave(instance)
+
+@receiver(post_save, sender=Mentorship)
+def presave_mentorship(sender, instance=None, created=False, **kwargs):
+    update_personal_leave_rules(instance)

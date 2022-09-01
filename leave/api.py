@@ -288,7 +288,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
                     else:
                         return Response(None, status=status.HTTP_404_NOT_FOUND)
                     unique_holidays = '\n'.join(set(holidays))
-                    holidays_entry = ConfigEntry.objects.get_or_create(
+                    holidays_entry, _ = ConfigEntry.objects.get_or_create(
                         name=config_name)
                     holidays_entry.extra = unique_holidays
                     holidays_entry.save()
