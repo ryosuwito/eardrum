@@ -192,8 +192,8 @@ def update_personal_leave_rules(instance):
             pro_rated_leaves = []
             extra = get_extra(instance)
             for leave in extra:
-                if leave["name"] == leave_type[instance.leave_type]:
-                    leave["limitation"] = instance.days
+                if leave["name"] == leave_type[rule.leave_type]:
+                    leave["limitation"] = rule.days
                 pro_rated_leaves.append(leave)
             save_personal_extra(pro_rated_leaves, instance)
 
@@ -281,5 +281,5 @@ def presave_mentorship(sender, instance=None, created=False, **kwargs):
     update_personal_childcare_leave(instance)
 
 @receiver(post_save, sender=Mentorship)
-def presave_mentorship(sender, instance=None, created=False, **kwargs):
+def postsave_mentorship(sender, instance=None, created=False, **kwargs):
     update_personal_leave_rules(instance)
