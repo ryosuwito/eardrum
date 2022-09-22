@@ -2,7 +2,9 @@
 
 <body>
     <p>
-        Hi all, please note that {{data.username}} will be on {{data.leave_type}} leave from {{data.start_date}} to {{data.end_date}}
+        Hi all, please note that {{data.username}} will be on {% if data.half_first %}({{data.half_first}}){% endif %} leave {% if data.same_date %}on {{data.start_date}}{% else %} 
+        on {{data.start_date}} to {% if data.half_last %}({{data.half_last}}){% endif %} {{data.end_date}}
+        {% endif %}
     </p>
 </body>
 

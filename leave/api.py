@@ -6,7 +6,8 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.forms.models import model_to_dict
 from leave.utils import (
-    notify_leave_to_mentors,
+    notify_leave_on_create,
+    notify_leave_on_approved,
     notify_leave_to_teammates,
 )
 
@@ -152,7 +153,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         instance = Leave.objects.get(id=serializer.data["id"])
-        notify_leave_to_mentors.handle([instance])
+        notify_leave_on_create.handle([instance])
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def destroy(self, request, *args, **kwargs):
@@ -196,6 +197,7 @@ class LeaveViewSet(mixins.CreateModelMixin,
         mask = get_mask(instance.user, instance.year)
         accumulate_mask(mask, [instance])
         notify_leave_to_teammates.handle([instance])
+        notify_leave_on_approved.handle([instance])
 
     @decorators.action(methods=['GET'], detail=False)
     def context(self, *args, **kwargs):

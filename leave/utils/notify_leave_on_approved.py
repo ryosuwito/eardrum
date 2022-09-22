@@ -14,8 +14,6 @@ def handle(leaves=None):
     for leave in leaves:
         if leave.status != "approved":
             continue
-        if leave.typ == "work_from_home":
-            continue
         try:
             user = User.objects.get(username=leave.user)
             start_date = datetime.strptime(leave.startdate, "%Y%m%d")
@@ -35,27 +33,22 @@ def handle(leaves=None):
                 "username": user.username,
                 "start_date": start_date.strftime("%d/%b/%Y"),
                 "end_date": end_date.strftime("%d/%b/%Y"),
-                "leave_type": leave.typ,
+                "typ": leave.typ,
                 "half_first": half_first,
                 "half_last": half_last,
+                "note": leave.note,
                 "same_date": same_date
             }
-            recipient_list = ["{}@{}".format(x.username, settings.DEFAULT_EMAIL_DOMAIN) for x in
-                              user.mentorship.teammate.all()] + \
-                             ["{}@{}".format(x.username, settings.DEFAULT_EMAIL_DOMAIN) for x in
-                              user.mentorship.mentor.all()]
+            recipient_list = ["{}@{}".format(user.username, settings.DEFAULT_EMAIL_DOMAIN)]
         except Exception as e:
             print(e)
             continue
         context = {"data": data}
-        if same_date:
-            subject = "{} Leave of Absence on {}".format(user.username, start_date)
-        else:
-            subject = "{} Leave of Absence from {} to {}".format(user.username, start_date, end_date)
+        subject = "Leave Request Has Been Approved".format(leave.typ)
         try:
-            rendered = render_to_string('email_draft/notify_leave_teammates.html', context=context)
+            rendered = render_to_string('email_draft/notify_leave_on_approved.html', context=context)
             from_email = settings.DEFAULT_FROM_EMAIL
-            body = render_to_string('email_draft/notify_leave_teammates.txt', context=context)
+            body = render_to_string('email_draft/notify_leave_on_approved.txt', context=context)
             message = EmailMultiAlternatives(
                 subject,
                 body,

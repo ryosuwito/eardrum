@@ -1,6 +1,6 @@
 Hi all, please note the following colleagues are on leave today:
 {% if data %}
 {% for user in data %}
-{{ forloop.counter }}. {{user.username}} - {{user.department}}
+{{ forloop.counter }}. {{user.username}} ({{user.department}}) {% if user.half_day %}({{user.half_day}}){% endif %}
 {% endfor %}
 {% endif %}
