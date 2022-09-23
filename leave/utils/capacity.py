@@ -10,6 +10,7 @@ from leave.models import (
 from datetime import datetime
 import json
 
+
 def get_leave_spent(user):
     stats = []
     year = datetime.today().year
@@ -31,8 +32,10 @@ def get_leave_spent(user):
     stats.append({**stat, 'user': user.username})
     return stats
 
+
 def get_prorated_capacity(user, year, default_capacity):
     data = {}
+
     def capacity_of(user):
         mask = get_mask(user.username, year)
         return {**default_capacity, **json.loads(mask.capacity)}
@@ -55,6 +58,7 @@ def get_prorated_capacity(user, year, default_capacity):
     data[user.username]["work_from_home"] = int(data[user.username]["work_from_home"] / 12)
 
     return data
+
 
 def get_capacity(user):
     year = datetime.today().year

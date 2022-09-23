@@ -8,6 +8,7 @@ from leave.utils.capacity import (
         get_leave_spent
     )
 
+
 def handle(leaves=None):
     data = None
     for leave in leaves:
@@ -15,7 +16,6 @@ def handle(leaves=None):
             continue
         if datetime.strptime(leave.startdate, "%Y%m%d").date() < datetime.today().date():
             continue
-        htan = User.objects.filter(username='htan').first()
         try:
             user = User.objects.get(username=leave.user)
             capacity = get_capacity(user)[user.username]
@@ -45,11 +45,11 @@ def handle(leaves=None):
                 same_date = True
 
             def daterange(date1, date2):
-                for n in range(int ((date2 - date1).days)+1):
+                for n in range(int((date2 - date1).days)+1):
                     yield date1 + timedelta(n)
             span = 0
             for dt in daterange(start_date, end_date):
-                if dt.weekday() not in [5,6]:
+                if dt.weekday() not in [5, 6]:
                     span += 1
                     print(dt.strftime("%Y-%m-%d"))
             span -= reduce
@@ -88,7 +88,7 @@ def handle(leaves=None):
                 body,
                 from_email,
                 recipient_list,
-                bcc = bcc_recipient_list
+                bcc=bcc_recipient_list
             )
             message.attach_alternative(rendered, "text/html")
             message.send()

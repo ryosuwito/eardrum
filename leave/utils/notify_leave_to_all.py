@@ -9,7 +9,7 @@ from django.conf import settings
 def handle():
     weekno = datetime.today().weekday()
     if weekno > 5:
-        print ("Weekend")
+        print("Weekend")
         return
     now = datetime.now().strftime("%Y%m%d")
     leaves = Leave.objects.filter(startdate=now)

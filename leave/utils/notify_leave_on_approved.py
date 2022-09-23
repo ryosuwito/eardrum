@@ -44,7 +44,7 @@ def handle(leaves=None):
             print(e)
             continue
         context = {"data": data}
-        subject = "Leave Request Has Been Approved".format(leave.typ)
+        subject = "Leave Request Has Been Approved"
         try:
             rendered = render_to_string('email_draft/notify_leave_on_approved.html', context=context)
             from_email = settings.DEFAULT_FROM_EMAIL
