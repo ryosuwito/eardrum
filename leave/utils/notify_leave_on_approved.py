@@ -25,7 +25,10 @@ def handle(leaves=None):
             elif leave.half == "01":
                 half_last = "morning off on last day"
             elif leave.half == "11":
-                half_first = "afternoon off on first day, morning off on last day"
+                half_first = "afternoon off on first day"
+                half_last = "morning off on last day"
+            elif leave.half == "00":
+                half_first = "full day"
             same_date = False
             if start_date == end_date:
                 same_date = True

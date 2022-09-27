@@ -12,7 +12,7 @@ def handle():
         print("Weekend")
         return
     now = datetime.now().strftime("%Y%m%d")
-    leaves = Leave.objects.filter(startdate=now)
+    leaves = Leave.objects.filter(startdate__lte=now, enddate__gte=now)
     data = []
     departments = {
         'HR': 'HR',
@@ -27,21 +27,38 @@ def handle():
         if leave.status != "approved":
             continue
         try:
-            half_day = ""
-            if leave.half == "10":
-                half_day = "afternoon off on first day"
-            elif leave.half == "01":
-                half_day = "morning off on last day"
-            elif leave.half == "11":
-                half_day = "afternoon off on first day, morning off on last day"
-            elif leave.half == "00":
-                half_day = "full day"
             user = User.objects.get(username=leave.user)
+            start_date = datetime.strptime(leave.startdate, "%Y%m%d")
+            end_date = datetime.strptime(leave.enddate, "%Y%m%d")
+            half_first = ""
+            half_last = ""
+            if leave.half == "10":
+                half_first = "afternoon"
+            elif leave.half == "01":
+                half_last = "morning"
+            elif leave.half == "11":
+                half_first = "afternoon"
+                half_last = "morning"
+            elif leave.half == "00":
+                half_first = "full day"
+                half_last = "full day"
+            on_start_date = False
+            on_end_date = False
+            if start_date.date() == datetime.now().date():
+                on_start_date = True
+            if end_date.date() == datetime.now().date():
+                on_end_date = True
             data.append({
+                "start_date": start_date.strftime("%d/%b/%Y"),
+                "end_date": end_date.strftime("%d/%b/%Y"),
+                "now": datetime.now().strftime("%d/%b/%Y"),
                 "username": user.username,
                 "department": departments[user.mentorship.department],
                 "leave_type": leave.typ,
-                "half_day": half_day
+                "half_first": half_first,
+                "half_last": half_last,
+                "on_start_date": on_start_date,
+                "on_end_date": on_end_date
             })
         except Exception as e:
             print(e)

@@ -9,13 +9,11 @@ from django.conf import settings
 def handle(leaves=None):
     now = datetime.now().strftime("%Y%m%d")
     if not leaves:
-        leaves = Leave.objects.filter(startdate=now)
+        leaves = Leave.objects.\
+            filter(startdate__lte=now, enddate__gte=now, status="approved").\
+            exclude(typ="work_from_home")
     data = None
     for leave in leaves:
-        if leave.status != "approved":
-            continue
-        if leave.typ == "work_from_home":
-            continue
         try:
             user = User.objects.get(username=leave.user)
             start_date = datetime.strptime(leave.startdate, "%Y%m%d")
@@ -23,22 +21,31 @@ def handle(leaves=None):
             half_first = ""
             half_last = ""
             if leave.half == "10":
-                half_first = "afternoon off on first day"
+                half_first = "afternoon"
             elif leave.half == "01":
-                half_last = "morning off on last day"
+                half_last = "morning"
             elif leave.half == "11":
-                half_first = "afternoon off on first day, morning off on last day"
-            same_date = False
-            if start_date == end_date:
-                same_date = True
+                half_first = "afternoon"
+                half_last = "morning"
+            elif leave.half == "00":
+                half_first = "full day"
+                half_last = "full day"
+            on_start_date = False
+            on_end_date = False
+            if start_date.date() == datetime.now().date():
+                on_start_date = True
+            if end_date.date() == datetime.now().date():
+                on_end_date = True
             data = {
                 "username": user.username,
                 "start_date": start_date.strftime("%d/%b/%Y"),
                 "end_date": end_date.strftime("%d/%b/%Y"),
+                "now": datetime.now().strftime("%d/%b/%Y"),
                 "leave_type": leave.typ,
                 "half_first": half_first,
                 "half_last": half_last,
-                "same_date": same_date
+                "on_start_date": on_start_date,
+                "on_end_date": on_end_date
             }
             recipient_list = ["{}@{}".format(x.username, settings.DEFAULT_EMAIL_DOMAIN) for x in
                               user.mentorship.teammate.all()] + \
@@ -48,7 +55,7 @@ def handle(leaves=None):
             print(e)
             continue
         context = {"data": data}
-        if same_date:
+        if start_date.date() == end_date.date():
             subject = "{} Leave of Absence on {}".format(user.username, start_date)
         else:
             subject = "{} Leave of Absence from {} to {}".format(user.username, start_date, end_date)

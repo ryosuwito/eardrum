@@ -7,7 +7,7 @@
     {% if data %}
         <ol>
             {% for user in data %}
-            <li>{{user.username}} ({{user.department}}) {% if user.half_day %}({{user.half_day}}){% endif %}
+            <li>{{user.username}} ({{user.department}}) {% if user.half != "00" and user.now != user.start_date and user.now != user.end_date %}fullday{% else %}{% if user.half_first and user.on_start_date%}({{user.half_first}}){% elif user.half_last and user.on_end_date%}({{user.half_last}}){% else %}({{user.half_first}}){% endif %}{% endif %}
             </li>
             {% endfor %}
         </ol>

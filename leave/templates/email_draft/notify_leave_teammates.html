@@ -2,9 +2,7 @@
 
 <body>
     <p>
-        Hi all, please note that {{data.username}} will be on {% if data.half_first %}({{data.half_first}}){% endif %} leave {% if data.same_date %}on {{data.start_date}}{% else %} 
-        on {{data.start_date}} to {% if data.half_last %}({{data.half_last}}){% endif %} {{data.end_date}}
-        {% endif %}
+        Hi all, please note that {{data.username}} will be on {% if data.same_date %}{% if data.half_first %}({{data.half_first}}){% else %}{% if data.half_last %} ({{data.half_last}}) {% endif %}{% endif %}leave on {{data.start_date}}{% else %}{% if data.half_first %}({{data.half_first}}) {% endif %}leave on {{data.start_date}} to{% if data.half_last %} ({{data.half_last}}){% endif %} {{data.end_date}}{% endif %}
     </p>
 </body>
 

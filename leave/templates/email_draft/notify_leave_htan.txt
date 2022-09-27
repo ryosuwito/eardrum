@@ -1,6 +1,6 @@
 Hi htan, please note that the following colleagues are on leave today:
 {% if data %}
 {% for user in data %}
-{{ forloop.counter }}. {{user.username}}, {{user.department}}, {{user.leave_type}}, {{user.half_day}}
+{{ forloop.counter }}. {{user.username}}, {{user.department}}, {{user.leave_type}}, {% if user.half != "00" and user.now != user.start_date and user.now != user.end_date %}fullday{% else %}{% if user.half_first and user.on_start_date%}({{user.half_first}}){% elif user.half_last and user.on_end_date%}({{user.half_last}}){% else %}({{user.half_first}}){% endif %}{% endif %}
 {% endfor %}
 {% endif %}

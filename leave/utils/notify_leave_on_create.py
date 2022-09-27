@@ -12,10 +12,6 @@ from leave.utils.capacity import (
 def handle(leaves=None):
     data = None
     for leave in leaves:
-        if leave.typ == "work_from_home":
-            continue
-        if datetime.strptime(leave.startdate, "%Y%m%d").date() < datetime.today().date():
-            continue
         try:
             user = User.objects.get(username=leave.user)
             capacity = get_capacity(user)[user.username]
